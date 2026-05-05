@@ -1,5 +1,5 @@
 
-export type MatchType = 'Singles' | 'Doubles';
+export type MatchType = 'Singles' | 'Doubles' | 'Mixed Doubles';
 export type MatchResult = 'Win' | 'Loss';
 
 export interface BadmintonMatch {
@@ -8,6 +8,7 @@ export interface BadmintonMatch {
   type: MatchType;
   opponent: string;
   partner?: string;
+  location: string;
   myScore: number[];
   opponentScore: number[];
   result: MatchResult;
@@ -25,7 +26,7 @@ export const MatchService = {
 
   addMatch: (match: Omit<BadmintonMatch, 'id'>): BadmintonMatch => {
     const matches = MatchService.getMatches();
-    const newMatch = { ...match, id: Math.random().toString(36).substr(2, 9) };
+    const newMatch = { ...match, id: Math.random().toString(36).substring(2, 11) };
     localStorage.setItem(STORAGE_KEY, JSON.stringify([newMatch, ...matches]));
     return newMatch;
   },
@@ -45,6 +46,7 @@ export const MatchService = {
       matchesByType: {
         Singles: matches.filter(m => m.type === 'Singles').length,
         Doubles: matches.filter(m => m.type === 'Doubles').length,
+        MixedDoubles: matches.filter(m => m.type === 'Mixed Doubles').length,
       }
     };
   }

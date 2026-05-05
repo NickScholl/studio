@@ -13,13 +13,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { MatchService, MatchType, MatchResult } from '@/lib/match-service'
-import { ChevronLeft, Info } from 'lucide-react'
+import { ChevronLeft, Info, MapPin, Users, Target } from 'lucide-react'
 import Link from 'next/link'
 
 export default function NewMatch() {
   const router = useRouter()
   const { toast } = useToast()
   const [loading, setLoading] = React.useState(false)
+  const [matchType, setMatchType] = React.useState<MatchType>('Singles')
+
+  const isDoubles = matchType === 'Doubles' || matchType === 'Mixed Doubles'
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -28,19 +31,20 @@ export default function NewMatch() {
     const formData = new FormData(e.currentTarget)
     const matchData = {
       date: formData.get('date') as string,
-      type: formData.get('type') as MatchType,
+      type: matchType,
       opponent: formData.get('opponent') as string,
-      partner: formData.get('partner') as string || undefined,
+      partner: isDoubles ? (formData.get('partner') as string) : undefined,
+      location: formData.get('location') as string,
       myScore: [
         Number(formData.get('set1_mine')),
         Number(formData.get('set2_mine')),
         formData.get('set3_mine') ? Number(formData.get('set3_mine')) : 0
-      ].filter(Boolean),
+      ].filter(score => score > 0),
       opponentScore: [
         Number(formData.get('set1_opp')),
         Number(formData.get('set2_opp')),
         formData.get('set3_opp') ? Number(formData.get('set3_opp')) : 0
-      ].filter(Boolean),
+      ].filter(score => score > 0),
       result: formData.get('result') as MatchResult,
       notes: formData.get('notes') as string,
     }
@@ -92,7 +96,7 @@ export default function NewMatch() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="type">Match Type</Label>
-                    <Select name="type" defaultValue="Singles">
+                    <Select value={matchType} onValueChange={(v) => setMatchType(v as MatchType)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
@@ -107,8 +111,11 @@ export default function NewMatch() {
 
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="opponent">Opponent Name</Label>
-                    <Input id="opponent" name="opponent" placeholder="Enter opponent name" required />
+                    <Label htmlFor="location">Location / Venue</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input id="location" name="location" placeholder="e.g. Smash Badminton Hall" className="pl-10" required />
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="result">Result</Label>
@@ -124,12 +131,31 @@ export default function NewMatch() {
                   </div>
                 </div>
 
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="opponent">Opponent Name</Label>
+                    <div className="relative">
+                      <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input id="opponent" name="opponent" placeholder="Enter opponent name" className="pl-10" required />
+                    </div>
+                  </div>
+                  {isDoubles && (
+                    <div className="space-y-2">
+                      <Label htmlFor="partner">Partner Name</Label>
+                      <div className="relative">
+                        <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input id="partner" name="partner" placeholder="Enter partner name" className="pl-10" required={isDoubles} />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Target className="h-4 w-4 text-primary" />
                     <Label className="font-bold">Set Scores</Label>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label className="text-xs uppercase text-muted-foreground">Set 1</Label>
                       <div className="flex gap-2">
@@ -159,7 +185,7 @@ export default function NewMatch() {
                   <Textarea id="notes" name="notes" placeholder="Any specific details or things to improve on?" />
                 </div>
 
-                <div className="pt-4 flex gap-4">
+                <div className="pt-4 flex flex-col md:flex-row gap-4">
                   <Button type="submit" className="flex-1" disabled={loading}>
                     {loading ? "Submitting..." : "Save Match Stats"}
                   </Button>
@@ -183,5 +209,3 @@ export default function NewMatch() {
     </div>
   )
 }
-
-import { Target } from 'lucide-react'
