@@ -1,23 +1,36 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth, useUser } from '@/firebase';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword 
+} from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trophy, AlertCircle, Loader2 } from 'lucide-react';
+import { Trophy, AlertCircle, Loader2, Mail, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function LoginPage() {
   const { user, loading: userLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  
   const [error, setError] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  
+  // Email/Password states
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSignUp, setIsSignUp] = useState(false);
 
   useEffect(() => {
     if (!userLoading && user) {
@@ -25,36 +38,41 @@ export default function LoginPage() {
     }
   }, [user, userLoading, router]);
 
-  const handleLogin = async () => {
+  const handleGoogleLogin = async () => {
     if (isLoggingIn) return;
-    
     setIsLoggingIn(true);
     setError(null);
     const provider = new GoogleAuthProvider();
-    
     try {
       await signInWithPopup(auth, provider);
-      // Redirect happens in useEffect
     } catch (err: any) {
-      console.error('Login failed', err);
-      let message = "An unexpected error occurred.";
-      
-      if (err.code === 'auth/popup-blocked') {
-        message = "The sign-in popup was blocked by your browser. Please allow popups for this site.";
-      } else if (err.code === 'auth/unauthorized-domain') {
-        message = "This domain is not authorized in the Firebase Console (Authentication > Settings > Authorized Domains).";
-      } else if (err.code === 'auth/network-request-failed') {
-        message = "Network error. Please check your internet connection.";
-      } else if (err.code === 'auth/configuration-not-found') {
-        message = "Google Sign-in is not configured properly in your Firebase project.";
-      }
-
+      const message = err.code === 'auth/popup-blocked' 
+        ? "Popup blocked! Try the Email login tab instead." 
+        : err.message;
       setError(message);
-      toast({
-        variant: 'destructive',
-        title: 'Login Error',
-        description: message,
-      });
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isLoggingIn) return;
+    setIsLoggingIn(true);
+    setError(null);
+
+    try {
+      if (isSignUp) {
+        await createUserWithEmailAndPassword(auth, email, password);
+        toast({ title: "Account Created", description: "Welcome to ShuttleScore!" });
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+      }
+    } catch (err: any) {
+      let message = "Invalid email or password.";
+      if (err.code === 'auth/email-already-in-use') message = "Email already in use.";
+      if (err.code === 'auth/weak-password') message = "Password should be at least 6 characters.";
+      
+      setError(message);
       setIsLoggingIn(false);
     }
   };
@@ -75,46 +93,82 @@ export default function LoginPage() {
             <Trophy className="h-7 w-7 text-primary-foreground" />
           </div>
           <CardTitle className="text-3xl font-bold tracking-tight">ShuttleScore</CardTitle>
-          <CardDescription className="text-base">
-            Your ultimate badminton performance companion
-          </CardDescription>
+          <CardDescription>Badminton Performance Tracker</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6 pt-4">
+        <CardContent className="space-y-4">
           {error && (
-            <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-1">
+            <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Sign-in Failed</AlertTitle>
+              <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          
-          <Button 
-            onClick={handleLogin} 
-            className="w-full h-12 text-lg font-semibold shadow-md transition-all active:scale-[0.98]" 
-            disabled={isLoggingIn}
-          >
-            {isLoggingIn ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              "Sign in with Google"
-            )}
-          </Button>
-          
-          <div className="space-y-3 pt-2">
-            <p className="text-center text-xs text-muted-foreground leading-relaxed">
-              Sign in to sync your match history across all your devices.
-            </p>
-            <div className="rounded-lg bg-muted/50 p-3 text-[10px] text-muted-foreground/80 leading-normal border border-border/50">
-              <p className="font-bold mb-1 uppercase tracking-wider">Troubleshooting:</p>
-              <ul className="list-disc pl-4 space-y-1">
-                <li>Ensure popups are allowed in your browser.</li>
-                <li>Verify your domain is in the <strong>'Authorized Domains'</strong> list in Firebase Console.</li>
-              </ul>
-            </div>
-          </div>
+
+          <Tabs defaultValue="google" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="google">Google</TabsTrigger>
+              <TabsTrigger value="email">Email</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="google" className="pt-4">
+              <Button 
+                onClick={handleGoogleLogin} 
+                className="w-full h-12 text-lg font-semibold" 
+                disabled={isLoggingIn}
+              >
+                {isLoggingIn ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Sign in with Google"}
+              </Button>
+              <p className="mt-4 text-center text-xs text-muted-foreground">
+                Fastest way to get started.
+              </p>
+            </TabsContent>
+
+            <TabsContent value="email" className="pt-4">
+              <form onSubmit={handleEmailAuth} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      placeholder="name@example.com" 
+                      className="pl-10"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required 
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      id="password" 
+                      type="password" 
+                      placeholder="••••••••" 
+                      className="pl-10"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required 
+                    />
+                  </div>
+                </div>
+                <Button type="submit" className="w-full h-11" disabled={isLoggingIn}>
+                  {isLoggingIn ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : (isSignUp ? "Create Account" : "Sign In")}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="link" 
+                  className="w-full text-xs" 
+                  onClick={() => setIsSignUp(!isSignUp)}
+                >
+                  {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
@@ -23,7 +22,6 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
     setIsMounted(true);
   }, []);
 
-  // Initialize Firebase only once on the client
   const firebaseInstances = useMemo(() => {
     if (typeof window === 'undefined') return null;
     try {
@@ -32,18 +30,19 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       const dbInstance = getFirebaseDb(appInstance);
       return { app: appInstance, auth: authInstance, db: dbInstance };
     } catch (error) {
-      console.error('Failed to initialize Firebase:', error);
+      console.error('Firebase Init Error:', error);
       return null;
     }
   }, []);
 
-  // Show a basic loader while mounting/initializing to prevent blank screen or hydration errors
-  if (!isMounted || !firebaseInstances) {
+  if (!isMounted) return null;
+
+  if (!firebaseInstances) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-          <p className="text-sm font-medium text-muted-foreground">Initializing ShuttleScore...</p>
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <div className="text-center space-y-4">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
+          <p className="text-sm font-medium">Connecting to ShuttleScore Cloud...</p>
         </div>
       </div>
     );
