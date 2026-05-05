@@ -8,7 +8,8 @@ import {
   History, 
   Trophy,
   LogOut,
-  LogIn
+  LogIn,
+  Settings
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -45,6 +46,7 @@ export function AppSidebar() {
     { name: "Dashboard", icon: LayoutDashboard, path: "/" },
     { name: "Submit Match", icon: PlusCircle, path: "/matches/new" },
     { name: "Match History", icon: History, path: "/history" },
+    { name: "Settings", icon: Settings, path: "/settings" },
   ];
 
   return (
@@ -81,7 +83,7 @@ export function AppSidebar() {
           {user ? (
             <>
               <SidebarMenuItem>
-                <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center">
+                <Link href="/settings" className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center hover:bg-muted rounded-md transition-colors">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user.photoURL || undefined} />
                     <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
@@ -92,7 +94,7 @@ export function AppSidebar() {
                     </span>
                     <span className="text-xs text-muted-foreground">Pro Account</span>
                   </div>
-                </div>
+                </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={handleSignOut} tooltip="Sign Out">

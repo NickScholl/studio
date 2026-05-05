@@ -28,7 +28,6 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   
-  // Email/Password states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
@@ -44,14 +43,22 @@ export default function LoginPage() {
     setIsLoggingIn(true);
     setError(null);
     const provider = new GoogleAuthProvider();
+    // Hint for Google Auth: sometimes popups are blocked or restricted in dev environments.
+    provider.setCustomParameters({ prompt: 'select_account' });
+    
     try {
       await signInWithPopup(auth, provider);
     } catch (err: any) {
+      console.error("Google Auth Error:", err);
       let message = err.message;
-      if (err.code === 'auth/popup-blocked') {
-        message = "Popup blocked! Please allow popups or use the Email tab.";
+      if (err.code === 'auth/popup-closed-by-user') {
+        message = "The login popup was closed. Please try again and keep the window open.";
+      } else if (err.code === 'auth/popup-blocked') {
+        message = "Popup blocked! Please allow popups for this site or use the Email tab.";
       } else if (err.code === 'auth/cancelled-popup-request') {
-        message = "Login cancelled.";
+        message = "Login was cancelled or interrupted.";
+      } else if (err.code === 'auth/operation-not-allowed') {
+        message = "Google login is not enabled in Firebase. Please enable it in the console.";
       }
       setError(message);
       setIsLoggingIn(false);
@@ -131,6 +138,9 @@ export default function LoginPage() {
               >
                 {isLoggingIn ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Sign in with Google"}
               </Button>
+              <p className="text-[10px] text-center text-muted-foreground mt-2 px-4">
+                Tip: If the popup closes immediately, ensure your browser isn't blocking popups or check your internet connection.
+              </p>
             </TabsContent>
 
             <TabsContent value="email" className="pt-4">

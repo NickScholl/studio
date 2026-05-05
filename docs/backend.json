@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserProfile": {
@@ -16,7 +17,7 @@
         },
         "email": {
           "type": "string",
-          "description": "The user's unique email address, primarily for contact and identification (not for authentication directly, as per security best practices).",
+          "description": "The user's unique email address.",
           "format": "email"
         },
         "firstName": {
@@ -26,6 +27,10 @@
         "lastName": {
           "type": "string",
           "description": "The user's last name."
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "URL to the user's profile picture."
         },
         "createdAt": {
           "type": "string",
@@ -40,10 +45,7 @@
       },
       "required": [
         "id",
-        "username",
         "email",
-        "firstName",
-        "lastName",
         "createdAt",
         "updatedAt"
       ]
@@ -52,7 +54,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Match",
       "type": "object",
-      "description": "Records the core details of a single badminton match played. This includes general information about the match for result submission and history tracking.",
+      "description": "Records the core details of a single badminton match played.",
       "properties": {
         "id": {
           "type": "string",
@@ -65,7 +67,7 @@
         },
         "location": {
           "type": "string",
-          "description": "The optional location where the match was played (e.g., specific court, club name)."
+          "description": "The optional location where the match was played."
         },
         "matchType": {
           "type": "string",
@@ -73,7 +75,12 @@
         },
         "submittedByUserId": {
           "type": "string",
-          "description": "Reference to the UserProfile who recorded and submitted this match's details. (Relationship: UserProfile 1:N Match)"
+          "description": "Reference to the UserProfile who recorded and submitted this match's details."
+        },
+        "participantUserIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of user UIDs involved in the match."
         },
         "description": {
           "type": "string",
@@ -84,14 +91,15 @@
         "id",
         "matchDate",
         "matchType",
-        "submittedByUserId"
+        "submittedByUserId",
+        "participantUserIds"
       ]
     },
     "MatchPlayerStats": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "MatchPlayerStats",
       "type": "object",
-      "description": "Stores individual player statistics and outcome for a specific match, linking players to matches and their respective sides. This entity captures detailed performance metrics crucial for calculating player statistics and populating the personalized performance dashboard.",
+      "description": "Stores individual player statistics and outcome for a specific match.",
       "properties": {
         "id": {
           "type": "string",
@@ -99,15 +107,15 @@
         },
         "matchId": {
           "type": "string",
-          "description": "Reference to the Match this statistic entry belongs to. (Relationship: Match 1:N MatchPlayerStats)"
+          "description": "Reference to the Match this statistic entry belongs to."
         },
         "userId": {
           "type": "string",
-          "description": "Reference to the UserProfile who participated in this match. (Relationship: UserProfile 1:N MatchPlayerStats)"
+          "description": "Reference to the UserProfile who participated in this match."
         },
         "sideNumber": {
           "type": "number",
-          "description": "Indicates which side (e.g., 1 or 2) the player belonged to in the match, useful for grouping players into opposing sides/teams for doubles matches."
+          "description": "Indicates which side (e.g., 1 or 2) the player belonged to."
         },
         "isWinner": {
           "type": "boolean",
@@ -115,35 +123,19 @@
         },
         "setsWon": {
           "type": "number",
-          "description": "The number of sets won by this player's side in the match."
+          "description": "The number of sets won by this player's side."
         },
         "setsLost": {
           "type": "number",
-          "description": "The number of sets lost by this player's side in the match."
+          "description": "The number of sets lost by this player's side."
         },
         "totalPointsScored": {
           "type": "number",
-          "description": "The total points scored by this player's side across all sets in the match."
+          "description": "The total points scored by this player's side."
         },
         "totalPointsConceded": {
           "type": "number",
-          "description": "The total points conceded by this player's side across all sets in the match."
-        },
-        "servesHit": {
-          "type": "number",
-          "description": "The number of serves hit by the player in the match. (Optional detailed stat)"
-        },
-        "smashesHit": {
-          "type": "number",
-          "description": "The number of successful smashes hit by the player in the match. (Optional detailed stat)"
-        },
-        "dropsHit": {
-          "type": "number",
-          "description": "The number of successful drop shots hit by the player in the match. (Optional detailed stat)"
-        },
-        "faultsCommitted": {
-          "type": "number",
-          "description": "The number of faults committed by the player in the match. (Optional detailed stat)"
+          "description": "The total points conceded by this player's side."
         }
       },
       "required": [
@@ -162,7 +154,8 @@
   "auth": {
     "providers": [
       "password",
-      "anonymous"
+      "anonymous",
+      "google"
     ]
   },
   "firestore": {
@@ -174,7 +167,7 @@
           "schema": {
             "$ref": "#/backend/entities/UserProfile"
           },
-          "description": "Stores individual user profiles. The {userId} in the path corresponds to the user's Firebase Authentication UID. This collection is primarily for private user data, enabling simple ownership-based security rules. Certain fields like username, first name, and last name may be publicly readable to facilitate displaying participants in matches."
+          "description": "Stores individual user profiles."
         }
       },
       {
@@ -184,36 +177,9 @@
           "schema": {
             "$ref": "#/backend/entities/Match"
           },
-          "description": "Stores the primary details of a badminton match. Each document includes 'submittedByUserId' (the user who recorded it) and a denormalized 'participantUserIds' array (list of all user UIDs involved) for robust authorization independence and efficient querying of matches a user is part of. This structure enables secure listing of matches for personalized dashboards without costly lookups.",
-          "params": [
-            {
-              "name": "matchId",
-              "description": "The unique identifier for a specific match."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/matches/{matchId}/matchPlayerStats/{matchPlayerStatsId}",
-        "definition": {
-          "entityName": "MatchPlayerStats",
-          "schema": {
-            "$ref": "#/backend/entities/MatchPlayerStats"
-          },
-          "description": "Stores detailed statistics for a specific player within a given match. These documents are subcollections of a Match. For authorization independence, each document includes denormalized 'matchOwnerId' (from parent Match's submittedByUserId) and 'matchParticipantUserIds' (from parent Match's participantUserIds) to avoid 'get()' calls in security rules.",
-          "params": [
-            {
-              "name": "matchId",
-              "description": "The unique identifier of the parent match."
-            },
-            {
-              "name": "matchPlayerStatsId",
-              "description": "The unique identifier for a specific player's statistics within a match."
-            }
-          ]
+          "description": "Stores the primary details of a badminton match."
         }
       }
-    ],
-    "reasoning": "The Firestore structure for ShuttleScore is designed with a strong emphasis on Authorization Independence, Structural Segregation, and effective Access Modeling to ensure security, scalability, and debuggability. \n\n1.  **UserProfile Management (`/userProfiles/{userId}`):** User profiles are stored in a top-level collection, with each document ID (`userId`) directly corresponding to the Firebase Authentication UID. This follows the 'Private Data: Path-Based ownership' principle, making ownership rules simple and explicit (`request.auth.uid == userId`). It segregates individual user data, providing a homogeneous security posture where the user primarily owns their profile. While some fields like `username` might be publicly readable for display in matches, the core profile remains user-centric.\n\n2.  **Match Data (`/matches/{matchId}`):** Match details are stored in a top-level `matches` collection. Crucially, each `Match` document includes a `submittedByUserId` field (referencing the user who recorded the match) and a denormalized `participantUserIds` array. This array contains the UIDs of all players involved in the match. This design is critical for **Authorization Independence** and supporting **QAPs** (Queryable Authorization Patterns). Instead of relying on `get()` calls to subcollections or related documents to determine who can access a match, the necessary authorization context (`submittedByUserId` and `participantUserIds`) is directly available within the `Match` document itself. This allows for simple security rules (e.g., `allow read: if request.auth.uid == resource.data.submittedByUserId || resource.data.participantUserIds.includes(request.auth.uid);`) and efficient listing of matches a user is involved in (`db.collection('matches').where('participantUserIds', 'array-contains', userId)`).\n\n3.  **Match Player Statistics (`/matches/{matchId}/matchPlayerStats/{matchPlayerStatsId}`):** Player-specific statistics for each match are stored in a subcollection of the respective `Match` document. This adheres to the 'Continue Hierarchy for Nested Data' principle. To achieve **Authorization Independence** for these subcollection documents, each `MatchPlayerStats` document **denormalizes** the `matchOwnerId` (the `submittedByUserId` from its parent `Match`) and the `matchParticipantUserIds` array (from its parent `Match`'s `participantUserIds`). This means that security rules for `MatchPlayerStats` documents never need to perform a `get()` operation on the parent `Match` document, fulfilling a critical design mandate. Access rules would mirror the parent `Match` document, checking `request.auth.uid` against these denormalized fields. This structure also ensures **Structural Segregation**, as all documents within this subcollection share the same security requirements related to the parent match's access model.\n\nBy denormalizing authorization-relevant fields (like `participantUserIds` and `matchOwnerId`) directly into the documents that require them, the design eliminates the need for expensive and complex `get()` calls in security rules, thereby enhancing security, simplifying rule logic, and improving debugging. The use of clear hierarchical paths and descriptive wildcards further contributes to data clarity and predictability."
+    ]
   }
 }
