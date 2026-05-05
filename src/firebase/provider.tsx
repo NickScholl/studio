@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { FirebaseApp } from 'firebase/app';
 import { Auth } from 'firebase/auth';
 import { Firestore } from 'firebase/firestore';
@@ -14,9 +14,19 @@ interface FirebaseContextType {
   db: Firestore;
 }
 
-const FirebaseContext = createContext<FirebaseContextType>({ app, auth, db });
+const FirebaseContext = createContext<FirebaseContextType | null>(null);
 
 export function FirebaseProvider({ children }: { children: React.ReactNode }) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return <div className="min-h-screen bg-background" />;
+  }
+
   return (
     <FirebaseContext.Provider value={{ app, auth, db }}>
       <FirebaseErrorListener />
@@ -27,7 +37,9 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
 
 export function useFirebase() {
   const context = useContext(FirebaseContext);
-  if (!context) throw new Error('useFirebase must be used within FirebaseProvider');
+  if (!context) {
+    throw new Error('useFirebase must be used within FirebaseProvider');
+  }
   return context;
 }
 

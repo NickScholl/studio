@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -14,7 +15,8 @@ import {
   TrendingUp,
   Activity,
   Plus,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from 'lucide-react';
 import { 
   ChartContainer, 
@@ -54,13 +56,15 @@ export default function Dashboard() {
 
   if (authLoading || matchesLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <Activity className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  if (!user) return null;
+  if (!user) {
+    return null;
+  }
 
   const stats = MatchService.calculateStats(matches);
   const recentMatches = matches.slice(0, 8);
@@ -82,7 +86,7 @@ export default function Dashboard() {
         <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-6">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />
-            <h1 className="text-lg font-headline font-semibold">Performance Dashboard</h1>
+            <h1 className="text-lg font-semibold">Performance Dashboard</h1>
           </div>
           <Button asChild variant="default" size="sm" className="gap-2">
             <Link href="/matches/new">
@@ -94,18 +98,18 @@ export default function Dashboard() {
 
         <main className="flex-1 space-y-8 p-6 lg:p-10">
           {matches.length === 0 && heroImage && (
-            <div className="relative w-full h-48 md:h-64 rounded-xl overflow-hidden mb-8 border-4 border-white shadow-xl">
+            <div className="relative w-full h-48 md:h-64 rounded-xl overflow-hidden mb-8 border border-border shadow-sm">
               <Image 
                 src={heroImage.imageUrl} 
                 alt={heroImage.description} 
                 fill 
-                className="object-cover opacity-80"
+                className="object-cover opacity-60"
                 data-ai-hint={heroImage.imageHint}
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/60 to-transparent flex flex-col justify-center px-8 text-white">
-                <h2 className="text-3xl font-bold">Welcome, {user.displayName?.split(' ')[0]}!</h2>
-                <p className="max-w-md mt-2 text-primary-foreground">Ready to track your first win? Record your match stats and see your performance grow.</p>
-                <Button asChild className="w-fit mt-4" variant="secondary">
+              <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-transparent flex flex-col justify-center px-8">
+                <h2 className="text-3xl font-bold">Welcome, {user.displayName?.split(' ')[0] || 'Player'}!</h2>
+                <p className="max-w-md mt-2 text-muted-foreground">Ready to track your first win? Record your match stats and see your performance grow.</p>
+                <Button asChild className="w-fit mt-4" variant="default">
                    <Link href="/matches/new">Start Tracking</Link>
                 </Button>
               </div>
@@ -113,7 +117,7 @@ export default function Dashboard() {
           )}
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="border-none shadow-sm">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Matches Played</CardTitle>
                 <Activity className="h-4 w-4 text-muted-foreground" />
@@ -122,7 +126,7 @@ export default function Dashboard() {
                 <div className="text-2xl font-bold">{stats.totalMatches}</div>
               </CardContent>
             </Card>
-            <Card className="border-none shadow-sm">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Win Ratio</CardTitle>
                 <TrendingUp className="h-4 w-4 text-secondary" />
@@ -137,7 +141,7 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="border-none shadow-sm">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Wins</CardTitle>
                 <Trophy className="h-4 w-4 text-primary" />
@@ -146,7 +150,7 @@ export default function Dashboard() {
                 <div className="text-2xl font-bold">{stats.wins}</div>
               </CardContent>
             </Card>
-            <Card className="border-none shadow-sm">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Losses</CardTitle>
                 <Frown className="h-4 w-4 text-accent" />
@@ -158,7 +162,7 @@ export default function Dashboard() {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <Card className="flex flex-col border-none shadow-md">
+            <Card className="flex flex-col">
               <CardHeader>
                 <CardTitle>Win/Loss Comparison</CardTitle>
                 <CardDescription>Visual breakdown of your overall performance.</CardDescription>
@@ -180,13 +184,13 @@ export default function Dashboard() {
                 ) : (
                   <div className="flex flex-col items-center justify-center text-muted-foreground">
                     <Activity className="h-12 w-12 mb-4 opacity-10" />
-                    <p className="text-sm text-center">No match data available yet. Submit your first match to see statistics.</p>
+                    <p className="text-sm text-center">No match data available yet.</p>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            <Card className="flex flex-col border-none shadow-md">
+            <Card className="flex flex-col">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle>Recent Activity</CardTitle>
