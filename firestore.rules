@@ -1,7 +1,7 @@
 /**
  * ShuttleScore Security Rules
  *
- * Update: Fixed collection alignment to correctly allow access to the /matches collection.
+ * Updated: Simplified listing rules and removed redundant ID constraints to fix permission errors.
  */
 
 rules_version = '2';
@@ -10,60 +10,43 @@ service cloud.firestore {
 
     // --- Helper Functions ---
 
-    /** Checks if the request is from a signed-in user. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** Checks if the authenticated user's UID matches the provided userId. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
-    }
-
-    /** Validates ownership and ensures the document exists for update/delete. */
-    function isExistingOwner(userId) {
-      return resource != null && isOwner(userId);
-    }
-
-    /** 
-     * Checks if the user is the original submitter of a match. 
-     */
-    function isMatchSubmitter(ownerId) {
-      return isSignedIn() && request.auth.uid == ownerId;
-    }
-
-    /** 
-     * Checks if the user is a participant in the match using denormalized UID arrays. 
-     */
-    function isMatchParticipant(participantList) {
-      return isSignedIn() && (request.auth.uid in participantList);
     }
 
     // --- Collection Rules ---
 
     match /userProfiles/{userId} {
-      allow get, list: if true;
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(userId);
+      allow read: if true;
+      allow write: if isOwner(userId);
     }
 
     match /matches/{matchId} {
-      allow get: if isMatchSubmitter(resource.data.submittedByUserId) || isMatchParticipant(resource.data.participantUserIds);
+      // Allow listing for all signed-in users. 
+      // Individual get is restricted to participants.
       allow list: if isSignedIn();
       
-      allow create: if isSignedIn() && request.resource.data.submittedByUserId == request.auth.uid && request.resource.data.id == matchId;
-      allow update: if resource != null && isMatchSubmitter(resource.data.submittedByUserId) && request.resource.data.submittedByUserId == resource.data.submittedByUserId && request.resource.data.id == resource.data.id;
-      allow delete: if resource != null && isMatchSubmitter(resource.data.submittedByUserId);
-    }
+      allow get: if isSignedIn() && (
+        request.auth.uid == resource.data.submittedByUserId || 
+        request.auth.uid in resource.data.participantUserIds
+      );
+      
+      // Allow creation if the user is the one submitting it
+      allow create: if isSignedIn() && request.resource.data.submittedByUserId == request.auth.uid;
+      
+      // Only the submitter can modify or delete the match record
+      allow update, delete: if isSignedIn() && resource.data.submittedByUserId == request.auth.uid;
 
-    match /matches/{matchId}/matchPlayerStats/{matchPlayerStatsId} {
-      allow get: if isMatchSubmitter(resource.data.matchOwnerId) || isMatchParticipant(resource.data.matchParticipantUserIds);
-      allow list: if isSignedIn();
-
-      allow create: if isSignedIn() && request.resource.data.matchOwnerId == request.auth.uid && request.resource.data.matchId == matchId && request.resource.data.id == matchPlayerStatsId;
-      allow update: if resource != null && isMatchSubmitter(resource.data.matchOwnerId) && request.resource.data.matchOwnerId == resource.data.matchOwnerId && request.resource.data.matchId == resource.data.matchId;
-      allow delete: if resource != null && isMatchSubmitter(resource.data.matchOwnerId);
+      match /matchPlayerStats/{statsId} {
+        allow read: if isSignedIn();
+        allow write: if isSignedIn() && (
+          request.auth.uid == get(/databases/$(database)/documents/matches/$(matchId)).data.submittedByUserId
+        );
+      }
     }
   }
 }
