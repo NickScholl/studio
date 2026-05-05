@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react'
@@ -15,7 +14,7 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Search, Filter, Calendar, MapPin, User, Users } from 'lucide-react'
+import { Search, Filter, Calendar, MapPin, User, Users, Swords } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
@@ -30,6 +29,7 @@ export default function MatchHistory() {
   const filteredMatches = matches.filter(m => {
     const search = searchTerm.toLowerCase()
     return (
+      m.myName.toLowerCase().includes(search) ||
       m.opponent.toLowerCase().includes(search) ||
       m.type.toLowerCase().includes(search) ||
       (m.location && m.location.toLowerCase().includes(search)) ||
@@ -53,7 +53,7 @@ export default function MatchHistory() {
             <div className="relative w-full md:w-96">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
-                placeholder="Search by opponent, location, or partner..." 
+                placeholder="Search by player, opponent, location..." 
                 className="pl-10"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -80,9 +80,9 @@ export default function MatchHistory() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Match Details</TableHead>
-                      <TableHead>Opponents / Partner</TableHead>
+                      <TableHead>Date & Venue</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Matchup</TableHead>
                       <TableHead>Score</TableHead>
                       <TableHead>Result</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -92,15 +92,14 @@ export default function MatchHistory() {
                     {filteredMatches.map((match) => (
                       <TableRow key={match.id}>
                         <TableCell className="font-medium">
-                          {new Date(match.date).toLocaleDateString(undefined, {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">{match.type}</span>
+                          <div className="flex flex-col">
+                            <span>
+                              {new Date(match.date).toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </span>
                             <div className="flex items-center text-xs text-muted-foreground">
                               <MapPin className="h-3 w-3 mr-1" />
                               {match.location}
@@ -108,17 +107,24 @@ export default function MatchHistory() {
                           </div>
                         </TableCell>
                         <TableCell>
+                          <Badge variant="outline" className="font-normal">
+                            {match.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
                           <div className="flex flex-col gap-1">
-                            <div className="flex items-center text-sm">
-                              <User className="h-3 w-3 mr-1 text-muted-foreground" />
+                            <div className="flex items-center gap-2 text-sm">
+                              <div className="flex flex-col">
+                                <span className="font-semibold text-primary">{match.myName}</span>
+                                {match.partner && (
+                                  <span className="text-[10px] text-muted-foreground flex items-center">
+                                    <Users className="h-2 w-2 mr-1" /> & {match.partner}
+                                  </span>
+                                )}
+                              </div>
+                              <Swords className="h-3 w-3 text-muted-foreground" />
                               <span className="font-medium">{match.opponent}</span>
                             </div>
-                            {match.partner && (
-                              <div className="flex items-center text-xs text-secondary">
-                                <Users className="h-3 w-3 mr-1" />
-                                <span>With: {match.partner}</span>
-                              </div>
-                            )}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -148,7 +154,7 @@ export default function MatchHistory() {
                     <Search className="h-8 w-8 text-muted-foreground" />
                   </div>
                   <h3 className="text-lg font-medium">No matches found</h3>
-                  <p className="text-muted-foreground">Try a different search term or submit your first match!</p>
+                  <p className="text-muted-foreground">Try a different search term or submit a new match!</p>
                 </div>
               )}
             </CardContent>

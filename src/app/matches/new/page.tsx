@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from 'react'
@@ -13,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { MatchService, MatchType, MatchResult } from '@/lib/match-service'
-import { ChevronLeft, Info, MapPin, Users, Target } from 'lucide-react'
+import { ChevronLeft, Info, MapPin, Users, Target, User } from 'lucide-react'
 import Link from 'next/link'
 
 export default function NewMatch() {
@@ -32,6 +31,7 @@ export default function NewMatch() {
     const matchData = {
       date: formData.get('date') as string,
       type: matchType,
+      myName: formData.get('myName') as string,
       opponent: formData.get('opponent') as string,
       partner: isDoubles ? (formData.get('partner') as string) : undefined,
       location: formData.get('location') as string,
@@ -53,7 +53,7 @@ export default function NewMatch() {
       MatchService.addMatch(matchData)
       toast({
         title: "Match Submitted!",
-        description: `Your match against ${matchData.opponent} has been recorded.`,
+        description: `Your match has been recorded.`,
       })
       router.push('/')
     } catch (error) {
@@ -85,7 +85,7 @@ export default function NewMatch() {
           <Card className="shadow-lg border-2 border-primary/5">
             <CardHeader className="bg-primary/5 rounded-t-lg">
               <CardTitle>Match Details</CardTitle>
-              <CardDescription>Enter the scores and details of your badminton session.</CardDescription>
+              <CardDescription>Enter the players and scores of the badminton match.</CardDescription>
             </CardHeader>
             <CardContent className="p-6">
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -118,7 +118,7 @@ export default function NewMatch() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="result">Result</Label>
+                    <Label htmlFor="result">Result (for the Player)</Label>
                     <Select name="result" defaultValue="Win">
                       <SelectTrigger>
                         <SelectValue placeholder="Match outcome" />
@@ -131,12 +131,22 @@ export default function NewMatch() {
                   </div>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="opponent">Opponent Name</Label>
-                    <div className="relative">
-                      <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input id="opponent" name="opponent" placeholder="Enter opponent name" className="pl-10" required />
+                <div className="space-y-4 border-t pt-4">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Players</h3>
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="myName">Player Name</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input id="myName" name="myName" placeholder="e.g. John Smith" className="pl-10" required />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="opponent">Opponent Name</Label>
+                      <div className="relative">
+                        <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input id="opponent" name="opponent" placeholder="Enter opponent name" className="pl-10" required />
+                      </div>
                     </div>
                   </div>
                   {isDoubles && (
@@ -150,7 +160,7 @@ export default function NewMatch() {
                   )}
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-4 border-t pt-4">
                   <div className="flex items-center gap-2">
                     <Target className="h-4 w-4 text-primary" />
                     <Label className="font-bold">Set Scores</Label>
@@ -159,21 +169,21 @@ export default function NewMatch() {
                     <div className="space-y-2">
                       <Label className="text-xs uppercase text-muted-foreground">Set 1</Label>
                       <div className="flex gap-2">
-                        <Input name="set1_mine" placeholder="Me" type="number" required />
+                        <Input name="set1_mine" placeholder="Player" type="number" required />
                         <Input name="set1_opp" placeholder="Opp" type="number" required />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-xs uppercase text-muted-foreground">Set 2</Label>
                       <div className="flex gap-2">
-                        <Input name="set2_mine" placeholder="Me" type="number" required />
+                        <Input name="set2_mine" placeholder="Player" type="number" required />
                         <Input name="set2_opp" placeholder="Opp" type="number" required />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-xs uppercase text-muted-foreground">Set 3 (Optional)</Label>
                       <div className="flex gap-2">
-                        <Input name="set3_mine" placeholder="Me" type="number" />
+                        <Input name="set3_mine" placeholder="Player" type="number" />
                         <Input name="set3_opp" placeholder="Opp" type="number" />
                       </div>
                     </div>
@@ -200,8 +210,7 @@ export default function NewMatch() {
           <div className="mt-6 flex items-start gap-3 p-4 bg-muted/30 rounded-lg text-sm text-muted-foreground">
             <Info className="h-5 w-5 mt-0.5 text-primary" />
             <p>
-              Your stats will be automatically updated on the dashboard once you submit this match. 
-              Consistent tracking helps you identify patterns in your gameplay!
+              Recording matches for different players helps you manage group stats or your personal historical performance!
             </p>
           </div>
         </main>

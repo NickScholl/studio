@@ -1,4 +1,3 @@
-
 export type MatchType = 'Singles' | 'Doubles' | 'Mixed Doubles';
 export type MatchResult = 'Win' | 'Loss';
 
@@ -6,6 +5,7 @@ export interface BadmintonMatch {
   id: string;
   date: string;
   type: MatchType;
+  myName: string;
   opponent: string;
   partner?: string;
   location: string;
