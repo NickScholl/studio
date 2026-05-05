@@ -1,35 +1,34 @@
 
 # ShuttleScore | Badminton Performance Tracker
 
-This is your Next.js application built with Firebase. Follow these steps to get it launched!
+This is your Next.js application built with Firebase. If you are seeing a "Page Not Found" or "Missing index.html" error, follow these exact steps to fix it.
 
-## 1. Project Map
-To run correctly, your project contains:
-- `src/` -> Application logic and Firebase setup
-- `public/` -> Static assets (Ensured `index.html` is removed to avoid conflicts)
-- `package.json` -> Dependencies and scripts
-- `firebase.json` -> Configuration for standard Firebase Hosting
-- `apphosting.yaml` -> Configuration for Firebase App Hosting
+## 1. Fix the "Missing index.html" Error (CLI Deployment)
+If you are deploying using the **Firebase CLI** from your terminal, you must enable the Web Frameworks experiment so Firebase knows how to handle Next.js:
 
-## 2. Option A: Standard Firebase Hosting (Manual CLI)
-If you want to deploy from your own computer using the Firebase CLI:
-1. **Install the CLI**: Open your terminal and run `npm install -g firebase-tools`
-2. **Login**: Run `firebase login` and follow the browser prompts.
-3. **Initialize**: Run `firebase init hosting`. 
-   - When asked if you want to use a web framework, say **Yes** (select Next.js).
-   - Select your existing Firebase project ID: `studio-5240103926-3ba8a`.
-4. **Deploy**: Run `firebase deploy`. This will build your Next.js app and upload it.
+1. **Install/Update Firebase Tools**: 
+   `npm install -g firebase-tools`
+2. **Enable Web Frameworks**: 
+   `firebase experiments:enable webframeworks`
+3. **Login**: 
+   `firebase login`
+4. **Deploy**: 
+   `firebase deploy`
 
-## 3. Option B: Firebase App Hosting (Automatic - Recommended)
+**Why this works**: By enabling `webframeworks`, Firebase will look at your `package.json`, see that it's a Next.js app, and automatically build and deploy the server-side logic for you. It will no longer look for a static `index.html` file.
+
+## 2. Option B: Firebase App Hosting (Easiest)
+If you don't want to use the CLI, use **App Hosting**. This is the modern, "hands-off" way to host Next.js:
 1. Go to the [Firebase Console](https://console.firebase.google.com/).
 2. Select **App Hosting** from the left sidebar.
 3. Connect your GitHub repository.
 4. Select the `main` branch and click **Finish and Deploy**.
+5. It will handle the entire build and setup for you automatically.
 
-## 4. Important: Authorized Domains
-Whether using Option A or B, you **must** add your live URL to the Firebase Console:
+## 3. Important: Authorized Domains
+After your site is live (e.g., `shuttlescore.web.app`), you **must** add that URL to your Firebase project:
 1. Go to **Authentication** > **Settings** > **Authorized Domains**.
-2. Add your project's URL (e.g., `your-project.web.app` or your custom domain).
+2. Add your live URL to the list so Google Login and Email Auth work correctly.
 
 ---
 *Built with ❤️ for Badminton Players.*
