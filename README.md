@@ -1,34 +1,24 @@
 
 # ShuttleScore | Badminton Performance Tracker
 
-This is your Next.js application built with Firebase. If you are seeing a "Page Not Found" or "Missing index.html" error, follow these exact steps to fix it.
+This project is built with Next.js 15 and Firebase. Follow these steps to resolve 404 errors or build issues.
 
-## 1. Fix the "Missing index.html" Error (CLI Deployment)
-If you are deploying using the **Firebase CLI** from your terminal, you must enable the Web Frameworks experiment so Firebase knows how to handle Next.js:
+## 1. Fix "Could not find the next executable"
+If you see this error in your terminal, it usually means your local dependencies need a refresh:
+1. Run `npm install` in your terminal to ensure Next.js is locally available.
+2. Run `firebase experiments:enable webframeworks`.
+3. Run `firebase deploy`.
 
-1. **Install/Update Firebase Tools**: 
-   `npm install -g firebase-tools`
-2. **Enable Web Frameworks**: 
-   `firebase experiments:enable webframeworks`
-3. **Login**: 
-   `firebase login`
-4. **Deploy**: 
-   `firebase deploy`
-
-**Why this works**: By enabling `webframeworks`, Firebase will look at your `package.json`, see that it's a Next.js app, and automatically build and deploy the server-side logic for you. It will no longer look for a static `index.html` file.
-
-## 2. Option B: Firebase App Hosting (Easiest)
-If you don't want to use the CLI, use **App Hosting**. This is the modern, "hands-off" way to host Next.js:
-1. Go to the [Firebase Console](https://console.firebase.google.com/).
-2. Select **App Hosting** from the left sidebar.
-3. Connect your GitHub repository.
-4. Select the `main` branch and click **Finish and Deploy**.
-5. It will handle the entire build and setup for you automatically.
-
-## 3. Important: Authorized Domains
+## 2. Authorized Domains
 After your site is live (e.g., `shuttlescore.web.app`), you **must** add that URL to your Firebase project:
-1. Go to **Authentication** > **Settings** > **Authorized Domains**.
-2. Add your live URL to the list so Google Login and Email Auth work correctly.
+1. Go to the [Firebase Console](https://console.firebase.google.com/).
+2. Select **Authentication** > **Settings** > **Authorized Domains**.
+3. Add your live URL (e.g., `https://shuttlescore.web.app`) to the list.
+
+## 3. Option B: Firebase App Hosting (Easiest)
+If you want to avoid CLI errors entirely, use **App Hosting**:
+1. Connect your GitHub repository in the Firebase Console under "App Hosting".
+2. It will automatically build and deploy your Next.js app on every push.
 
 ---
 *Built with ❤️ for Badminton Players.*

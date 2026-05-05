@@ -39,7 +39,6 @@ export default function MatchHistory() {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [filterType, setFilterType] = React.useState<string>('all');
   const [filterResult, setFilterResult] = React.useState<string>('all');
-  const [filterPlace, setFilterPlace] = React.useState<string>('all');
   const [filterCompetition, setFilterCompetition] = React.useState<string>('all');
   const [viewMode, setViewMode] = React.useState<'list' | 'competition'>('list');
 
@@ -62,11 +61,6 @@ export default function MatchHistory() {
 
   const allMatches = matches || [];
 
-  const uniqueLocations = React.useMemo(() => {
-    const locations = allMatches.map(m => m.location).filter(Boolean);
-    return Array.from(new Set(locations)).sort();
-  }, [allMatches]);
-
   const uniqueCompetitions = React.useMemo(() => {
     const competitions = allMatches.map(m => m.competitionName).filter(Boolean);
     return Array.from(new Set(competitions)).sort();
@@ -84,12 +78,11 @@ export default function MatchHistory() {
       );
       const matchesType = filterType === 'all' || m.matchType === filterType;
       const matchesResult = filterResult === 'all' || m.result === filterResult;
-      const matchesPlace = filterPlace === 'all' || m.location === filterPlace;
       const matchesCompetition = filterCompetition === 'all' || m.competitionName === filterCompetition;
 
-      return matchesSearch && matchesType && matchesResult && matchesPlace && matchesCompetition;
+      return matchesSearch && matchesType && matchesResult && matchesCompetition;
     });
-  }, [allMatches, searchTerm, filterType, filterResult, filterPlace, filterCompetition]);
+  }, [allMatches, searchTerm, filterType, filterResult, filterCompetition]);
 
   const groupedByCompetition = React.useMemo(() => {
     const groups: Record<string, BadmintonMatch[]> = {};
@@ -105,14 +98,12 @@ export default function MatchHistory() {
     setSearchTerm('');
     setFilterType('all');
     setFilterResult('all');
-    setFilterPlace('all');
     setFilterCompetition('all');
   };
 
   const hasFilters = searchTerm !== '' || 
                      filterType !== 'all' || 
                      filterResult !== 'all' || 
-                     filterPlace !== 'all' ||
                      filterCompetition !== 'all';
 
   if (isUserLoading || (user && matchesLoading)) {
@@ -137,7 +128,7 @@ export default function MatchHistory() {
           <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)} className="hidden sm:block">
             <TabsList>
               <TabsTrigger value="list" className="gap-2">
-                <ListIcon className="h-4 w-4" /> List View
+                <ListIcon className="h-4 w-4" /> List
               </TabsTrigger>
               <TabsTrigger value="competition" className="gap-2">
                 <Trophy className="h-4 w-4" /> Groups
@@ -151,17 +142,17 @@ export default function MatchHistory() {
             <CardHeader className="pb-4 border-b">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Filter className="h-4 w-4" />
-                <CardTitle className="text-sm font-bold uppercase tracking-wider">Search & Filters</CardTitle>
+                <CardTitle className="text-sm font-bold uppercase tracking-wider">Filters</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="pt-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-muted-foreground uppercase">Player / Competition</Label>
+                  <Label className="text-xs font-bold text-muted-foreground uppercase">Search Players</Label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input 
-                      placeholder="Search names..." 
+                      placeholder="Name..." 
                       className="pl-10"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
@@ -172,10 +163,10 @@ export default function MatchHistory() {
                 <div className="space-y-2">
                   <Label className="text-xs font-bold text-muted-foreground uppercase">Match Type</Label>
                   <Select value={filterType} onValueChange={setFilterType}>
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-white">
                       <SelectValue placeholder="All Types" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white">
                       <SelectItem value="all">All Types</SelectItem>
                       <SelectItem value="Singles">Singles</SelectItem>
                       <SelectItem value="Doubles">Doubles</SelectItem>
@@ -187,11 +178,11 @@ export default function MatchHistory() {
                 <div className="space-y-2">
                   <Label className="text-xs font-bold text-muted-foreground uppercase">Competition</Label>
                   <Select value={filterCompetition} onValueChange={setFilterCompetition}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="All Competitions" />
+                    <SelectTrigger className="bg-white">
+                      <SelectValue placeholder="All Events" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Competitions</SelectItem>
+                    <SelectContent className="bg-white">
+                      <SelectItem value="all">All Events</SelectItem>
                       {uniqueCompetitions.map(comp => (
                         <SelectItem key={comp} value={comp!}>{comp}</SelectItem>
                       ))}
@@ -202,7 +193,7 @@ export default function MatchHistory() {
 
               {hasFilters && (
                 <div className="flex justify-end pt-2">
-                  <Button variant="ghost" size="sm" onClick={clearFilters} className="text-primary hover:text-primary/80">
+                  <Button variant="ghost" size="sm" onClick={clearFilters} className="text-primary">
                     <X className="h-4 w-4 mr-2" />
                     Clear Filters
                   </Button>
@@ -228,7 +219,7 @@ export default function MatchHistory() {
             {filteredMatches.length === 0 && (
               <div className="text-center py-20 bg-white rounded-lg border border-dashed">
                 <Activity className="h-10 w-10 mx-auto mb-4 text-muted-foreground opacity-20" />
-                <p className="text-muted-foreground">No matches found matching your search.</p>
+                <p className="text-muted-foreground">No matches match your criteria.</p>
               </div>
             )}
           </div>
@@ -245,7 +236,7 @@ function MatchTable({ title, matches, icon }: { title: string, matches: Badminto
     <Card className="shadow-sm border-none overflow-hidden">
       <CardHeader className="bg-primary/5 pb-4 flex flex-row items-center gap-2">
         {icon}
-        <CardTitle className="text-lg font-bold">{title} ({matches.length})</CardTitle>
+        <CardTitle className="text-lg font-bold">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
