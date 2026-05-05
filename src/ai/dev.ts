@@ -1,2 +1,2 @@
 // Flows will be imported for their side effects in this file.
-import './flows/analyze-performance';
+// All AI coach features have been removed by user request.
