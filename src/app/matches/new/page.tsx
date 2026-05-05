@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -12,14 +13,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { MatchService, MatchType, MatchResult } from '@/lib/match-service';
-import { ChevronLeft, MapPin, Target, User, Swords } from 'lucide-react';
+import { ChevronLeft, MapPin, Target, User, Swords, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore } from '@/firebase';
 
 export default function NewMatch() {
   const router = useRouter();
   const { toast } = useToast();
-  const { user, loading: authLoading } = useUser();
+  const { user, isUserLoading } = useUser();
   const db = useFirestore();
   const [loading, setLoading] = React.useState(false);
   const [matchType, setMatchType] = React.useState<MatchType>('Singles');
@@ -28,10 +29,10 @@ export default function NewMatch() {
   const isDoubles = matchType === 'Doubles' || matchType === 'Mixed Doubles';
 
   React.useEffect(() => {
-    if (!authLoading && !user) {
+    if (!isUserLoading && !user) {
       router.push('/login');
     }
-  }, [user, authLoading, router]);
+  }, [user, isUserLoading, router]);
 
   React.useEffect(() => {
     setDefaultDate(new Date().toISOString().split('T')[0]);
@@ -46,6 +47,7 @@ export default function NewMatch() {
     const matchData = {
       date: formData.get('date') as string,
       type: matchType,
+      competitionName: formData.get('competitionName') as string || '',
       myName: formData.get('myName') as string,
       opponent: formData.get('opponent') as string,
       partner: isDoubles ? (formData.get('partner') as string) : undefined,
@@ -63,13 +65,14 @@ export default function NewMatch() {
       ].filter(score => score > 0),
       result: formData.get('result') as MatchResult,
       notes: formData.get('notes') as string,
+      matchDate: formData.get('date') as string,
     };
 
     try {
       MatchService.addMatch(db, user.uid, matchData);
       toast({
         title: "Match Submitted!",
-        description: `Your match has been recorded to the cloud.`,
+        description: `Your match has been recorded.`,
       });
       router.push('/');
     } catch (error) {
@@ -83,7 +86,7 @@ export default function NewMatch() {
     }
   };
 
-  if (authLoading) return null;
+  if (isUserLoading) return null;
 
   return (
     <div className="flex min-h-screen">
@@ -103,7 +106,7 @@ export default function NewMatch() {
           <Card className="shadow-lg border-2 border-primary/5">
             <CardHeader className="bg-primary/5 rounded-t-lg">
               <CardTitle>Match Details</CardTitle>
-              <CardDescription>Enter the players and scores of the badminton match.</CardDescription>
+              <CardDescription>Enter the players, scores, and competition info.</CardDescription>
             </CardHeader>
             <CardContent className="p-6">
               <form onSubmit={handleSubmit} className="space-y-8">
@@ -136,24 +139,32 @@ export default function NewMatch() {
 
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
+                    <Label htmlFor="competitionName">Competition (Optional)</Label>
+                    <div className="relative">
+                      <Trophy className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input id="competitionName" name="competitionName" placeholder="e.g. City Open 2024" className="pl-10" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="location">Location / Venue</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input id="location" name="location" placeholder="e.g. Smash Badminton Hall" className="pl-10" required />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="result">Result (for Team 1)</Label>
-                    <Select name="result" defaultValue="Win">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Match outcome" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Win">Victory (Win)</SelectItem>
-                        <SelectItem value="Loss">Defeat (Loss)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="result">Result (for Team 1)</Label>
+                  <Select name="result" defaultValue="Win">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Match outcome" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Win">Victory (Win)</SelectItem>
+                      <SelectItem value="Loss">Defeat (Loss)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-6">

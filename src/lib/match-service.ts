@@ -1,3 +1,4 @@
+
 import { 
   collection, 
   addDoc, 
@@ -14,6 +15,7 @@ export interface BadmintonMatch {
   id: string;
   matchDate: string;
   matchType: MatchType;
+  competitionName?: string;
   myName: string;
   opponent: string;
   partner?: string;
@@ -35,7 +37,7 @@ export const MatchService = {
     const docData = {
       ...match,
       submittedByUserId: userId,
-      participantUserIds: [userId], // In a real app, we'd lookup other players' UIDs too
+      participantUserIds: [userId],
       createdAt: serverTimestamp(),
     };
 

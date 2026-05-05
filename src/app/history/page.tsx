@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -15,7 +16,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, MapPin, Swords, X, Calendar as CalendarIcon, Activity, Filter } from 'lucide-react';
+import { Search, MapPin, Swords, X, Calendar as CalendarIcon, Activity, Filter, Trophy, List as ListIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, where } from 'firebase/firestore';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function MatchHistory() {
   const { user, isUserLoading } = useUser();
@@ -38,8 +40,8 @@ export default function MatchHistory() {
   const [filterType, setFilterType] = React.useState<string>('all');
   const [filterResult, setFilterResult] = React.useState<string>('all');
   const [filterPlace, setFilterPlace] = React.useState<string>('all');
-  const [filterStartDate, setFilterStartDate] = React.useState<string>('');
-  const [filterEndDate, setFilterEndDate] = React.useState<string>('');
+  const [filterCompetition, setFilterCompetition] = React.useState<string>('all');
+  const [viewMode, setViewMode] = React.useState<'list' | 'competition'>('list');
 
   const matchesQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -65,6 +67,11 @@ export default function MatchHistory() {
     return Array.from(new Set(locations)).sort();
   }, [allMatches]);
 
+  const uniqueCompetitions = React.useMemo(() => {
+    const competitions = allMatches.map(m => m.competitionName).filter(Boolean);
+    return Array.from(new Set(competitions)).sort();
+  }, [allMatches]);
+
   const filteredMatches = React.useMemo(() => {
     return allMatches.filter(m => {
       const search = searchTerm.toLowerCase();
@@ -72,34 +79,41 @@ export default function MatchHistory() {
         m.myName.toLowerCase().includes(search) ||
         m.opponent.toLowerCase().includes(search) ||
         (m.partner && m.partner.toLowerCase().includes(search)) ||
-        (m.opponentPartner && m.opponentPartner.toLowerCase().includes(search))
+        (m.opponentPartner && m.opponentPartner.toLowerCase().includes(search)) ||
+        (m.competitionName && m.competitionName.toLowerCase().includes(search))
       );
       const matchesType = filterType === 'all' || m.matchType === filterType;
       const matchesResult = filterResult === 'all' || m.result === filterResult;
       const matchesPlace = filterPlace === 'all' || m.location === filterPlace;
-      
-      const matchesDate = (!filterStartDate || m.matchDate >= filterStartDate) && 
-                          (!filterEndDate || m.matchDate <= filterEndDate);
+      const matchesCompetition = filterCompetition === 'all' || m.competitionName === filterCompetition;
 
-      return matchesSearch && matchesType && matchesResult && matchesPlace && matchesDate;
+      return matchesSearch && matchesType && matchesResult && matchesPlace && matchesCompetition;
     });
-  }, [allMatches, searchTerm, filterType, filterResult, filterPlace, filterStartDate, filterEndDate]);
+  }, [allMatches, searchTerm, filterType, filterResult, filterPlace, filterCompetition]);
+
+  const groupedByCompetition = React.useMemo(() => {
+    const groups: Record<string, BadmintonMatch[]> = {};
+    filteredMatches.forEach(m => {
+      const comp = m.competitionName || 'Casual / Friendly';
+      if (!groups[comp]) groups[comp] = [];
+      groups[comp].push(m);
+    });
+    return groups;
+  }, [filteredMatches]);
 
   const clearFilters = () => {
     setSearchTerm('');
     setFilterType('all');
     setFilterResult('all');
     setFilterPlace('all');
-    setFilterStartDate('');
-    setFilterEndDate('');
+    setFilterCompetition('all');
   };
 
   const hasFilters = searchTerm !== '' || 
                      filterType !== 'all' || 
                      filterResult !== 'all' || 
-                     filterPlace !== 'all' || 
-                     filterStartDate !== '' || 
-                     filterEndDate !== '';
+                     filterPlace !== 'all' ||
+                     filterCompetition !== 'all';
 
   if (isUserLoading || (user && matchesLoading)) {
     return (
@@ -120,6 +134,16 @@ export default function MatchHistory() {
             <SidebarTrigger className="-ml-1" />
             <h1 className="text-lg font-headline font-semibold">Match History</h1>
           </div>
+          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)} className="w-auto">
+            <TabsList>
+              <TabsTrigger value="list" className="gap-2">
+                <ListIcon className="h-4 w-4" /> List View
+              </TabsTrigger>
+              <TabsTrigger value="competition" className="gap-2">
+                <Trophy className="h-4 w-4" /> Competition View
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </header>
 
         <main className="p-6 lg:p-10 space-y-6">
@@ -131,13 +155,13 @@ export default function MatchHistory() {
               </div>
             </CardHeader>
             <CardContent className="pt-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-xs font-bold text-muted-foreground">PLAYER/OPPONENT</Label>
+                  <Label className="text-xs font-bold text-muted-foreground">PLAYER/OPPONENT/COMP</Label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input 
-                      placeholder="Search names..." 
+                      placeholder="Search names or competitions..." 
                       className="pl-10 h-10"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
@@ -160,6 +184,23 @@ export default function MatchHistory() {
                   </Select>
                 </div>
 
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-muted-foreground">COMPETITION</Label>
+                  <Select value={filterCompetition} onValueChange={setFilterCompetition}>
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="All Competitions" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Competitions</SelectItem>
+                      {uniqueCompetitions.map(comp => (
+                        <SelectItem key={comp} value={comp!}>{comp}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t">
                 <div className="space-y-2">
                   <Label className="text-xs font-bold text-muted-foreground">RESULT</Label>
                   <Select value={filterResult} onValueChange={setFilterResult}>
@@ -188,31 +229,7 @@ export default function MatchHistory() {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t">
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
-                    <CalendarIcon className="h-3 w-3" /> FROM DATE
-                  </Label>
-                  <Input 
-                    type="date" 
-                    className="h-10"
-                    value={filterStartDate} 
-                    onChange={(e) => setFilterStartDate(e.target.value)} 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
-                    <CalendarIcon className="h-3 w-3" /> TO DATE
-                  </Label>
-                  <Input 
-                    type="date" 
-                    className="h-10"
-                    value={filterEndDate} 
-                    onChange={(e) => setFilterEndDate(e.target.value)} 
-                  />
-                </div>
                 <div className="flex items-end">
                   {hasFilters && (
                     <Button variant="outline" size="sm" onClick={clearFilters} className="text-muted-foreground h-10 w-full md:w-auto">
@@ -225,80 +242,107 @@ export default function MatchHistory() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-lg border-none overflow-hidden">
-            <CardHeader className="bg-primary/5 pb-4">
-              <CardTitle className="text-xl font-bold">Matches Log ({filteredMatches.length})</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              {filteredMatches.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/30">
-                      <TableHead className="w-[150px] font-bold">Date & Venue</TableHead>
-                      <TableHead className="font-bold">Matchup</TableHead>
-                      <TableHead className="font-bold">Score</TableHead>
-                      <TableHead className="text-right font-bold">Result</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredMatches.map((match) => (
-                      <TableRow key={match.id} className="hover:bg-muted/10 transition-colors">
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-sm">{new Date(match.matchDate).toLocaleDateString()}</span>
-                            <div className="flex items-center text-[11px] text-muted-foreground mt-0.5">
-                              <MapPin className="h-2.5 w-2.5 mr-1 text-primary" />
-                              {match.location}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="text-[10px] h-4 px-1 font-normal opacity-70">
-                                {match.matchType}
-                              </Badge>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                              <span className="font-bold text-primary">{match.myName}</span>
-                              {match.partner && <span className="text-muted-foreground text-xs">& {match.partner}</span>}
-                              <Swords className="h-3 w-3 mx-1 text-muted-foreground" />
-                              <span className="font-medium">{match.opponent}</span>
-                              {match.opponentPartner && <span className="text-muted-foreground text-xs">& {match.opponentPartner}</span>}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1.5 flex-wrap">
-                            {match.myScore.map((s, i) => (
-                              <span key={i} className={`text-xs px-2 py-0.5 rounded font-mono ${s > match.opponentScore[i] ? 'bg-primary/10 text-primary font-bold' : 'bg-muted text-muted-foreground'}`}>
-                                {s}-{match.opponentScore[i]}
-                              </span>
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Badge variant={match.result === 'Win' ? 'secondary' : 'destructive'} className="shadow-sm">
-                            {match.result}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="text-center py-24">
-                  <Activity className="h-12 w-12 mx-auto mb-4 opacity-10 text-primary" />
-                  <p className="text-muted-foreground font-medium">No matches match your criteria.</p>
-                  <Button variant="link" onClick={clearFilters} className="mt-2 text-primary">
-                    Clear all filters
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            {viewMode === 'list' ? (
+              <MatchTable title={`Matches Log (${filteredMatches.length})`} matches={filteredMatches} clearFilters={clearFilters} />
+            ) : (
+              Object.entries(groupedByCompetition).map(([comp, compMatches]) => (
+                <MatchTable 
+                  key={comp} 
+                  title={comp} 
+                  matches={compMatches} 
+                  icon={<Trophy className="h-5 w-5 text-primary" />} 
+                />
+              ))
+            )}
+
+            {filteredMatches.length === 0 && (
+              <div className="text-center py-24 bg-white rounded-lg shadow">
+                <Activity className="h-12 w-12 mx-auto mb-4 opacity-10 text-primary" />
+                <p className="text-muted-foreground font-medium">No matches match your criteria.</p>
+                <Button variant="link" onClick={clearFilters} className="mt-2 text-primary">
+                  Clear all filters
+                </Button>
+              </div>
+            )}
+          </div>
         </main>
       </SidebarInset>
     </div>
+  );
+}
+
+function MatchTable({ title, matches, clearFilters, icon }: { title: string, matches: BadmintonMatch[], clearFilters?: () => void, icon?: React.ReactNode }) {
+  if (matches.length === 0) return null;
+
+  return (
+    <Card className="shadow-lg border-none overflow-hidden">
+      <CardHeader className="bg-primary/5 pb-4 flex flex-row items-center gap-2">
+        {icon}
+        <CardTitle className="text-lg font-bold">{title} ({matches.length})</CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/30">
+              <TableHead className="w-[150px] font-bold">Date & Venue</TableHead>
+              <TableHead className="font-bold">Matchup</TableHead>
+              <TableHead className="font-bold">Score</TableHead>
+              <TableHead className="text-right font-bold">Result</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {matches.map((match) => (
+              <TableRow key={match.id} className="hover:bg-muted/10 transition-colors">
+                <TableCell>
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-sm">{new Date(match.matchDate).toLocaleDateString()}</span>
+                    <div className="flex items-center text-[11px] text-muted-foreground mt-0.5">
+                      <MapPin className="h-2.5 w-2.5 mr-1 text-primary" />
+                      {match.location}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-[10px] h-4 px-1 font-normal opacity-70">
+                        {match.matchType}
+                      </Badge>
+                      {match.competitionName && (
+                        <Badge className="text-[10px] h-4 px-1 bg-primary/10 text-primary border-none">
+                          {match.competitionName}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="font-bold text-primary">{match.myName}</span>
+                      {match.partner && <span className="text-muted-foreground text-xs">& {match.partner}</span>}
+                      <Swords className="h-3 w-3 mx-1 text-muted-foreground" />
+                      <span className="font-medium">{match.opponent}</span>
+                      {match.opponentPartner && <span className="text-muted-foreground text-xs">& {match.opponentPartner}</span>}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {match.myScore.map((s, i) => (
+                      <span key={i} className={`text-xs px-2 py-0.5 rounded font-mono ${s > match.opponentScore[i] ? 'bg-primary/10 text-primary font-bold' : 'bg-muted text-muted-foreground'}`}>
+                        {s}-{match.opponentScore[i]}
+                      </span>
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Badge variant={match.result === 'Win' ? 'secondary' : 'destructive'} className="shadow-sm">
+                    {match.result}
+                  </Badge>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 }

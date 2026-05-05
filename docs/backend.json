@@ -73,6 +73,10 @@
           "type": "string",
           "description": "The type of match played, such as 'Singles', 'Doubles', or 'Mixed Doubles'."
         },
+        "competitionName": {
+          "type": "string",
+          "description": "The optional name of the competition or tournament this match belongs to."
+        },
         "submittedByUserId": {
           "type": "string",
           "description": "Reference to the UserProfile who recorded and submitted this match's details."
