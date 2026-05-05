@@ -1,11 +1,11 @@
 
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext } from 'react';
 import { FirebaseApp } from 'firebase/app';
 import { Auth } from 'firebase/auth';
 import { Firestore } from 'firebase/firestore';
-import { initializeFirebase } from './index';
+import { app, auth, db } from './init';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
 interface FirebaseContextType {
@@ -14,20 +14,11 @@ interface FirebaseContextType {
   db: Firestore;
 }
 
-const FirebaseContext = createContext<FirebaseContextType | null>(null);
+const FirebaseContext = createContext<FirebaseContextType>({ app, auth, db });
 
 export function FirebaseProvider({ children }: { children: React.ReactNode }) {
-  const [services, setServices] = useState<FirebaseContextType | null>(null);
-
-  useEffect(() => {
-    const { app, auth, db } = initializeFirebase();
-    setServices({ app, auth, db });
-  }, []);
-
-  if (!services) return null;
-
   return (
-    <FirebaseContext.Provider value={services}>
+    <FirebaseContext.Provider value={{ app, auth, db }}>
       <FirebaseErrorListener />
       {children}
     </FirebaseContext.Provider>
