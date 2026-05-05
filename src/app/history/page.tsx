@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -16,7 +15,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, MapPin, Swords, X, Calendar as CalendarIcon, Activity } from 'lucide-react';
+import { Search, MapPin, Swords, X, Calendar as CalendarIcon, Activity, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -76,7 +75,6 @@ export default function MatchHistory() {
       const matchesResult = filterResult === 'all' || m.result === filterResult;
       const matchesPlace = filterPlace === 'all' || m.location === filterPlace;
       
-      // Robust string-based date comparison
       const matchesDate = (!filterStartDate || m.date >= filterStartDate) && 
                           (!filterEndDate || m.date <= filterEndDate);
 
@@ -120,148 +118,162 @@ export default function MatchHistory() {
         </header>
 
         <main className="p-6 lg:p-10 space-y-6">
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col md:flex-row gap-4 items-end">
-              <div className="flex-1 space-y-2 w-full">
-                <Label className="text-xs uppercase text-muted-foreground font-bold">Search Players</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search by name or partner..." 
-                    className="pl-10"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
+          <Card className="border-none shadow-md bg-white">
+            <CardHeader className="pb-4 border-b">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Filter className="h-4 w-4" />
+                <CardTitle className="text-sm font-bold uppercase tracking-wider">Search & Filters</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-muted-foreground">PLAYER/OPPONENT</Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      placeholder="Search names..." 
+                      className="pl-10 h-10"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-muted-foreground">MATCH TYPE</Label>
+                  <Select value={filterType} onValueChange={setFilterType}>
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="All Types" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="Singles">Singles</SelectItem>
+                      <SelectItem value="Doubles">Doubles</SelectItem>
+                      <SelectItem value="Mixed Doubles">Mixed Doubles</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-muted-foreground">RESULT</Label>
+                  <Select value={filterResult} onValueChange={setFilterResult}>
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="All Results" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Results</SelectItem>
+                      <SelectItem value="Win">Win</SelectItem>
+                      <SelectItem value="Loss">Loss</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-muted-foreground">VENUE</Label>
+                  <Select value={filterPlace} onValueChange={setFilterPlace}>
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="All Venues" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Venues</SelectItem>
+                      {uniqueLocations.map(loc => (
+                        <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-              
-              <div className="space-y-2">
-                <Label className="text-xs uppercase text-muted-foreground font-bold">Type</Label>
-                <Select value={filterType} onValueChange={setFilterType}>
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="Match Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="Singles">Singles</SelectItem>
-                    <SelectItem value="Doubles">Doubles</SelectItem>
-                    <SelectItem value="Mixed Doubles">Mixed Doubles</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
 
-              <div className="space-y-2">
-                <Label className="text-xs uppercase text-muted-foreground font-bold">Result</Label>
-                <Select value={filterResult} onValueChange={setFilterResult}>
-                  <SelectTrigger className="w-[120px]">
-                    <SelectValue placeholder="Result" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="Win">Win</SelectItem>
-                    <SelectItem value="Loss">Loss</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-xs uppercase text-muted-foreground font-bold">Venue</Label>
-                <Select value={filterPlace} onValueChange={setFilterPlace}>
-                  <SelectTrigger className="w-[160px]">
-                    <SelectValue placeholder="Select Venue" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Venues</SelectItem>
-                    {uniqueLocations.map(loc => (
-                      <SelectItem key={loc} value={loc}>{loc}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row gap-4 items-end bg-muted/30 p-4 rounded-lg border">
-              <div className="grid grid-cols-2 gap-4 flex-1 w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t">
                 <div className="space-y-2">
-                  <Label className="text-xs uppercase text-muted-foreground font-bold flex items-center gap-1">
-                    <CalendarIcon className="h-3 w-3" /> From Date
+                  <Label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                    <CalendarIcon className="h-3 w-3" /> FROM DATE
                   </Label>
                   <Input 
                     type="date" 
+                    className="h-10"
                     value={filterStartDate} 
                     onChange={(e) => setFilterStartDate(e.target.value)} 
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs uppercase text-muted-foreground font-bold flex items-center gap-1">
-                    <CalendarIcon className="h-3 w-3" /> To Date
+                  <Label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                    <CalendarIcon className="h-3 w-3" /> TO DATE
                   </Label>
                   <Input 
                     type="date" 
+                    className="h-10"
                     value={filterEndDate} 
                     onChange={(e) => setFilterEndDate(e.target.value)} 
                   />
                 </div>
+                <div className="flex items-end">
+                  {hasFilters && (
+                    <Button variant="outline" size="sm" onClick={clearFilters} className="text-muted-foreground h-10 w-full md:w-auto">
+                      <X className="h-4 w-4 mr-2" />
+                      Reset All
+                    </Button>
+                  )}
+                </div>
               </div>
+            </CardContent>
+          </Card>
 
-              {hasFilters && (
-                <Button variant="outline" size="sm" onClick={clearFilters} className="text-muted-foreground h-10">
-                  <X className="h-4 w-4 mr-2" />
-                  Clear All Filters
-                </Button>
-              )}
-            </div>
-          </div>
-
-          <Card>
-            <CardHeader className="pb-2 border-b">
-              <CardTitle className="text-xl">Match Records ({filteredMatches.length})</CardTitle>
+          <Card className="shadow-lg border-none overflow-hidden">
+            <CardHeader className="bg-primary/5 pb-4">
+              <CardTitle className="text-xl font-bold">Matches Log ({filteredMatches.length})</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               {filteredMatches.length > 0 ? (
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-muted/50">
-                      <TableHead className="w-[150px]">Date & Venue</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Matchup</TableHead>
-                      <TableHead>Score</TableHead>
-                      <TableHead className="text-right">Result</TableHead>
+                    <TableRow className="bg-muted/30">
+                      <TableHead className="w-[150px] font-bold">Date & Venue</TableHead>
+                      <TableHead className="font-bold">Matchup</TableHead>
+                      <TableHead className="font-bold">Score</TableHead>
+                      <TableHead className="text-right font-bold">Result</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredMatches.map((match) => (
-                      <TableRow key={match.id}>
+                      <TableRow key={match.id} className="hover:bg-muted/10 transition-colors">
                         <TableCell>
                           <div className="flex flex-col">
-                            <span className="font-medium">{new Date(match.date).toLocaleDateString()}</span>
-                            <div className="flex items-center text-[10px] text-muted-foreground">
-                              <MapPin className="h-2.5 w-2.5 mr-1" />
+                            <span className="font-semibold text-sm">{new Date(match.date).toLocaleDateString()}</span>
+                            <div className="flex items-center text-[11px] text-muted-foreground mt-0.5">
+                              <MapPin className="h-2.5 w-2.5 mr-1 text-primary" />
                               {match.location}
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className="text-[10px]">{match.type}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2 text-xs">
-                            <span className="font-bold text-primary">{match.myName}</span>
-                            {match.partner && <span className="text-muted-foreground">& {match.partner}</span>}
-                            <Swords className="h-3 w-3 mx-1 opacity-50" />
-                            <span>{match.opponent}</span>
-                            {match.opponentPartner && <span className="text-muted-foreground">& {match.opponentPartner}</span>}
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-[10px] h-4 px-1 font-normal opacity-70">
+                                {match.type}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="font-bold text-primary">{match.myName}</span>
+                              {match.partner && <span className="text-muted-foreground text-xs">& {match.partner}</span>}
+                              <Swords className="h-3 w-3 mx-1 text-muted-foreground" />
+                              <span className="font-medium">{match.opponent}</span>
+                              {match.opponentPartner && <span className="text-muted-foreground text-xs">& {match.opponentPartner}</span>}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex gap-1">
+                          <div className="flex gap-1.5 flex-wrap">
                             {match.myScore.map((s, i) => (
-                              <span key={i} className="text-[10px] bg-muted px-1 rounded">{s}-{match.opponentScore[i]}</span>
+                              <span key={i} className={`text-xs px-2 py-0.5 rounded font-mono ${s > match.opponentScore[i] ? 'bg-primary/10 text-primary font-bold' : 'bg-muted text-muted-foreground'}`}>
+                                {s}-{match.opponentScore[i]}
+                              </span>
                             ))}
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Badge variant={match.result === 'Win' ? 'secondary' : 'destructive'}>
+                          <Badge variant={match.result === 'Win' ? 'secondary' : 'destructive'} className="shadow-sm">
                             {match.result}
                           </Badge>
                         </TableCell>
@@ -270,9 +282,12 @@ export default function MatchHistory() {
                   </TableBody>
                 </Table>
               ) : (
-                <div className="text-center py-20">
-                  <Activity className="h-10 w-10 mx-auto mb-4 opacity-20" />
-                  <p className="text-muted-foreground">No matches found matching your filters.</p>
+                <div className="text-center py-24">
+                  <Activity className="h-12 w-12 mx-auto mb-4 opacity-10 text-primary" />
+                  <p className="text-muted-foreground font-medium">No matches match your criteria.</p>
+                  <Button variant="link" onClick={clearFilters} className="mt-2 text-primary">
+                    Clear all filters
+                  </Button>
                 </div>
               )}
             </CardContent>

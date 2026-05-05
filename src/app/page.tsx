@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -114,7 +113,7 @@ export default function Dashboard() {
           )}
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
+            <Card className="border-none shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Matches Played</CardTitle>
                 <Activity className="h-4 w-4 text-muted-foreground" />
@@ -123,7 +122,7 @@ export default function Dashboard() {
                 <div className="text-2xl font-bold">{stats.totalMatches}</div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-none shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Win Ratio</CardTitle>
                 <TrendingUp className="h-4 w-4 text-secondary" />
@@ -138,7 +137,7 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-none shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Wins</CardTitle>
                 <Trophy className="h-4 w-4 text-primary" />
@@ -147,7 +146,7 @@ export default function Dashboard() {
                 <div className="text-2xl font-bold">{stats.wins}</div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-none shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Losses</CardTitle>
                 <Frown className="h-4 w-4 text-accent" />
@@ -159,7 +158,7 @@ export default function Dashboard() {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <Card className="flex flex-col">
+            <Card className="flex flex-col border-none shadow-md">
               <CardHeader>
                 <CardTitle>Win/Loss Comparison</CardTitle>
                 <CardDescription>Visual breakdown of your overall performance.</CardDescription>
@@ -187,7 +186,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="flex flex-col">
+            <Card className="flex flex-col border-none shadow-md">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle>Recent Activity</CardTitle>
