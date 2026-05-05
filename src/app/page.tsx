@@ -62,8 +62,13 @@ export default function Dashboard() {
     );
   }
 
+  // If we're not loading but have no user, show a simple transition screen while redirecting
   if (!user) {
-    return null;
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <p className="text-muted-foreground">Redirecting to login...</p>
+      </div>
+    );
   }
 
   const stats = MatchService.calculateStats(matches);

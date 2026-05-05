@@ -4,19 +4,29 @@ import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { firebaseConfig } from './config';
 
-let app: FirebaseApp;
-let auth: Auth;
-let db: Firestore;
-
-if (typeof window !== 'undefined') {
-  app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-} else {
-  // Fallback for SSR
-  app = {} as FirebaseApp;
-  auth = {} as Auth;
-  db = {} as Firestore;
+/**
+ * Safely initializes or retrieves the Firebase App instance.
+ */
+export function getFirebaseApp(): FirebaseApp {
+  if (getApps().length > 0) return getApp();
+  return initializeApp(firebaseConfig);
 }
 
-export { app, auth, db };
+/**
+ * Retrieves the Firebase Auth instance for the given app.
+ */
+export function getFirebaseAuth(app: FirebaseApp): Auth {
+  return getAuth(app);
+}
+
+/**
+ * Retrieves the Firestore instance for the given app.
+ */
+export function getFirebaseDb(app: FirebaseApp): Firestore {
+  return getFirestore(app);
+}
+
+// These are kept for legacy compatibility but should ideally be accessed via the Provider/Hooks
+export const app = typeof window !== 'undefined' ? getFirebaseApp() : {} as FirebaseApp;
+export const auth = typeof window !== 'undefined' ? getFirebaseAuth(app as FirebaseApp) : {} as Auth;
+export const db = typeof window !== 'undefined' ? getFirebaseDb(app as FirebaseApp) : {} as Firestore;

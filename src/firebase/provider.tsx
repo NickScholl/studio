@@ -1,11 +1,11 @@
 
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { FirebaseApp } from 'firebase/app';
 import { Auth } from 'firebase/auth';
 import { Firestore } from 'firebase/firestore';
-import { app, auth, db } from './init';
+import { getFirebaseApp, getFirebaseAuth, getFirebaseDb } from './init';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
 interface FirebaseContextType {
@@ -23,12 +23,34 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
     setIsMounted(true);
   }, []);
 
-  if (!isMounted) {
-    return <div className="min-h-screen bg-background" />;
+  // Initialize Firebase only once on the client
+  const firebaseInstances = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const appInstance = getFirebaseApp();
+      const authInstance = getFirebaseAuth(appInstance);
+      const dbInstance = getFirebaseDb(appInstance);
+      return { app: appInstance, auth: authInstance, db: dbInstance };
+    } catch (error) {
+      console.error('Failed to initialize Firebase:', error);
+      return null;
+    }
+  }, []);
+
+  // Show a basic loader while mounting/initializing to prevent blank screen or hydration errors
+  if (!isMounted || !firebaseInstances) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <p className="text-sm font-medium text-muted-foreground">Initializing ShuttleScore...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <FirebaseContext.Provider value={{ app, auth, db }}>
+    <FirebaseContext.Provider value={firebaseInstances}>
       <FirebaseErrorListener />
       {children}
     </FirebaseContext.Provider>
