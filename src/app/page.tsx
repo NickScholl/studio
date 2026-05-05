@@ -1,11 +1,12 @@
 
-"use client"
+'use client';
 
-import * as React from 'react'
-import { AppSidebar } from '@/components/app-sidebar'
-import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { BadmintonMatch, MatchService } from '@/lib/match-service'
+import * as React from 'react';
+import { useRouter } from 'next/navigation';
+import { AppSidebar } from '@/components/app-sidebar';
+import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { BadmintonMatch, MatchService } from '@/lib/match-service';
 import { 
   Trophy, 
   Frown, 
@@ -13,36 +14,61 @@ import {
   TrendingUp,
   Activity,
   Plus
-} from 'lucide-react'
+} from 'lucide-react';
 import { 
   ChartContainer, 
   ChartTooltip, 
   ChartTooltipContent, 
-} from "@/components/ui/chart"
-import { Bar, BarChart, XAxis, YAxis, ResponsiveContainer, Cell } from "recharts"
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+} from "@/components/ui/chart";
+import { Bar, BarChart, XAxis, YAxis, Cell } from "recharts";
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { useUser, useFirestore, useCollection } from '@/firebase';
+import { collection, query, orderBy, limit } from 'firebase/firestore';
 
 export default function Dashboard() {
-  const [stats, setStats] = React.useState<any>(null)
-  const [recentMatches, setRecentMatches] = React.useState<BadmintonMatch[]>([])
+  const { user, loading: authLoading } = useUser();
+  const db = useFirestore();
+  const router = useRouter();
+
+  const matchesQuery = React.useMemo(() => {
+    if (!db || !user) return null;
+    return query(
+      collection(db, 'users', user.uid, 'matches'),
+      orderBy('date', 'desc')
+    );
+  }, [db, user]);
+
+  const { data: matches, loading: matchesLoading } = useCollection<BadmintonMatch>(matchesQuery);
 
   React.useEffect(() => {
-    setStats(MatchService.getStats())
-    setRecentMatches(MatchService.getMatches().slice(0, 5))
-  }, [])
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
 
-  if (!stats) return null
+  if (authLoading || matchesLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <Activity className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) return null;
+
+  const stats = MatchService.calculateStats(matches);
+  const recentMatches = matches.slice(0, 5);
 
   const chartData = [
     { name: 'Wins', value: stats.wins, fill: 'hsl(var(--primary))' },
     { name: 'Losses', value: stats.losses, fill: 'hsl(var(--accent))' },
-  ]
+  ];
 
   const config = {
     wins: { label: "Wins", color: "hsl(var(--primary))" },
     losses: { label: "Losses", color: "hsl(var(--accent))" },
-  }
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -62,7 +88,6 @@ export default function Dashboard() {
         </header>
 
         <main className="flex-1 space-y-8 p-6 lg:p-10">
-          {/* Quick Stats Grid */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -71,7 +96,6 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalMatches}</div>
-                <p className="text-xs text-muted-foreground">+2 from last week</p>
               </CardContent>
             </Card>
             <Card>
@@ -96,7 +120,6 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.wins}</div>
-                <p className="text-xs text-muted-foreground">Recent streak: 3W</p>
               </CardContent>
             </Card>
             <Card>
@@ -106,13 +129,11 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.losses}</div>
-                <p className="text-xs text-muted-foreground">Keep fighting!</p>
               </CardContent>
             </Card>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-7">
-            {/* Chart Area */}
             <Card className="lg:col-span-4">
               <CardHeader>
                 <CardTitle>Win/Loss Comparison</CardTitle>
@@ -141,7 +162,6 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Recent Matches Area */}
             <Card className="lg:col-span-3">
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
@@ -186,5 +206,5 @@ export default function Dashboard() {
         </main>
       </SidebarInset>
     </div>
-  )
+  );
 }

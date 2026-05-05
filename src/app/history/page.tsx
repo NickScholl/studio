@@ -1,10 +1,11 @@
 
-"use client"
+'use client';
 
-import * as React from 'react'
-import { AppSidebar } from '@/components/app-sidebar'
-import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
-import { BadmintonMatch, MatchService } from '@/lib/match-service'
+import * as React from 'react';
+import { useRouter } from 'next/navigation';
+import { AppSidebar } from '@/components/app-sidebar';
+import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { BadmintonMatch } from '@/lib/match-service';
 import { 
   Table, 
   TableBody, 
@@ -12,85 +13,100 @@ import {
   TableHead, 
   TableHeader, 
   TableRow 
-} from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Search, MapPin, Users, Swords, X, Calendar as CalendarIcon, Filter } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Search, MapPin, Users, Swords, X, Calendar as CalendarIcon, Filter, Activity } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
+import { useUser, useFirestore, useCollection } from '@/firebase';
+import { collection, query, orderBy } from 'firebase/firestore';
 
 export default function MatchHistory() {
-  const [matches, setMatches] = React.useState<BadmintonMatch[]>([])
-  const [searchTerm, setSearchTerm] = React.useState('')
-  const [filterType, setFilterType] = React.useState<string>('all')
-  const [filterResult, setFilterResult] = React.useState<string>('all')
-  const [filterPlace, setFilterPlace] = React.useState<string>('all')
-  const [filterStartDate, setFilterStartDate] = React.useState<string>('')
-  const [filterEndDate, setFilterEndDate] = React.useState<string>('')
+  const { user, loading: authLoading } = useUser();
+  const db = useFirestore();
+  const router = useRouter();
+
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [filterType, setFilterType] = React.useState<string>('all');
+  const [filterResult, setFilterResult] = React.useState<string>('all');
+  const [filterPlace, setFilterPlace] = React.useState<string>('all');
+  const [filterStartDate, setFilterStartDate] = React.useState<string>('');
+  const [filterEndDate, setFilterEndDate] = React.useState<string>('');
+
+  const matchesQuery = React.useMemo(() => {
+    if (!db || !user) return null;
+    return query(
+      collection(db, 'users', user.uid, 'matches'),
+      orderBy('date', 'desc')
+    );
+  }, [db, user]);
+
+  const { data: matches, loading: matchesLoading } = useCollection<BadmintonMatch>(matchesQuery);
 
   React.useEffect(() => {
-    setMatches(MatchService.getMatches())
-  }, [])
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
 
   const uniqueLocations = React.useMemo(() => {
-    const locations = matches.map(m => m.location).filter(Boolean)
-    return Array.from(new Set(locations)).sort()
-  }, [matches])
+    const locations = matches.map(m => m.location).filter(Boolean);
+    return Array.from(new Set(locations)).sort();
+  }, [matches]);
 
   const filteredMatches = React.useMemo(() => {
     return matches.filter(m => {
-      const search = searchTerm.toLowerCase()
-      
-      // Text Search Filter (Players, Partners)
+      const search = searchTerm.toLowerCase();
       const matchesSearch = !searchTerm || (
         m.myName.toLowerCase().includes(search) ||
         m.opponent.toLowerCase().includes(search) ||
         (m.partner && m.partner.toLowerCase().includes(search)) ||
         (m.opponentPartner && m.opponentPartner.toLowerCase().includes(search))
-      )
+      );
+      const matchesType = filterType === 'all' || m.type === filterType;
+      const matchesResult = filterResult === 'all' || m.result === filterResult;
+      const matchesPlace = filterPlace === 'all' || m.location === filterPlace;
+      const matchTime = new Date(m.date).getTime();
+      const start = filterStartDate ? new Date(filterStartDate).getTime() : -Infinity;
+      const end = filterEndDate ? new Date(filterEndDate).getTime() : Infinity;
+      const matchesDate = matchTime >= start && matchTime <= end;
 
-      // Type Filter
-      const matchesType = filterType === 'all' || m.type === filterType
-
-      // Result Filter
-      const matchesResult = filterResult === 'all' || m.result === filterResult
-
-      // Place Filter
-      const matchesPlace = filterPlace === 'all' || m.location === filterPlace
-
-      // Date Filter
-      const matchTime = new Date(m.date).getTime()
-      const start = filterStartDate ? new Date(filterStartDate).getTime() : -Infinity
-      const end = filterEndDate ? new Date(filterEndDate).getTime() : Infinity
-      const matchesDate = matchTime >= start && matchTime <= end
-
-      return matchesSearch && matchesType && matchesResult && matchesPlace && matchesDate
-    })
-  }, [matches, searchTerm, filterType, filterResult, filterPlace, filterStartDate, filterEndDate])
+      return matchesSearch && matchesType && matchesResult && matchesPlace && matchesDate;
+    });
+  }, [matches, searchTerm, filterType, filterResult, filterPlace, filterStartDate, filterEndDate]);
 
   const clearFilters = () => {
-    setSearchTerm('')
-    setFilterType('all')
-    setFilterResult('all')
-    setFilterPlace('all')
-    setFilterStartDate('')
-    setFilterEndDate('')
-  }
+    setSearchTerm('');
+    setFilterType('all');
+    setFilterResult('all');
+    setFilterPlace('all');
+    setFilterStartDate('');
+    setFilterEndDate('');
+  };
 
   const hasFilters = searchTerm !== '' || 
                      filterType !== 'all' || 
                      filterResult !== 'all' || 
                      filterPlace !== 'all' || 
                      filterStartDate !== '' || 
-                     filterEndDate !== ''
+                     filterEndDate !== '';
+
+  if (authLoading || matchesLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <Activity className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen">
@@ -105,7 +121,6 @@ export default function MatchHistory() {
 
         <main className="p-6 lg:p-10 space-y-6">
           <div className="flex flex-col gap-6">
-            {/* Search and Main Filters */}
             <div className="flex flex-col md:flex-row gap-4 items-end">
               <div className="flex-1 space-y-2 w-full">
                 <Label className="text-xs uppercase text-muted-foreground font-bold">Search Players</Label>
@@ -165,7 +180,6 @@ export default function MatchHistory() {
               </div>
             </div>
 
-            {/* Date Range and Secondary Filters */}
             <div className="flex flex-col md:flex-row gap-4 items-end bg-muted/30 p-4 rounded-lg border">
               <div className="grid grid-cols-2 gap-4 flex-1 w-full">
                 <div className="space-y-2">
@@ -201,15 +215,7 @@ export default function MatchHistory() {
 
           <Card>
             <CardHeader className="pb-2 border-b">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl">Match Records</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Found {filteredMatches.length} matches
-                  </p>
-                </div>
-                <Filter className="h-5 w-5 text-muted-foreground opacity-20" />
-              </div>
+              <CardTitle className="text-xl">Match Records ({filteredMatches.length})</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               {filteredMatches.length > 0 ? (
@@ -226,58 +232,36 @@ export default function MatchHistory() {
                   <TableBody>
                     {filteredMatches.map((match) => (
                       <TableRow key={match.id}>
-                        <TableCell className="font-medium">
+                        <TableCell>
                           <div className="flex flex-col">
-                            <span>
-                              {new Date(match.date).toLocaleDateString(undefined, {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric'
-                              })}
-                            </span>
-                            <div className="flex items-center text-[10px] text-muted-foreground mt-0.5">
-                              <MapPin className="h-2.5 w-2.5 mr-1 text-primary" />
+                            <span className="font-medium">{new Date(match.date).toLocaleDateString()}</span>
+                            <div className="flex items-center text-[10px] text-muted-foreground">
+                              <MapPin className="h-2.5 w-2.5 mr-1" />
                               {match.location}
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className="font-normal text-[10px] whitespace-nowrap">
-                            {match.type}
-                          </Badge>
+                          <Badge variant="outline" className="text-[10px]">{match.type}</Badge>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-3 text-sm">
-                            <div className="flex flex-col min-w-[80px]">
-                              <span className="font-semibold text-primary">{match.myName}</span>
-                              {match.partner && (
-                                <span className="text-[10px] text-muted-foreground flex items-center">
-                                  <Users className="h-2 w-2 mr-1" /> & {match.partner}
-                                </span>
-                              )}
-                            </div>
-                            <Swords className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                            <div className="flex flex-col min-w-[80px]">
-                              <span className="font-medium">{match.opponent}</span>
-                              {match.opponentPartner && (
-                                <span className="text-[10px] text-muted-foreground flex items-center">
-                                  <Users className="h-2 w-2 mr-1" /> & {match.opponentPartner}
-                                </span>
-                              )}
-                            </div>
+                          <div className="flex items-center gap-2 text-xs">
+                            <span className="font-bold text-primary">{match.myName}</span>
+                            {match.partner && <span className="text-muted-foreground">& {match.partner}</span>}
+                            <Swords className="h-3 w-3 mx-1 opacity-50" />
+                            <span>{match.opponent}</span>
+                            {match.opponentPartner && <span className="text-muted-foreground">& {match.opponentPartner}</span>}
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-1">
-                            {match.myScore.map((score, idx) => (
-                              <span key={idx} className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-mono border">
-                                {score}-{match.opponentScore[idx]}
-                              </span>
+                            {match.myScore.map((s, i) => (
+                              <span key={i} className="text-[10px] bg-muted px-1 rounded">{s}-{match.opponentScore[i]}</span>
                             ))}
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Badge variant={match.result === 'Win' ? 'default' : 'destructive'} className={match.result === 'Win' ? 'bg-secondary' : ''}>
+                          <Badge variant={match.result === 'Win' ? 'secondary' : 'destructive'}>
                             {match.result}
                           </Badge>
                         </TableCell>
@@ -286,15 +270,9 @@ export default function MatchHistory() {
                   </TableBody>
                 </Table>
               ) : (
-                <div className="text-center py-20 bg-muted/5">
-                  <div className="inline-flex items-center justify-center p-4 bg-muted rounded-full mb-4">
-                    <Search className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <h3 className="text-lg font-medium">No results found</h3>
-                  <p className="text-muted-foreground mb-6">Try adjusting your filters or search terms.</p>
-                  {hasFilters && (
-                    <Button variant="outline" onClick={clearFilters}>Reset All Filters</Button>
-                  )}
+                <div className="text-center py-20">
+                  <Activity className="h-10 w-10 mx-auto mb-4 opacity-20" />
+                  <p className="text-muted-foreground">No matches found matching your filters.</p>
                 </div>
               )}
             </CardContent>
@@ -302,5 +280,5 @@ export default function MatchHistory() {
         </main>
       </SidebarInset>
     </div>
-  )
+  );
 }

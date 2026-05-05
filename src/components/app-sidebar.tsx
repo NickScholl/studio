@@ -1,18 +1,22 @@
 
-"use client"
+'use client';
 
-import * as React from "react"
+import * as React from "react";
 import { 
   LayoutDashboard, 
   PlusCircle, 
   History, 
-  Settings, 
   Trophy,
-  User,
-  LogOut
-} from "lucide-react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+  LogOut,
+  LogIn
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { 
+  useUser, 
+  useAuth 
+} from "@/firebase";
+import { signOut } from "firebase/auth";
 
 import {
   Sidebar,
@@ -23,20 +27,25 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
-} from "@/components/ui/sidebar"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { PlaceHolderImages } from "@/lib/placeholder-images"
+} from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function AppSidebar() {
-  const pathname = usePathname()
-  const avatar = PlaceHolderImages.find(img => img.id === 'user-avatar')?.imageUrl
+  const pathname = usePathname();
+  const router = useRouter();
+  const { user, loading } = useUser();
+  const auth = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut(auth);
+    router.push('/login');
+  };
 
   const navItems = [
     { name: "Dashboard", icon: LayoutDashboard, path: "/" },
     { name: "Submit Match", icon: PlusCircle, path: "/matches/new" },
     { name: "Match History", icon: History, path: "/history" },
-    { name: "Leaderboard", icon: Trophy, path: "/leaderboard" },
-  ]
+  ];
 
   return (
     <Sidebar variant="sidebar" collapsible="icon">
@@ -69,26 +78,41 @@ export function AppSidebar() {
       <SidebarSeparator />
       <SidebarFooter className="p-4">
         <SidebarMenu>
-          <SidebarMenuItem>
-            <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={avatar} />
-                <AvatarFallback>JS</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-                <span className="text-sm font-medium">John Smash</span>
-                <span className="text-xs text-muted-foreground">Pro Player</span>
-              </div>
-            </div>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Sign Out">
-              <LogOut className="h-4 w-4" />
-              <span>Sign Out</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {user ? (
+            <>
+              <SidebarMenuItem>
+                <div className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.photoURL || undefined} />
+                    <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col group-data-[collapsible=icon]:hidden">
+                    <span className="text-sm font-medium truncate max-w-[120px]">
+                      {user.displayName || 'Player'}
+                    </span>
+                    <span className="text-xs text-muted-foreground">Pro Account</span>
+                  </div>
+                </div>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={handleSignOut} tooltip="Sign Out">
+                  <LogOut className="h-4 w-4" />
+                  <span>Sign Out</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </>
+          ) : (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Sign In">
+                <Link href="/login">
+                  <LogIn className="h-4 w-4" />
+                  <span>Sign In</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

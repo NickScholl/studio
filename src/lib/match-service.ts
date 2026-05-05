@@ -1,3 +1,16 @@
+
+import { 
+  collection, 
+  addDoc, 
+  serverTimestamp, 
+  Firestore,
+  query,
+  where,
+  orderBy
+} from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
+
 export type MatchType = 'Singles' | 'Doubles' | 'Mixed Doubles';
 export type MatchResult = 'Win' | 'Loss';
 
@@ -14,26 +27,27 @@ export interface BadmintonMatch {
   opponentScore: number[];
   result: MatchResult;
   notes?: string;
+  createdAt?: any;
 }
 
-const STORAGE_KEY = 'shuttlescore_matches';
-
 export const MatchService = {
-  getMatches: (): BadmintonMatch[] => {
-    if (typeof window === 'undefined') return [];
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+  addMatch: (db: Firestore, userId: string, match: Omit<BadmintonMatch, 'id'>) => {
+    const matchesRef = collection(db, 'users', userId, 'matches');
+    
+    addDoc(matchesRef, {
+      ...match,
+      createdAt: serverTimestamp(),
+    }).catch(async (error) => {
+      const permissionError = new FirestorePermissionError({
+        path: matchesRef.path,
+        operation: 'create',
+        requestResourceData: match,
+      });
+      errorEmitter.emit('permission-error', permissionError);
+    });
   },
 
-  addMatch: (match: Omit<BadmintonMatch, 'id'>): BadmintonMatch => {
-    const matches = MatchService.getMatches();
-    const newMatch = { ...match, id: Math.random().toString(36).substring(2, 11) };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([newMatch, ...matches]));
-    return newMatch;
-  },
-
-  getStats: () => {
-    const matches = MatchService.getMatches();
+  calculateStats: (matches: BadmintonMatch[]) => {
     const totalMatches = matches.length;
     const wins = matches.filter(m => m.result === 'Win').length;
     const losses = totalMatches - wins;

@@ -1,0 +1,86 @@
+
+{
+  "entities": {
+    "Match": {
+      "title": "Match",
+      "description": "A badminton match record",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "Singles",
+            "Doubles",
+            "Mixed Doubles"
+          ]
+        },
+        "myName": {
+          "type": "string"
+        },
+        "opponent": {
+          "type": "string"
+        },
+        "partner": {
+          "type": "string"
+        },
+        "opponentPartner": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "myScore": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "opponentScore": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "result": {
+          "type": "string",
+          "enum": [
+            "Win",
+            "Loss"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "date",
+        "type",
+        "myName",
+        "opponent",
+        "location",
+        "myScore",
+        "opponentScore",
+        "result"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "google.com"
+    ]
+  },
+  "firestore": {
+    "/users/{userId}/matches/{matchId}": {
+      "schema": "Match",
+      "description": "User's personal match history"
+    }
+  }
+}

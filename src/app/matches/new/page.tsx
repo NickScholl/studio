@@ -1,33 +1,44 @@
-"use client"
 
-import * as React from 'react'
-import { useRouter } from 'next/navigation'
-import { AppSidebar } from '@/components/app-sidebar'
-import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/hooks/use-toast'
-import { MatchService, MatchType, MatchResult } from '@/lib/match-service'
-import { ChevronLeft, Info, MapPin, Users, Target, User, Swords } from 'lucide-react'
-import Link from 'next/link'
+'use client';
+
+import * as React from 'react';
+import { useRouter } from 'next/navigation';
+import { AppSidebar } from '@/components/app-sidebar';
+import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { MatchService, MatchType, MatchResult } from '@/lib/match-service';
+import { ChevronLeft, Info, MapPin, Target, User, Swords } from 'lucide-react';
+import Link from 'next/link';
+import { useUser, useFirestore } from '@/firebase';
 
 export default function NewMatch() {
-  const router = useRouter()
-  const { toast } = useToast()
-  const [loading, setLoading] = React.useState(false)
-  const [matchType, setMatchType] = React.useState<MatchType>('Singles')
+  const router = useRouter();
+  const { toast } = useToast();
+  const { user, loading: authLoading } = useUser();
+  const db = useFirestore();
+  const [loading, setLoading] = React.useState(false);
+  const [matchType, setMatchType] = React.useState<MatchType>('Singles');
 
-  const isDoubles = matchType === 'Doubles' || matchType === 'Mixed Doubles'
+  const isDoubles = matchType === 'Doubles' || matchType === 'Mixed Doubles';
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setLoading(true)
+  React.useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!user || !db) return;
     
-    const formData = new FormData(e.currentTarget)
+    setLoading(true);
+    const formData = new FormData(e.currentTarget);
     const matchData = {
       date: formData.get('date') as string,
       type: matchType,
@@ -48,25 +59,27 @@ export default function NewMatch() {
       ].filter(score => score > 0),
       result: formData.get('result') as MatchResult,
       notes: formData.get('notes') as string,
-    }
+    };
 
     try {
-      MatchService.addMatch(matchData)
+      MatchService.addMatch(db, user.uid, matchData);
       toast({
         title: "Match Submitted!",
-        description: `Your match has been recorded.`,
-      })
-      router.push('/')
+        description: `Your match has been recorded to the cloud.`,
+      });
+      router.push('/');
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
         description: "Failed to save match data.",
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+  if (authLoading) return null;
 
   return (
     <div className="flex min-h-screen">
@@ -134,14 +147,13 @@ export default function NewMatch() {
 
                 <div className="space-y-6">
                   <div className="grid gap-8 md:grid-cols-2">
-                    {/* Team 1 */}
                     <div className="space-y-4 p-4 border rounded-lg bg-muted/5">
                       <h3 className="text-sm font-bold uppercase text-primary flex items-center gap-2">
                         <User className="h-4 w-4" /> Team 1
                       </h3>
                       <div className="space-y-2">
                         <Label htmlFor="myName">Player Name</Label>
-                        <Input id="myName" name="myName" placeholder="Main player" required />
+                        <Input id="myName" name="myName" defaultValue={user?.displayName || ''} required />
                       </div>
                       {isDoubles && (
                         <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
@@ -151,10 +163,9 @@ export default function NewMatch() {
                       )}
                     </div>
 
-                    {/* Team 2 */}
                     <div className="space-y-4 p-4 border rounded-lg bg-muted/5">
                       <h3 className="text-sm font-bold uppercase text-muted-foreground flex items-center gap-2">
-                        <Swords className="h-4 w-4" /> Team 2 (Opponents)
+                        <Swords className="h-4 w-4" /> Team 2
                       </h3>
                       <div className="space-y-2">
                         <Label htmlFor="opponent">Opponent 1</Label>
@@ -162,7 +173,7 @@ export default function NewMatch() {
                       </div>
                       {isDoubles && (
                         <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
-                          <Label htmlFor="opponentPartner">Opponent 2 (Partner)</Label>
+                          <Label htmlFor="opponentPartner">Opponent 2</Label>
                           <Input id="opponentPartner" name="opponentPartner" placeholder="Opponent partner" required={isDoubles} />
                         </div>
                       )}
@@ -216,15 +227,8 @@ export default function NewMatch() {
               </form>
             </CardContent>
           </Card>
-
-          <div className="mt-6 flex items-start gap-3 p-4 bg-muted/30 rounded-lg text-sm text-muted-foreground">
-            <Info className="h-5 w-5 mt-0.5 text-primary" />
-            <p>
-              Recording matches for different players helps you manage group stats or your personal historical performance!
-            </p>
-          </div>
         </main>
       </SidebarInset>
     </div>
-  )
+  );
 }
