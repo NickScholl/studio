@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Search, Filter, Calendar, MapPin, User, Users, Swords } from 'lucide-react'
+import { Search, Filter, Calendar, MapPin, Users, Swords } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
@@ -33,7 +33,8 @@ export default function MatchHistory() {
       m.opponent.toLowerCase().includes(search) ||
       m.type.toLowerCase().includes(search) ||
       (m.location && m.location.toLowerCase().includes(search)) ||
-      (m.partner && m.partner.toLowerCase().includes(search))
+      (m.partner && m.partner.toLowerCase().includes(search)) ||
+      (m.opponentPartner && m.opponentPartner.toLowerCase().includes(search))
     )
   })
 
@@ -112,18 +113,23 @@ export default function MatchHistory() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-2 text-sm">
-                              <div className="flex flex-col">
-                                <span className="font-semibold text-primary">{match.myName}</span>
-                                {match.partner && (
-                                  <span className="text-[10px] text-muted-foreground flex items-center">
-                                    <Users className="h-2 w-2 mr-1" /> & {match.partner}
-                                  </span>
-                                )}
-                              </div>
-                              <Swords className="h-3 w-3 text-muted-foreground" />
+                          <div className="flex items-center gap-3 text-sm">
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-primary">{match.myName}</span>
+                              {match.partner && (
+                                <span className="text-[10px] text-muted-foreground flex items-center">
+                                  <Users className="h-2 w-2 mr-1" /> & {match.partner}
+                                </span>
+                              )}
+                            </div>
+                            <Swords className="h-3 w-3 text-muted-foreground" />
+                            <div className="flex flex-col">
                               <span className="font-medium">{match.opponent}</span>
+                              {match.opponentPartner && (
+                                <span className="text-[10px] text-muted-foreground flex items-center">
+                                  <Users className="h-2 w-2 mr-1" /> & {match.opponentPartner}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </TableCell>

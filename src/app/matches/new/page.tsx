@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { MatchService, MatchType, MatchResult } from '@/lib/match-service'
-import { ChevronLeft, Info, MapPin, Users, Target, User } from 'lucide-react'
+import { ChevronLeft, Info, MapPin, Users, Target, User, Swords } from 'lucide-react'
 import Link from 'next/link'
 
 export default function NewMatch() {
@@ -34,6 +34,7 @@ export default function NewMatch() {
       myName: formData.get('myName') as string,
       opponent: formData.get('opponent') as string,
       partner: isDoubles ? (formData.get('partner') as string) : undefined,
+      opponentPartner: isDoubles ? (formData.get('opponentPartner') as string) : undefined,
       location: formData.get('location') as string,
       myScore: [
         Number(formData.get('set1_mine')),
@@ -88,7 +89,7 @@ export default function NewMatch() {
               <CardDescription>Enter the players and scores of the badminton match.</CardDescription>
             </CardHeader>
             <CardContent className="p-6">
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-8">
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="date">Match Date</Label>
@@ -118,7 +119,7 @@ export default function NewMatch() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="result">Result (for the Player)</Label>
+                    <Label htmlFor="result">Result (for Team 1)</Label>
                     <Select name="result" defaultValue="Win">
                       <SelectTrigger>
                         <SelectValue placeholder="Match outcome" />
@@ -131,33 +132,42 @@ export default function NewMatch() {
                   </div>
                 </div>
 
-                <div className="space-y-4 border-t pt-4">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Players</h3>
-                  <div className="grid gap-6 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="myName">Player Name</Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="myName" name="myName" placeholder="e.g. John Smith" className="pl-10" required />
+                <div className="space-y-6">
+                  <div className="grid gap-8 md:grid-cols-2">
+                    {/* Team 1 */}
+                    <div className="space-y-4 p-4 border rounded-lg bg-muted/5">
+                      <h3 className="text-sm font-bold uppercase text-primary flex items-center gap-2">
+                        <User className="h-4 w-4" /> Team 1
+                      </h3>
+                      <div className="space-y-2">
+                        <Label htmlFor="myName">Player Name</Label>
+                        <Input id="myName" name="myName" placeholder="Main player" required />
                       </div>
+                      {isDoubles && (
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
+                          <Label htmlFor="partner">Partner Name</Label>
+                          <Input id="partner" name="partner" placeholder="Partner" required={isDoubles} />
+                        </div>
+                      )}
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="opponent">Opponent Name</Label>
-                      <div className="relative">
-                        <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="opponent" name="opponent" placeholder="Enter opponent name" className="pl-10" required />
+
+                    {/* Team 2 */}
+                    <div className="space-y-4 p-4 border rounded-lg bg-muted/5">
+                      <h3 className="text-sm font-bold uppercase text-muted-foreground flex items-center gap-2">
+                        <Swords className="h-4 w-4" /> Team 2 (Opponents)
+                      </h3>
+                      <div className="space-y-2">
+                        <Label htmlFor="opponent">Opponent 1</Label>
+                        <Input id="opponent" name="opponent" placeholder="Main opponent" required />
                       </div>
+                      {isDoubles && (
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
+                          <Label htmlFor="opponentPartner">Opponent 2 (Partner)</Label>
+                          <Input id="opponentPartner" name="opponentPartner" placeholder="Opponent partner" required={isDoubles} />
+                        </div>
+                      )}
                     </div>
                   </div>
-                  {isDoubles && (
-                    <div className="space-y-2">
-                      <Label htmlFor="partner">Partner Name</Label>
-                      <div className="relative">
-                        <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id="partner" name="partner" placeholder="Enter partner name" className="pl-10" required={isDoubles} />
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 <div className="space-y-4 border-t pt-4">
@@ -169,22 +179,22 @@ export default function NewMatch() {
                     <div className="space-y-2">
                       <Label className="text-xs uppercase text-muted-foreground">Set 1</Label>
                       <div className="flex gap-2">
-                        <Input name="set1_mine" placeholder="Player" type="number" required />
-                        <Input name="set1_opp" placeholder="Opp" type="number" required />
+                        <Input name="set1_mine" placeholder="T1" type="number" required />
+                        <Input name="set1_opp" placeholder="T2" type="number" required />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-xs uppercase text-muted-foreground">Set 2</Label>
                       <div className="flex gap-2">
-                        <Input name="set2_mine" placeholder="Player" type="number" required />
-                        <Input name="set2_opp" placeholder="Opp" type="number" required />
+                        <Input name="set2_mine" placeholder="T1" type="number" required />
+                        <Input name="set2_opp" placeholder="T2" type="number" required />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-xs uppercase text-muted-foreground">Set 3 (Optional)</Label>
                       <div className="flex gap-2">
-                        <Input name="set3_mine" placeholder="Player" type="number" />
-                        <Input name="set3_opp" placeholder="Opp" type="number" />
+                        <Input name="set3_mine" placeholder="T1" type="number" />
+                        <Input name="set3_opp" placeholder="T2" type="number" />
                       </div>
                     </div>
                   </div>

@@ -8,6 +8,7 @@ export interface BadmintonMatch {
   myName: string;
   opponent: string;
   partner?: string;
+  opponentPartner?: string;
   location: string;
   myScore: number[];
   opponentScore: number[];
