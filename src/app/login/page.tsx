@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -19,7 +20,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function LoginPage() {
-  const { user, loading: userLoading } = useUser();
+  const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -33,10 +34,10 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
 
   useEffect(() => {
-    if (!userLoading && user) {
+    if (!isUserLoading && user) {
       router.push('/');
     }
-  }, [user, userLoading, router]);
+  }, [user, isUserLoading, router]);
 
   const handleGoogleLogin = async () => {
     if (isLoggingIn) return;
@@ -46,10 +47,9 @@ export default function LoginPage() {
     try {
       await signInWithPopup(auth, provider);
     } catch (err: any) {
-      console.error(err);
       let message = err.message;
       if (err.code === 'auth/popup-blocked') {
-        message = "Popup blocked! Please allow popups for this site or use the Email login tab.";
+        message = "Popup blocked! Please allow popups or use the Email tab.";
       } else if (err.code === 'auth/cancelled-popup-request') {
         message = "Login cancelled.";
       }
@@ -75,43 +75,22 @@ export default function LoginPage() {
         await createUserWithEmailAndPassword(auth, email, password);
         toast({ 
           title: "Account Created!", 
-          description: "Welcome to ShuttleScore. Redirecting you now...",
+          description: "Welcome to ShuttleScore.",
         });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
     } catch (err: any) {
-      console.error("Auth error:", err.code, err.message);
-      let message = "An error occurred. Please check your credentials.";
-      
-      switch (err.code) {
-        case 'auth/email-already-in-use':
-          message = "This email is already registered. Please sign in instead.";
-          break;
-        case 'auth/invalid-email':
-          message = "Please enter a valid email address.";
-          break;
-        case 'auth/weak-password':
-          message = "Password is too weak. Please use at least 6 characters.";
-          break;
-        case 'auth/user-not-found':
-        case 'auth/wrong-password':
-        case 'auth/invalid-credential':
-          message = "Invalid email or password.";
-          break;
-        case 'auth/operation-not-allowed':
-          message = "Email/Password sign-in is not enabled in Firebase Console.";
-          break;
-        default:
-          message = err.message;
-      }
-      
+      let message = "Check your credentials and try again.";
+      if (err.code === 'auth/email-already-in-use') message = "Email already registered.";
+      if (err.code === 'auth/invalid-email') message = "Invalid email address.";
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') message = "Invalid email or password.";
       setError(message);
       setIsLoggingIn(false);
     }
   };
 
-  if (userLoading) {
+  if (isUserLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -121,10 +100,10 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
-      <Card className="w-full max-w-md shadow-lg border-none">
+      <Card className="w-full max-w-md shadow-xl border-none">
         <CardHeader className="text-center space-y-1">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-inner">
-            <Trophy className="h-7 w-7 text-primary-foreground" />
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-lg">
+            <Trophy className="h-8 w-8 text-primary-foreground" />
           </div>
           <CardTitle className="text-3xl font-bold tracking-tight">ShuttleScore</CardTitle>
           <CardDescription>Badminton Performance Tracker</CardDescription>
@@ -133,15 +112,15 @@ export default function LoginPage() {
           {error && (
             <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-1">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Authentication Issue</AlertTitle>
+              <AlertTitle>Auth Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
           <Tabs defaultValue="google" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="google">Google</TabsTrigger>
-              <TabsTrigger value="email">Email</TabsTrigger>
+              <TabsTrigger value="google">Google Login</TabsTrigger>
+              <TabsTrigger value="email">Email Login</TabsTrigger>
             </TabsList>
             
             <TabsContent value="google" className="pt-4">
@@ -152,21 +131,18 @@ export default function LoginPage() {
               >
                 {isLoggingIn ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Sign in with Google"}
               </Button>
-              <p className="mt-4 text-center text-xs text-muted-foreground">
-                One-click secure login.
-              </p>
             </TabsContent>
 
             <TabsContent value="email" className="pt-4">
               <form onSubmit={handleEmailAuth} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="email">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input 
                       id="email" 
                       type="email" 
-                      placeholder="name@example.com" 
+                      placeholder="email@example.com" 
                       className="pl-10"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -181,7 +157,7 @@ export default function LoginPage() {
                     <Input 
                       id="password" 
                       type="password" 
-                      placeholder="At least 6 characters" 
+                      placeholder="Min. 6 characters" 
                       className="pl-10"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
