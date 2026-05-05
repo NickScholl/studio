@@ -27,10 +27,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { collection, query, orderBy, where } from 'firebase/firestore';
 
 export default function MatchHistory() {
-  const { user, loading: authLoading } = useUser();
+  const { user, isUserLoading } = useUser();
   const db = useFirestore();
   const router = useRouter();
 
@@ -44,18 +44,19 @@ export default function MatchHistory() {
   const matchesQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(
-      collection(db, 'users', user.uid, 'matches'),
-      orderBy('date', 'desc')
+      collection(db, 'matches'),
+      where('participantUserIds', 'array-contains', user.uid),
+      orderBy('matchDate', 'desc')
     );
   }, [db, user]);
 
-  const { data: matches, loading: matchesLoading } = useCollection<BadmintonMatch>(matchesQuery);
+  const { data: matches, isLoading: matchesLoading } = useCollection<BadmintonMatch>(matchesQuery);
 
   React.useEffect(() => {
-    if (!authLoading && !user) {
+    if (!isUserLoading && !user) {
       router.push('/login');
     }
-  }, [user, authLoading, router]);
+  }, [user, isUserLoading, router]);
 
   const allMatches = matches || [];
 
@@ -73,12 +74,12 @@ export default function MatchHistory() {
         (m.partner && m.partner.toLowerCase().includes(search)) ||
         (m.opponentPartner && m.opponentPartner.toLowerCase().includes(search))
       );
-      const matchesType = filterType === 'all' || m.type === filterType;
+      const matchesType = filterType === 'all' || m.matchType === filterType;
       const matchesResult = filterResult === 'all' || m.result === filterResult;
       const matchesPlace = filterPlace === 'all' || m.location === filterPlace;
       
-      const matchesDate = (!filterStartDate || m.date >= filterStartDate) && 
-                          (!filterEndDate || m.date <= filterEndDate);
+      const matchesDate = (!filterStartDate || m.matchDate >= filterStartDate) && 
+                          (!filterEndDate || m.matchDate <= filterEndDate);
 
       return matchesSearch && matchesType && matchesResult && matchesPlace && matchesDate;
     });
@@ -100,13 +101,15 @@ export default function MatchHistory() {
                      filterStartDate !== '' || 
                      filterEndDate !== '';
 
-  if (authLoading || matchesLoading) {
+  if (isUserLoading || (user && matchesLoading)) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <Activity className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
+
+  if (!user) return null;
 
   return (
     <div className="flex min-h-screen">
@@ -242,7 +245,7 @@ export default function MatchHistory() {
                       <TableRow key={match.id} className="hover:bg-muted/10 transition-colors">
                         <TableCell>
                           <div className="flex flex-col">
-                            <span className="font-semibold text-sm">{new Date(match.date).toLocaleDateString()}</span>
+                            <span className="font-semibold text-sm">{new Date(match.matchDate).toLocaleDateString()}</span>
                             <div className="flex items-center text-[11px] text-muted-foreground mt-0.5">
                               <MapPin className="h-2.5 w-2.5 mr-1 text-primary" />
                               {match.location}
@@ -253,7 +256,7 @@ export default function MatchHistory() {
                           <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-2">
                               <Badge variant="outline" className="text-[10px] h-4 px-1 font-normal opacity-70">
-                                {match.type}
+                                {match.matchType}
                               </Badge>
                             </div>
                             <div className="flex items-center gap-2 text-sm">

@@ -27,11 +27,11 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { collection, query, orderBy, where } from 'firebase/firestore';
 import placeholderData from '@/app/lib/placeholder-images.json';
 
 export default function Dashboard() {
-  const { user, loading: authLoading } = useUser();
+  const { user, isUserLoading } = useUser();
   const db = useFirestore();
   const router = useRouter();
 
@@ -39,21 +39,23 @@ export default function Dashboard() {
 
   const matchesQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
+    // Querying global matches collection filtered by participation
     return query(
-      collection(db, 'users', user.uid, 'matches'),
-      orderBy('date', 'desc')
+      collection(db, 'matches'),
+      where('participantUserIds', 'array-contains', user.uid),
+      orderBy('matchDate', 'desc')
     );
   }, [db, user]);
 
-  const { data: matches, loading: matchesLoading } = useCollection<BadmintonMatch>(matchesQuery);
+  const { data: matches, isLoading: matchesLoading } = useCollection<BadmintonMatch>(matchesQuery);
 
   React.useEffect(() => {
-    if (!authLoading && !user) {
+    if (!isUserLoading && !user) {
       router.push('/login');
     }
-  }, [user, authLoading, router]);
+  }, [user, isUserLoading, router]);
 
-  if (authLoading || matchesLoading) {
+  if (isUserLoading || (user && matchesLoading)) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -61,14 +63,7 @@ export default function Dashboard() {
     );
   }
 
-  // If we're not loading but have no user, show a simple transition screen while redirecting
-  if (!user) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
-        <p className="text-muted-foreground">Redirecting to login...</p>
-      </div>
-    );
-  }
+  if (!user) return null;
 
   const allMatches = matches || [];
   const stats = MatchService.calculateStats(allMatches);
@@ -218,7 +213,7 @@ export default function Dashboard() {
                           <div>
                             <p className="text-sm font-semibold">vs {match.opponent}</p>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <span>{new Date(match.date).toLocaleDateString()}</span>
+                              <span>{new Date(match.matchDate).toLocaleDateString()}</span>
                               <span>•</span>
                               <span>{match.location}</span>
                             </div>

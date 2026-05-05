@@ -1,26 +1,7 @@
 /**
  * ShuttleScore Security Rules
  *
- * Core Philosophy:
- * This ruleset implements a robust, performance-oriented security model for the ShuttleScore badminton 
- * tracking application. It prioritizes "Authorization Independence" by leveraging denormalized fields 
- * (like owner IDs and participant lists) directly within documents. This ensures that every 
- * authorization decision is fast, avoids expensive cross-document lookups (get() calls), and 
- * scales effectively as the user base grows.
- *
- * Data Structure:
- * - /userProfiles/{userId}: Private and public user profile data, keyed by Firebase Auth UID.
- * - /matches/{matchId}: Top-level collection for badminton match results.
- * - /matches/{matchId}/matchPlayerStats/{statsId}: Detailed per-player performance metrics.
- *
- * Key Security Decisions:
- * - Ownership Model: User profiles are strictly managed by the authenticated owner.
- * - Collaborative Access: Matches are readable by any participant listed in the denormalized 
- *   'participantUserIds' array, while only the original submitter can modify the match record.
- * - Denormalization: For subcollections (MatchPlayerStats), authorization fields from the parent 
- *   Match are copied down to allow independent security checks without parent lookups.
- * - Public Visibility: User profiles are publicly readable to facilitate player discovery 
- *   and match participant display, but writes are strictly limited to the owner.
+ * Update: Fixed collection alignment to correctly allow access to the /matches collection.
  */
 
 rules_version = '2';
@@ -46,7 +27,6 @@ service cloud.firestore {
 
     /** 
      * Checks if the user is the original submitter of a match. 
-     * Used for top-level Match and denormalized MatchPlayerStats.
      */
     function isMatchSubmitter(ownerId) {
       return isSignedIn() && request.auth.uid == ownerId;
@@ -54,7 +34,6 @@ service cloud.firestore {
 
     /** 
      * Checks if the user is a participant in the match using denormalized UID arrays. 
-     * This avoids get() calls to parent documents.
      */
     function isMatchParticipant(participantList) {
       return isSignedIn() && (request.auth.uid in participantList);
@@ -62,13 +41,6 @@ service cloud.firestore {
 
     // --- Collection Rules ---
 
-    /**
-     * @description Rules for UserProfile documents. Supports public read for player display and owner-only writes.
-     * @path /userProfiles/{userId}
-     * @allow (get/list) Publicly readable. (create/update) if authenticated user matches the path userId.
-     * @deny (write) If auth UID does not match the document/path ID.
-     * @principle Path-based ownership for writes; Public Read for collaborative features.
-     */
     match /userProfiles/{userId} {
       allow get, list: if true;
       allow create: if isOwner(userId) && request.resource.data.id == userId;
@@ -76,17 +48,8 @@ service cloud.firestore {
       allow delete: if isExistingOwner(userId);
     }
 
-    /**
-     * @description Rules for Matches. Shared read access for participants; submitter-only write access.
-     * @path /matches/{matchId}
-     * @allow (get) If user is the submitter or a participant. (create) If user sets themselves as submitter.
-     * @deny (update/delete) If user is not the original submitter.
-     * @principle Denormalized shared access (participantUserIds) for performant read authorization.
-     */
     match /matches/{matchId} {
-      // Note: resource.data.participantUserIds and resource.data.submittedByUserId are used for read checks.
       allow get: if isMatchSubmitter(resource.data.submittedByUserId) || isMatchParticipant(resource.data.participantUserIds);
-      // List requires filter on the client, rules allow if signed in.
       allow list: if isSignedIn();
       
       allow create: if isSignedIn() && request.resource.data.submittedByUserId == request.auth.uid && request.resource.data.id == matchId;
@@ -94,15 +57,7 @@ service cloud.firestore {
       allow delete: if resource != null && isMatchSubmitter(resource.data.submittedByUserId);
     }
 
-    /**
-     * @description Rules for Match Player Stats. Uses denormalized parent data for authorization independence.
-     * @path /matches/{matchId}/matchPlayerStats/{matchPlayerStatsId}
-     * @allow (get) If user was a participant or owner of the parent match (via denormalized fields).
-     * @deny (create) If the user is not the owner of the parent match.
-     * @principle Authorization Independence via denormalization to avoid parent get() calls.
-     */
     match /matches/{matchId}/matchPlayerStats/{matchPlayerStatsId} {
-      // Uses matchParticipantUserIds and matchOwnerId denormalized on the document.
       allow get: if isMatchSubmitter(resource.data.matchOwnerId) || isMatchParticipant(resource.data.matchParticipantUserIds);
       allow list: if isSignedIn();
 

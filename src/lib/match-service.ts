@@ -12,8 +12,8 @@ export type MatchResult = 'Win' | 'Loss';
 
 export interface BadmintonMatch {
   id: string;
-  date: string;
-  type: MatchType;
+  matchDate: string;
+  matchType: MatchType;
   myName: string;
   opponent: string;
   partner?: string;
@@ -23,21 +23,27 @@ export interface BadmintonMatch {
   opponentScore: number[];
   result: MatchResult;
   notes?: string;
+  submittedByUserId: string;
+  participantUserIds: string[];
   createdAt?: any;
 }
 
 export const MatchService = {
-  addMatch: (db: Firestore, userId: string, match: Omit<BadmintonMatch, 'id'>) => {
-    const matchesRef = collection(db, 'users', userId, 'matches');
+  addMatch: (db: Firestore, userId: string, match: Omit<BadmintonMatch, 'id' | 'submittedByUserId' | 'participantUserIds'>) => {
+    const matchesRef = collection(db, 'matches');
     
-    addDoc(matchesRef, {
+    const docData = {
       ...match,
+      submittedByUserId: userId,
+      participantUserIds: [userId], // In a real app, we'd lookup other players' UIDs too
       createdAt: serverTimestamp(),
-    }).catch(async (error) => {
+    };
+
+    addDoc(matchesRef, docData).catch(async (error) => {
       const permissionError = new FirestorePermissionError({
         path: matchesRef.path,
         operation: 'create',
-        requestResourceData: match,
+        requestResourceData: docData,
       });
       errorEmitter.emit('permission-error', permissionError);
     });
@@ -55,9 +61,9 @@ export const MatchService = {
       losses,
       winRatio: Math.round(winRatio * 10) / 10,
       matchesByType: {
-        Singles: matches.filter(m => m.type === 'Singles').length,
-        Doubles: matches.filter(m => m.type === 'Doubles').length,
-        MixedDoubles: matches.filter(m => m.type === 'Mixed Doubles').length,
+        Singles: matches.filter(m => m.matchType === 'Singles').length,
+        Doubles: matches.filter(m => m.matchType === 'Doubles').length,
+        MixedDoubles: matches.filter(m => m.matchType === 'Mixed Doubles').length,
       }
     };
   }
