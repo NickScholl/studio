@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -13,7 +12,10 @@ import {
   Target, 
   TrendingUp,
   Activity,
-  Plus
+  Plus,
+  Sparkles,
+  ChevronRight,
+  BrainCircuit
 } from 'lucide-react';
 import { 
   ChartContainer, 
@@ -24,12 +26,17 @@ import { Bar, BarChart, XAxis, YAxis, Cell } from "recharts";
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useUser, useFirestore, useCollection } from '@/firebase';
-import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { collection, query, orderBy } from 'firebase/firestore';
+import { analyzePerformance, type AnalyzePerformanceOutput } from '@/ai/flows/analyze-performance';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useUser();
   const db = useFirestore();
   const router = useRouter();
+
+  const [aiAnalysis, setAiAnalysis] = React.useState<AnalyzePerformanceOutput | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
 
   const matchesQuery = React.useMemo(() => {
     if (!db || !user) return null;
@@ -46,6 +53,30 @@ export default function Dashboard() {
       router.push('/login');
     }
   }, [user, authLoading, router]);
+
+  async function handleGetAiInsights() {
+    if (!matches || matches.length === 0) return;
+    setIsAnalyzing(true);
+    try {
+      const result = await analyzePerformance({
+        playerName: user?.displayName || 'Player',
+        matches: matches.map(m => ({
+          date: m.date,
+          type: m.type,
+          opponent: m.opponent,
+          result: m.result,
+          myScore: m.myScore,
+          opponentScore: m.opponentScore,
+          notes: m.notes,
+        })),
+      });
+      setAiAnalysis(result);
+    } catch (error) {
+      console.error('AI Analysis failed', error);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }
 
   if (authLoading || matchesLoading) {
     return (
@@ -135,73 +166,147 @@ export default function Dashboard() {
 
           <div className="grid gap-6 lg:grid-cols-7">
             <Card className="lg:col-span-4">
-              <CardHeader>
-                <CardTitle>Win/Loss Comparison</CardTitle>
-                <CardDescription>Visual breakdown of your match outcomes.</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>AI Performance Insights</CardTitle>
+                  <CardDescription>Get expert analysis based on your history.</CardDescription>
+                </div>
+                <Button 
+                  onClick={handleGetAiInsights} 
+                  disabled={isAnalyzing || matches.length === 0}
+                  variant="outline"
+                  className="gap-2 border-primary/20 hover:border-primary/50"
+                >
+                  {isAnalyzing ? <Activity className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 text-primary" />}
+                  {aiAnalysis ? "Refresh Analysis" : "Analyze My Game"}
+                </Button>
               </CardHeader>
-              <CardContent className="h-[300px]">
-                {stats.totalMatches > 0 ? (
-                  <ChartContainer config={config}>
-                    <BarChart data={chartData}>
-                      <XAxis dataKey="name" />
-                      <YAxis hide />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                        {chartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
+              <CardContent>
+                {isAnalyzing ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-20 w-full" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <Skeleton className="h-32 w-full" />
+                      <Skeleton className="h-32 w-full" />
+                    </div>
+                  </div>
+                ) : aiAnalysis ? (
+                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="bg-primary/5 p-4 rounded-lg border border-primary/10">
+                      <p className="text-sm leading-relaxed italic text-muted-foreground">
+                        "{aiAnalysis.analysis}"
+                      </p>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-bold uppercase tracking-wider text-secondary flex items-center gap-2">
+                          <Trophy className="h-4 w-4" /> Strengths
+                        </h4>
+                        <ul className="space-y-2">
+                          {aiAnalysis.strengths.map((s, i) => (
+                            <li key={i} className="text-xs flex items-start gap-2">
+                              <ChevronRight className="h-3 w-3 mt-0.5 text-secondary" />
+                              {s}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-bold uppercase tracking-wider text-accent flex items-center gap-2">
+                          <Target className="h-4 w-4" /> Focus Areas
+                        </h4>
+                        <ul className="space-y-2">
+                          {aiAnalysis.weaknesses.map((w, i) => (
+                            <li key={i} className="text-xs flex items-start gap-2">
+                              <ChevronRight className="h-3 w-3 mt-0.5 text-accent" />
+                              {w}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t">
+                      <h4 className="text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <BrainCircuit className="h-4 w-4 text-primary" /> Training Plan
+                      </h4>
+                      <div className="grid gap-2">
+                        {aiAnalysis.recommendations.map((r, i) => (
+                          <div key={i} className="text-xs bg-muted/30 p-2 rounded border border-border/50">
+                            {r}
+                          </div>
                         ))}
-                      </Bar>
-                    </BarChart>
-                  </ChartContainer>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
-                  <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
-                    <Activity className="h-10 w-10 mb-2 opacity-20" />
-                    <p>No matches recorded yet</p>
+                  <div className="h-[300px] flex flex-col items-center justify-center text-muted-foreground border-2 border-dashed rounded-lg">
+                    <Sparkles className="h-12 w-12 mb-4 opacity-10" />
+                    <p className="text-sm">Click the button above for an AI coaching session.</p>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            <Card className="lg:col-span-3">
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Your last 5 match results.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentMatches.length > 0 ? (
-                    recentMatches.map((match) => (
-                      <div key={match.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-full ${match.result === 'Win' ? 'bg-secondary/10 text-secondary' : 'bg-destructive/10 text-destructive'}`}>
-                            {match.result === 'Win' ? <Trophy className="h-4 w-4" /> : <Frown className="h-4 w-4" />}
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">vs {match.opponent}</p>
-                            <p className="text-xs text-muted-foreground">{new Date(match.date).toLocaleDateString()}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className={`text-sm font-bold ${match.result === 'Win' ? 'text-secondary' : 'text-destructive'}`}>
-                            {match.result}
-                          </p>
-                          <p className="text-xs text-muted-foreground">{match.type}</p>
-                        </div>
-                      </div>
-                    ))
+            <div className="lg:col-span-3 space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Win/Loss Ratio</CardTitle>
+                </CardHeader>
+                <CardContent className="h-[200px]">
+                  {stats.totalMatches > 0 ? (
+                    <ChartContainer config={config}>
+                      <BarChart data={chartData}>
+                        <XAxis dataKey="name" hide />
+                        <YAxis hide />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                          {chartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ChartContainer>
                   ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      No recent matches found.
+                    <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+                      <Activity className="h-8 w-8 mb-2 opacity-20" />
+                      <p className="text-xs">No data yet</p>
                     </div>
                   )}
-                </div>
-                {recentMatches.length > 0 && (
-                  <Button asChild variant="link" className="w-full mt-4">
-                    <Link href="/history">View all match history</Link>
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Recent Activity</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {recentMatches.length > 0 ? (
+                      recentMatches.map((match) => (
+                        <div key={match.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-transparent hover:border-border transition-all">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-1.5 rounded-full ${match.result === 'Win' ? 'bg-secondary/10 text-secondary' : 'bg-destructive/10 text-destructive'}`}>
+                              {match.result === 'Win' ? <Trophy className="h-3 w-3" /> : <Frown className="h-3 w-3" />}
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium">vs {match.opponent}</p>
+                              <p className="text-[10px] text-muted-foreground">{new Date(match.date).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+                          <Badge variant={match.result === 'Win' ? 'secondary' : 'destructive'} className="text-[9px] px-1.5 py-0">
+                            {match.result}
+                          </Badge>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-4 text-xs text-muted-foreground">
+                        No recent matches.
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </main>
       </SidebarInset>

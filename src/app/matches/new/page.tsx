@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -13,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { MatchService, MatchType, MatchResult } from '@/lib/match-service';
-import { ChevronLeft, Info, MapPin, Target, User, Swords } from 'lucide-react';
+import { ChevronLeft, MapPin, Target, User, Swords } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore } from '@/firebase';
 
@@ -24,6 +23,7 @@ export default function NewMatch() {
   const db = useFirestore();
   const [loading, setLoading] = React.useState(false);
   const [matchType, setMatchType] = React.useState<MatchType>('Singles');
+  const [defaultDate, setDefaultDate] = React.useState('');
 
   const isDoubles = matchType === 'Doubles' || matchType === 'Mixed Doubles';
 
@@ -32,6 +32,11 @@ export default function NewMatch() {
       router.push('/login');
     }
   }, [user, authLoading, router]);
+
+  // Fix hydration mismatch by setting the date only on the client
+  React.useEffect(() => {
+    setDefaultDate(new Date().toISOString().split('T')[0]);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -106,7 +111,14 @@ export default function NewMatch() {
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="date">Match Date</Label>
-                    <Input id="date" name="date" type="date" required defaultValue={new Date().toISOString().split('T')[0]} />
+                    <Input 
+                      id="date" 
+                      name="date" 
+                      type="date" 
+                      required 
+                      defaultValue={defaultDate} 
+                      key={defaultDate} // Use key to force re-render when defaultDate is set
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="type">Match Type</Label>
@@ -197,8 +209,8 @@ export default function NewMatch() {
                     <div className="space-y-2">
                       <Label className="text-xs uppercase text-muted-foreground">Set 2</Label>
                       <div className="flex gap-2">
-                        <Input name="set2_mine" placeholder="T1" type="number" required />
-                        <Input name="set2_opp" placeholder="T2" type="number" required />
+                        <Input name="set1_mine" placeholder="T1" type="number" required />
+                        <Input name="set1_opp" placeholder="T2" type="number" required />
                       </div>
                     </div>
                     <div className="space-y-2">
