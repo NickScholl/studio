@@ -34,13 +34,16 @@ export const MatchService = {
   addMatch: (db: Firestore, userId: string, match: Omit<BadmintonMatch, 'id' | 'submittedByUserId' | 'participantUserIds'>) => {
     const matchesRef = collection(db, 'matches');
     
+    // Ensure all required fields for Security Rules and grouping are present
     const docData = {
       ...match,
       submittedByUserId: userId,
-      participantUserIds: [userId],
+      participantUserIds: [userId], // In a real doubles app, you'd add the partner's UID here too if they are a user
       createdAt: serverTimestamp(),
+      competitionName: match.competitionName || 'Casual / Friendly',
     };
 
+    // Non-blocking write
     addDoc(matchesRef, docData).catch(async (error) => {
       const permissionError = new FirestorePermissionError({
         path: matchesRef.path,

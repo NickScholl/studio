@@ -13,19 +13,14 @@ service cloud.firestore {
     }
 
     match /matches/{matchId} {
-      // Explicitly allow both get and list for all signed-in users
-      allow read, get, list: if isSignedIn();
+      // Allow all signed-in users to list matches (app filters them by participantUserIds)
+      allow read, list: if isSignedIn();
       
-      // Only allow creators to submit matches
+      // Allow creation if the submittedByUserId matches the auth UID
       allow create: if isSignedIn() && request.resource.data.submittedByUserId == request.auth.uid;
       
-      // Only the submitter can modify or delete their records
+      // Only allow the original submitter to edit or delete
       allow update, delete: if isSignedIn() && resource.data.submittedByUserId == request.auth.uid;
-
-      match /matchPlayerStats/{statsId} {
-        allow read: if isSignedIn();
-        allow write: if isSignedIn();
-      }
     }
   }
 }
