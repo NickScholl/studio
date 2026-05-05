@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -27,7 +26,7 @@ import { Bar, BarChart, XAxis, YAxis, Cell } from "recharts";
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useUser, useFirestore, useCollection } from '@/firebase';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import placeholderData from '@/app/lib/placeholder-images.json';
 
@@ -38,7 +37,7 @@ export default function Dashboard() {
 
   const heroImage = placeholderData.placeholderImages.find(img => img.id === 'badminton-hero');
 
-  const matchesQuery = React.useMemo(() => {
+  const matchesQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(
       collection(db, 'users', user.uid, 'matches'),
@@ -71,8 +70,9 @@ export default function Dashboard() {
     );
   }
 
-  const stats = MatchService.calculateStats(matches);
-  const recentMatches = matches.slice(0, 8);
+  const allMatches = matches || [];
+  const stats = MatchService.calculateStats(allMatches);
+  const recentMatches = allMatches.slice(0, 8);
 
   const chartData = [
     { name: 'Wins', value: stats.wins, fill: 'hsl(var(--primary))' },
@@ -102,7 +102,7 @@ export default function Dashboard() {
         </header>
 
         <main className="flex-1 space-y-8 p-6 lg:p-10">
-          {matches.length === 0 && heroImage && (
+          {allMatches.length === 0 && heroImage && (
             <div className="relative w-full h-48 md:h-64 rounded-xl overflow-hidden mb-8 border border-border shadow-sm">
               <Image 
                 src={heroImage.imageUrl} 

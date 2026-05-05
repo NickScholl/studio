@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useUser, useFirestore, useCollection } from '@/firebase';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 
 export default function MatchHistory() {
@@ -41,7 +41,7 @@ export default function MatchHistory() {
   const [filterStartDate, setFilterStartDate] = React.useState<string>('');
   const [filterEndDate, setFilterEndDate] = React.useState<string>('');
 
-  const matchesQuery = React.useMemo(() => {
+  const matchesQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(
       collection(db, 'users', user.uid, 'matches'),
@@ -57,13 +57,15 @@ export default function MatchHistory() {
     }
   }, [user, authLoading, router]);
 
+  const allMatches = matches || [];
+
   const uniqueLocations = React.useMemo(() => {
-    const locations = matches.map(m => m.location).filter(Boolean);
+    const locations = allMatches.map(m => m.location).filter(Boolean);
     return Array.from(new Set(locations)).sort();
-  }, [matches]);
+  }, [allMatches]);
 
   const filteredMatches = React.useMemo(() => {
-    return matches.filter(m => {
+    return allMatches.filter(m => {
       const search = searchTerm.toLowerCase();
       const matchesSearch = !searchTerm || (
         m.myName.toLowerCase().includes(search) ||
@@ -80,7 +82,7 @@ export default function MatchHistory() {
 
       return matchesSearch && matchesType && matchesResult && matchesPlace && matchesDate;
     });
-  }, [matches, searchTerm, filterType, filterResult, filterPlace, filterStartDate, filterEndDate]);
+  }, [allMatches, searchTerm, filterType, filterResult, filterPlace, filterStartDate, filterEndDate]);
 
   const clearFilters = () => {
     setSearchTerm('');
