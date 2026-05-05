@@ -46,9 +46,13 @@ export default function LoginPage() {
     try {
       await signInWithPopup(auth, provider);
     } catch (err: any) {
-      const message = err.code === 'auth/popup-blocked' 
-        ? "Popup blocked! Try the Email login tab instead." 
-        : err.message;
+      console.error(err);
+      let message = err.message;
+      if (err.code === 'auth/popup-blocked') {
+        message = "Popup blocked! Please allow popups for this site or use the Email login tab.";
+      } else if (err.code === 'auth/cancelled-popup-request') {
+        message = "Login cancelled.";
+      }
       setError(message);
       setIsLoggingIn(false);
     }
@@ -57,20 +61,50 @@ export default function LoginPage() {
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoggingIn) return;
+    
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
     setIsLoggingIn(true);
     setError(null);
 
     try {
       if (isSignUp) {
         await createUserWithEmailAndPassword(auth, email, password);
-        toast({ title: "Account Created", description: "Welcome to ShuttleScore!" });
+        toast({ 
+          title: "Account Created!", 
+          description: "Welcome to ShuttleScore. Redirecting you now...",
+        });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
     } catch (err: any) {
-      let message = "Invalid email or password.";
-      if (err.code === 'auth/email-already-in-use') message = "Email already in use.";
-      if (err.code === 'auth/weak-password') message = "Password should be at least 6 characters.";
+      console.error("Auth error:", err.code, err.message);
+      let message = "An error occurred. Please check your credentials.";
+      
+      switch (err.code) {
+        case 'auth/email-already-in-use':
+          message = "This email is already registered. Please sign in instead.";
+          break;
+        case 'auth/invalid-email':
+          message = "Please enter a valid email address.";
+          break;
+        case 'auth/weak-password':
+          message = "Password is too weak. Please use at least 6 characters.";
+          break;
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+          message = "Invalid email or password.";
+          break;
+        case 'auth/operation-not-allowed':
+          message = "Email/Password sign-in is not enabled in Firebase Console.";
+          break;
+        default:
+          message = err.message;
+      }
       
       setError(message);
       setIsLoggingIn(false);
@@ -97,9 +131,9 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {error && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-1">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
+              <AlertTitle>Authentication Issue</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -119,7 +153,7 @@ export default function LoginPage() {
                 {isLoggingIn ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Sign in with Google"}
               </Button>
               <p className="mt-4 text-center text-xs text-muted-foreground">
-                Fastest way to get started.
+                One-click secure login.
               </p>
             </TabsContent>
 
@@ -147,7 +181,7 @@ export default function LoginPage() {
                     <Input 
                       id="password" 
                       type="password" 
-                      placeholder="••••••••" 
+                      placeholder="At least 6 characters" 
                       className="pl-10"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -156,15 +190,22 @@ export default function LoginPage() {
                   </div>
                 </div>
                 <Button type="submit" className="w-full h-11" disabled={isLoggingIn}>
-                  {isLoggingIn ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : (isSignUp ? "Create Account" : "Sign In")}
+                  {isLoggingIn ? (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  ) : (
+                    isSignUp ? "Create Account" : "Sign In"
+                  )}
                 </Button>
                 <Button 
                   type="button" 
                   variant="link" 
                   className="w-full text-xs" 
-                  onClick={() => setIsSignUp(!isSignUp)}
+                  onClick={() => {
+                    setIsSignUp(!isSignUp);
+                    setError(null);
+                  }}
                 >
-                  {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
+                  {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Create one"}
                 </Button>
               </form>
             </TabsContent>
