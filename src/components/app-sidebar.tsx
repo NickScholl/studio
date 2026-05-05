@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from "react";
@@ -15,9 +14,13 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { 
   useUser, 
-  useAuth 
+  useAuth,
+  useFirestore,
+  useDoc,
+  useMemoFirebase
 } from "@/firebase";
 import { signOut } from "firebase/auth";
+import { doc } from 'firebase/firestore';
 
 import {
   Sidebar,
@@ -34,8 +37,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading } = useUser();
+  const { user } = useUser();
   const auth = useAuth();
+  const db = useFirestore();
+
+  // Fetch Firestore profile for the most up-to-date name/photo (especially for base64 photos)
+  const profileRef = useMemoFirebase(() => {
+    if (!db || !user) return null;
+    return doc(db, 'userProfiles', user.uid);
+  }, [db, user]);
+
+  const { data: profile } = useDoc(profileRef);
 
   const handleSignOut = async () => {
     await signOut(auth);
@@ -48,6 +60,9 @@ export function AppSidebar() {
     { name: "Match History", icon: History, path: "/history" },
     { name: "Settings", icon: Settings, path: "/settings" },
   ];
+
+  const displayName = profile?.username || profile?.firstName ? `${profile.firstName} ${profile.lastName}`.trim() : user?.displayName || 'Player';
+  const photoURL = profile?.photoURL || user?.photoURL || undefined;
 
   return (
     <Sidebar variant="sidebar" collapsible="icon">
@@ -85,12 +100,12 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <Link href="/settings" className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center hover:bg-muted rounded-md transition-colors">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.photoURL || undefined} />
-                    <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                    <AvatarImage src={photoURL} className="object-cover" />
+                    <AvatarFallback>{displayName.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col group-data-[collapsible=icon]:hidden">
                     <span className="text-sm font-medium truncate max-w-[120px]">
-                      {user.displayName || 'Player'}
+                      {displayName}
                     </span>
                     <span className="text-xs text-muted-foreground">Pro Account</span>
                   </div>

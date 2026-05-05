@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { Camera, Loader2, Save, Upload } from 'lucide-react';
+import { Camera, Loader2, Save, Upload, X } from 'lucide-react';
 import { updateProfile } from 'firebase/auth';
 
 export default function SettingsPage() {
@@ -49,7 +49,7 @@ export default function SettingsPage() {
         firstName: profile.firstName || '',
         lastName: profile.lastName || '',
         username: profile.username || '',
-        photoURL: profile.photoURL || user?.photoURL || '',
+        photoURL: profile.photoURL || '',
       });
     } else if (user) {
       const names = user.displayName?.split(' ') || ['', ''];
@@ -70,11 +70,12 @@ export default function SettingsPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 1024 * 1024) { // 1MB limit for Base64 storage
+      // Limit to 500KB to ensure Firestore doc size limits are respected
+      if (file.size > 500 * 1024) { 
         toast({
           variant: "destructive",
           title: "File too large",
-          description: "Please select an image smaller than 1MB.",
+          description: "Please select an image smaller than 500KB.",
         });
         return;
       }
@@ -94,7 +95,10 @@ export default function SettingsPage() {
     setSaving(true);
     try {
       const profileData = {
-        ...formData,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        username: formData.username,
+        photoURL: formData.photoURL,
         id: user.uid,
         email: user.email,
         updatedAt: serverTimestamp(),
@@ -103,21 +107,28 @@ export default function SettingsPage() {
 
       await setDoc(doc(db, 'userProfiles', user.uid), profileData, { merge: true });
 
-      await updateProfile(user, {
+      // Important: We ONLY update Auth profile photo if it's a standard URL.
+      // Giant data URIs in Auth profile can cause session tokens to become too large (400 errors).
+      const authUpdate: { displayName: string; photoURL?: string } = {
         displayName: `${formData.firstName} ${formData.lastName}`.trim(),
-        photoURL: formData.photoURL,
-      });
+      };
+      
+      if (formData.photoURL && !formData.photoURL.startsWith('data:')) {
+        authUpdate.photoURL = formData.photoURL;
+      }
+
+      await updateProfile(user, authUpdate);
 
       toast({
         title: "Profile Updated!",
-        description: "Your changes have been saved successfully.",
+        description: "Your changes have been saved to your player profile.",
       });
     } catch (error: any) {
       console.error("Update Profile Error:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to update profile.",
+        description: error.message || "Failed to update profile.",
       });
     } finally {
       setSaving(false);
@@ -156,7 +167,7 @@ export default function SettingsPage() {
                     <Avatar className="h-28 w-28 border-4 border-white shadow-xl">
                       <AvatarImage src={formData.photoURL} className="object-cover" />
                       <AvatarFallback className="text-3xl bg-primary/10 text-primary">
-                        {formData.firstName?.charAt(0) || 'U'}
+                        {formData.firstName?.charAt(0) || user.email?.charAt(0).toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <button 
@@ -166,7 +177,7 @@ export default function SettingsPage() {
                     >
                       <Camera className="h-6 w-6" />
                     </button>
-                    <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground p-2 rounded-full shadow-lg border-2 border-white">
+                    <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground p-2 rounded-full shadow-lg border-2 border-white pointer-events-none">
                       <Upload className="h-4 w-4" />
                     </div>
                     <input 
@@ -179,24 +190,27 @@ export default function SettingsPage() {
                   </div>
                   <div className="flex-1 space-y-4 w-full">
                     <div className="space-y-2">
-                      <Label htmlFor="photoURL">Photo Link (Optional)</Label>
-                      <Input 
-                        id="photoURL" 
-                        name="photoURL" 
-                        placeholder="Or paste a direct URL here..." 
-                        value={formData.photoURL.startsWith('data:') ? 'Uploaded Image Content' : formData.photoURL}
-                        onChange={handleChange}
-                        disabled={formData.photoURL.startsWith('data:')}
-                      />
-                      {formData.photoURL.startsWith('data:') && (
-                        <Button 
-                          variant="link" 
-                          size="sm" 
-                          className="h-auto p-0 text-xs text-primary"
-                          onClick={() => setFormData(prev => ({ ...prev, photoURL: '' }))}
-                        >
-                          Clear uploaded photo
-                        </Button>
+                      <Label htmlFor="photoURL">Avatar Preview</Label>
+                      {formData.photoURL.startsWith('data:') ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground italic bg-muted px-2 py-1 rounded">Image uploaded from local file</span>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-6 w-6 text-destructive"
+                            onClick={() => setFormData(prev => ({ ...prev, photoURL: '' }))}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <Input 
+                          id="photoURL" 
+                          name="photoURL" 
+                          placeholder="Or paste a direct URL here..." 
+                          value={formData.photoURL}
+                          onChange={handleChange}
+                        />
                       )}
                     </div>
                   </div>
