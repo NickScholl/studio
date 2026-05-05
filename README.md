@@ -1,39 +1,40 @@
 # ShuttleScore | Badminton Performance Tracker
 
-This is a Next.js application designed to track badminton match statistics. It uses Firebase for Authentication and Firestore for data storage.
+This is your Next.js application built with Firebase. Follow these steps to get it launched!
 
-## Deployment Instructions (Firebase App Hosting)
+## 1. Ensure your local folder is ready
+Make sure your folder (like `C:\appbad` in your screenshot) contains the following essential files we've built:
+- `src/` (The folder containing your app code)
+- `package.json` (The configuration for your app)
+- `public/` (For static images and robots.txt)
+- `next.config.ts`
+- `tailwind.config.ts`
 
-Firebase App Hosting is the recommended way to deploy this Next.js app. It automatically builds and deploys your site whenever you push to GitHub.
+## 2. Push to GitHub
+Open your terminal (Command Prompt or PowerShell) inside your folder and run these commands:
 
-### 1. Push to GitHub
-If you haven't already, initialize a git repository and push your code to GitHub:
 ```bash
-git init
+# 1. Add all the new files
 git add .
-git commit -m "Initial commit"
-git remote add origin <your-github-repo-url>
-git push -u origin main
+
+# 2. Save the changes with a message
+git commit -m "Ready for launch"
+
+# 3. Push to GitHub
+# (Make sure you have created a repository on GitHub first and connected it)
+git push origin main
 ```
 
-### 2. Connect to Firebase
+## 3. Launch with Firebase App Hosting
 1. Go to the [Firebase Console](https://console.firebase.google.com/).
-2. Select your project.
-3. Click on **App Hosting** in the left sidebar.
-4. Click **Get Started** and connect your GitHub repository.
-5. Follow the prompts to set up the build settings (defaults are usually fine for Next.js).
+2. Click on **App Hosting** in the left-hand menu.
+3. Click **Get Started** (or "New Backend").
+4. Connect your GitHub account and select your `ShuttleScore` repository.
+5. Follow the steps (default settings are perfect for Next.js).
+6. Firebase will give you a **URL** where your site is live!
 
-### 3. Environment Variables
-In the Firebase App Hosting dashboard for your app, ensure you add your Firebase configuration as environment variables if they are not already detected:
-- `NEXT_PUBLIC_FIREBASE_API_KEY`
-- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
-- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
-- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
-- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
-- `NEXT_PUBLIC_FIREBASE_APP_ID`
+## 4. Environment Variables
+In the Firebase App Hosting dashboard, you might need to add your Firebase configuration (API keys, etc.) as environment variables so the website can talk to your database.
 
-## Local Development
-Run the development server:
-```bash
-npm run dev
-```
+---
+*Built with ❤️ for Badminton Players.*
