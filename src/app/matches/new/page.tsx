@@ -33,7 +33,6 @@ export default function NewMatch() {
     }
   }, [user, authLoading, router]);
 
-  // Fix hydration mismatch by setting the date only on the client
   React.useEffect(() => {
     setDefaultDate(new Date().toISOString().split('T')[0]);
   }, []);
@@ -117,7 +116,7 @@ export default function NewMatch() {
                       type="date" 
                       required 
                       defaultValue={defaultDate} 
-                      key={defaultDate} // Use key to force re-render when defaultDate is set
+                      key={defaultDate} 
                     />
                   </div>
                   <div className="space-y-2">
@@ -209,8 +208,8 @@ export default function NewMatch() {
                     <div className="space-y-2">
                       <Label className="text-xs uppercase text-muted-foreground">Set 2</Label>
                       <div className="flex gap-2">
-                        <Input name="set1_mine" placeholder="T1" type="number" required />
-                        <Input name="set1_opp" placeholder="T2" type="number" required />
+                        <Input name="set2_mine" placeholder="T1" type="number" required />
+                        <Input name="set2_opp" placeholder="T2" type="number" required />
                       </div>
                     </div>
                     <div className="space-y-2">
