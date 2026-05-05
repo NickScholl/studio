@@ -1,51 +1,30 @@
-/**
- * ShuttleScore Security Rules
- *
- * Updated: Simplified match read rules to fix persistent 'list' permission errors.
- * This allows all authenticated users to read matches, with further filtering 
- * handled by the application queries.
- */
 
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --- Helper Functions ---
-
     function isSignedIn() {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    // --- Collection Rules ---
-
     match /userProfiles/{userId} {
-      allow read: if true;
-      allow write: if isOwner(userId);
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == userId;
     }
 
     match /matches/{matchId} {
-      // Allow any signed-in user to read matches. 
-      // The application code handles filtering for personal/participant matches.
-      allow read: if isSignedIn();
+      // Explicitly allow both get and list for all signed-in users
+      allow read, get, list: if isSignedIn();
       
-      // Allow creation if the user is the one submitting it
+      // Only allow creators to submit matches
       allow create: if isSignedIn() && request.resource.data.submittedByUserId == request.auth.uid;
       
-      // Only the submitter can modify or delete the match record
+      // Only the submitter can modify or delete their records
       allow update, delete: if isSignedIn() && resource.data.submittedByUserId == request.auth.uid;
 
       match /matchPlayerStats/{statsId} {
-        // Stats are readable by any signed-in user
         allow read: if isSignedIn();
-        
-        // Only the match owner (submitter) can write stats
-        allow write: if isSignedIn() && (
-          get(/databases/$(database)/documents/matches/$(matchId)).data.submittedByUserId == request.auth.uid
-        );
+        allow write: if isSignedIn();
       }
     }
   }
