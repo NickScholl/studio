@@ -1,7 +1,9 @@
+
 'use client';
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -26,11 +28,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useUser, useFirestore, useCollection } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
+import placeholderData from '@/app/lib/placeholder-images.json';
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useUser();
   const db = useFirestore();
   const router = useRouter();
+
+  const heroImage = placeholderData.placeholderImages.find(img => img.id === 'badminton-hero');
 
   const matchesQuery = React.useMemo(() => {
     if (!db || !user) return null;
@@ -89,6 +94,25 @@ export default function Dashboard() {
         </header>
 
         <main className="flex-1 space-y-8 p-6 lg:p-10">
+          {matches.length === 0 && heroImage && (
+            <div className="relative w-full h-48 md:h-64 rounded-xl overflow-hidden mb-8 border-4 border-white shadow-xl">
+              <Image 
+                src={heroImage.imageUrl} 
+                alt={heroImage.description} 
+                fill 
+                className="object-cover opacity-80"
+                data-ai-hint={heroImage.imageHint}
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/60 to-transparent flex flex-col justify-center px-8 text-white">
+                <h2 className="text-3xl font-bold">Welcome, {user.displayName?.split(' ')[0]}!</h2>
+                <p className="max-w-md mt-2 text-primary-foreground">Ready to track your first win? Record your match stats and see your performance grow.</p>
+                <Button asChild className="w-fit mt-4" variant="secondary">
+                   <Link href="/matches/new">Start Tracking</Link>
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

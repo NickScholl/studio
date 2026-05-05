@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, MapPin, Users, Swords, X, Calendar as CalendarIcon, Filter, Activity } from 'lucide-react';
+import { Search, MapPin, Swords, X, Calendar as CalendarIcon, Activity } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -75,10 +75,10 @@ export default function MatchHistory() {
       const matchesType = filterType === 'all' || m.type === filterType;
       const matchesResult = filterResult === 'all' || m.result === filterResult;
       const matchesPlace = filterPlace === 'all' || m.location === filterPlace;
-      const matchTime = new Date(m.date).getTime();
-      const start = filterStartDate ? new Date(filterStartDate).getTime() : -Infinity;
-      const end = filterEndDate ? new Date(filterEndDate).getTime() : Infinity;
-      const matchesDate = matchTime >= start && matchTime <= end;
+      
+      // Robust string-based date comparison
+      const matchesDate = (!filterStartDate || m.date >= filterStartDate) && 
+                          (!filterEndDate || m.date <= filterEndDate);
 
       return matchesSearch && matchesType && matchesResult && matchesPlace && matchesDate;
     });
