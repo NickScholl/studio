@@ -57,6 +57,7 @@ export default function LoginPage() {
         message = "Popup blocked! Please enable popups for this site in your browser settings.";
       }
       setError(message);
+    } finally {
       setIsLoggingIn(false);
     }
   };
@@ -88,6 +89,7 @@ export default function LoginPage() {
       if (err.code === 'auth/email-already-in-use') message = "Email already registered.";
       if (err.code === 'auth/invalid-email') message = "Invalid email address.";
       setError(message);
+    } finally {
       setIsLoggingIn(false);
     }
   };
