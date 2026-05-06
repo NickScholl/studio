@@ -1,33 +1,27 @@
 'use client';
 
 import { firebaseConfig } from '@/firebase/config';
-import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 
 /**
- * Robust Firebase initialization for Cloudflare and SSR environments.
- * This pattern ensures we never attempt "automatic" initialization which fails on Cloudflare.
+ * Initializes Firebase services for both Client and Server (SSR/Edge) contexts.
+ * This function is designed to be robust on Cloudflare Workers by explicitly
+ * providing the configuration object, avoiding the 'app/no-options' error.
  */
-let firebaseApp: FirebaseApp;
-let auth: Auth;
-let firestore: Firestore;
-
 export function initializeFirebase(): { firebaseApp: FirebaseApp; auth: Auth; firestore: Firestore } {
   const apps = getApps();
   
-  if (apps.length > 0) {
-    firebaseApp = apps[0];
-  } else {
-    // Explicitly initialize with config to avoid "app/no-options" error on Cloudflare
-    firebaseApp = initializeApp(firebaseConfig);
-  }
+  // Use existing app if available, otherwise initialize with explicit config.
+  // We NEVER call initializeApp() without arguments on non-Firebase-Hosting platforms.
+  const app = apps.length > 0 ? apps[0] : initializeApp(firebaseConfig);
 
-  auth = getAuth(firebaseApp);
-  firestore = getFirestore(firebaseApp);
+  const auth = getAuth(app);
+  const firestore = getFirestore(app);
 
   return {
-    firebaseApp,
+    firebaseApp: app,
     auth,
     firestore
   };
