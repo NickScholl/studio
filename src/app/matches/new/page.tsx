@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -128,97 +129,97 @@ export default function NewMatch() {
     <div className="flex min-h-screen bg-[#f8f9fc]">
       <AppSidebar />
       <SidebarInset className="flex flex-col">
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-white/80 backdrop-blur-md px-6 sticky top-0 z-20 shadow-sm w-full">
-          <div className="flex items-center gap-2">
+        <header className="flex h-20 shrink-0 items-center gap-4 border-b bg-white/90 backdrop-blur-xl px-8 sticky top-0 z-50 shadow-sm w-full">
+          <div className="flex items-center gap-4">
             <SidebarTrigger className="-ml-1" />
-            <Button variant="ghost" size="icon" asChild className="h-9 w-9">
+            <Button variant="ghost" size="icon" asChild className="h-12 w-12 hover:bg-primary/5 rounded-2xl">
               <Link href="/">
-                <ChevronLeft className="h-5 w-5" />
+                <ChevronLeft className="h-6 w-6" />
               </Link>
             </Button>
-            <div className="h-4 w-px bg-muted mx-2" />
-            <h1 className="text-[10px] font-black uppercase tracking-widest text-primary">Record Entry</h1>
+            <div className="h-6 w-px bg-muted mx-3" />
+            <h1 className="text-xs font-black uppercase tracking-[0.4em] text-primary">Tactical Entry</h1>
           </div>
         </header>
 
-        <main className="max-w-4xl mx-auto p-4 md:p-10 w-full pb-32">
-          <Card className="shadow-2xl shadow-black/5 border-none rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden bg-white">
-            <CardHeader className="bg-primary/5 px-6 md:px-12 pt-8 md:pt-12 pb-6 md:pb-10 border-b border-muted/50 text-center md:text-left">
-              <CardTitle className="text-3xl md:text-5xl font-black tracking-tighter text-primary">Match Log</CardTitle>
-              <CardDescription className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">Record every flight of the shuttle</CardDescription>
+        <main className="max-w-[1200px] mx-auto p-6 md:p-16 w-full pb-64">
+          <Card className="shadow-2xl shadow-black/5 border-none rounded-[3rem] overflow-hidden bg-white">
+            <CardHeader className="bg-primary/5 px-8 md:px-20 pt-12 md:pt-20 pb-10 md:pb-16 border-b border-muted/30 text-center md:text-left">
+              <CardTitle className="text-4xl md:text-7xl font-black tracking-tighter text-primary">Match Log</CardTitle>
+              <CardDescription className="text-xs md:text-sm font-black uppercase tracking-[0.4em] text-muted-foreground opacity-60 mt-4">Record every flight of the shuttle</CardDescription>
             </CardHeader>
-            <CardContent className="p-6 md:p-12">
-              <form onSubmit={handleSubmit} className="space-y-8 md:space-y-12">
-                <div className="grid gap-6 md:grid-cols-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="date" className="font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Match Date</Label>
+            <CardContent className="p-8 md:p-20">
+              <form onSubmit={handleSubmit} className="space-y-12 md:space-y-20">
+                <div className="grid gap-10 md:grid-cols-3">
+                  <div className="space-y-3">
+                    <Label htmlFor="date" className="font-black text-[11px] uppercase tracking-[0.3em] text-muted-foreground px-1">Match Date</Label>
                     <Input 
                       id="date" 
                       name="date" 
                       type="date" 
                       required 
                       defaultValue={defaultDate} 
-                      className="h-12 border-none bg-muted/10 rounded-xl font-bold shadow-inner"
+                      className="h-14 border-none bg-muted/10 rounded-2xl font-black text-lg shadow-inner focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="time" className="font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Start Time</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="time" className="font-black text-[11px] uppercase tracking-[0.3em] text-muted-foreground px-1">Start Time</Label>
                     <div className="relative">
-                      <Clock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                      <Clock className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-primary/60" />
                       <Input 
                         id="time" 
                         name="time" 
                         type="time" 
                         required 
                         defaultValue={defaultTime} 
-                        className="pl-12 h-12 border-none bg-muted/10 rounded-xl font-bold shadow-inner"
+                        className="pl-14 h-14 border-none bg-muted/10 rounded-2xl font-black text-lg shadow-inner focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="type" className="font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Match Format</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="type" className="font-black text-[11px] uppercase tracking-[0.3em] text-muted-foreground px-1">Format</Label>
                     <Select value={matchType} onValueChange={(v) => setMatchType(v as MatchType)}>
-                      <SelectTrigger className="h-12 border-none bg-muted/10 rounded-xl focus:ring-primary font-bold shadow-inner">
-                        <SelectValue placeholder="Format" />
+                      <SelectTrigger className="h-14 border-none bg-muted/10 rounded-2xl focus:ring-2 focus:ring-primary/20 font-black text-lg shadow-inner">
+                        <SelectValue placeholder="Select Format" />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-none shadow-2xl z-50">
-                        <SelectItem value="Singles" className="font-bold">Singles</SelectItem>
-                        <SelectItem value="Doubles" className="font-bold">Doubles</SelectItem>
-                        <SelectItem value="Mixed Doubles" className="font-bold">Mixed Doubles</SelectItem>
+                        <SelectItem value="Singles" className="font-black">Singles</SelectItem>
+                        <SelectItem value="Doubles" className="font-black">Doubles</SelectItem>
+                        <SelectItem value="Mixed Doubles" className="font-black">Mixed Doubles</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="competitionName" className="font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Tournament / Event</Label>
+                <div className="grid gap-10 md:grid-cols-2">
+                  <div className="space-y-3">
+                    <Label htmlFor="competitionName" className="font-black text-[11px] uppercase tracking-[0.3em] text-muted-foreground px-1">Tournament / Event</Label>
                     <div className="relative">
-                      <Trophy className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                      <Trophy className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-primary/60" />
                       <Input 
                         id="competitionName" 
                         name="competitionName" 
                         list="competition-list"
                         autoComplete="off"
-                        placeholder="e.g. City Open" 
-                        className="pl-12 h-12 border-none bg-muted/10 rounded-xl font-bold shadow-inner" 
+                        placeholder="e.g. Grand Championship" 
+                        className="pl-14 h-14 border-none bg-muted/10 rounded-2xl font-black text-lg shadow-inner focus:ring-2 focus:ring-primary/20" 
                       />
                       <datalist id="competition-list">
                         {suggestions.competitions.map(c => <option key={c} value={c} />)}
                       </datalist>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="location" className="font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Arena Venue</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="location" className="font-black text-[11px] uppercase tracking-[0.3em] text-muted-foreground px-1">Arena Venue</Label>
                     <div className="relative">
-                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                      <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-primary/60" />
                       <Input 
                         id="location" 
                         name="location" 
                         list="location-list"
                         autoComplete="off"
-                        placeholder="e.g. Center Court" 
-                        className="pl-12 h-12 border-none bg-muted/10 rounded-xl font-bold shadow-inner" 
+                        placeholder="e.g. Olympic Center" 
+                        className="pl-14 h-14 border-none bg-muted/10 rounded-2xl font-black text-lg shadow-inner focus:ring-2 focus:ring-primary/20" 
                         required 
                       />
                       <datalist id="location-list">
@@ -228,55 +229,55 @@ export default function NewMatch() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="result" className="font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Match Outcome</Label>
+                <div className="space-y-4">
+                  <Label htmlFor="result" className="font-black text-[11px] uppercase tracking-[0.3em] text-muted-foreground px-1">Final Outcome</Label>
                   <Select name="result" defaultValue="Win">
-                    <SelectTrigger className="h-12 border-none bg-muted/10 rounded-xl font-black uppercase text-xs tracking-widest shadow-inner">
-                      <SelectValue placeholder="Outcome" />
+                    <SelectTrigger className="h-16 border-none bg-muted/10 rounded-2xl font-black uppercase text-sm tracking-[0.4em] shadow-inner">
+                      <SelectValue placeholder="Select Outcome" />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-none shadow-2xl z-50">
-                      <SelectItem value="Win" className="font-black text-secondary">VICTORY (WIN)</SelectItem>
-                      <SelectItem value="Loss" className="font-black text-destructive">DEFEAT (LOSS)</SelectItem>
+                      <SelectItem value="Win" className="font-black text-secondary py-4">VICTORY (PRO WIN)</SelectItem>
+                      <SelectItem value="Loss" className="font-black text-destructive py-4">DEFEAT (PRO LOSS)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                  <Card className="border-none shadow-xl shadow-black/5 bg-muted/5 rounded-[1.2rem] md:rounded-[2rem] overflow-hidden">
-                    <CardHeader className="pb-4 bg-primary/10 px-5 pt-5">
-                      <CardTitle className="text-[9px] font-black uppercase tracking-widest flex items-center gap-2 text-primary">
-                        <User className="h-3 w-3" /> Side A (You)
+                <div className="grid gap-10 md:grid-cols-2">
+                  <Card className="border-none shadow-2xl shadow-black/5 bg-muted/5 rounded-[2.5rem] overflow-hidden">
+                    <CardHeader className="pb-6 bg-primary/10 px-8 pt-8">
+                      <CardTitle className="text-[11px] font-black uppercase tracking-[0.3em] flex items-center gap-3 text-primary">
+                        <User className="h-4 w-4" /> Team Alpha (You)
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4 pt-5 px-5 pb-6">
-                      <div className="space-y-1.5">
-                        <Label htmlFor="myName" className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Primary Player</Label>
-                        <Input id="myName" name="myName" list="name-list" autoComplete="off" defaultValue={user?.displayName || ''} required className="h-11 border-none bg-white rounded-xl font-bold shadow-sm" />
+                    <CardContent className="space-y-6 pt-8 px-8 pb-10">
+                      <div className="space-y-2">
+                        <Label htmlFor="myName" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Primary Player</Label>
+                        <Input id="myName" name="myName" list="name-list" autoComplete="off" defaultValue={user?.displayName || ''} required className="h-14 border-none bg-white rounded-2xl font-black text-lg shadow-sm" />
                       </div>
                       {isDoubles && (
-                        <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2">
-                          <Label htmlFor="partner" className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Partner</Label>
-                          <Input id="partner" name="partner" list="name-list" autoComplete="off" placeholder="Teammate Name" required={isDoubles} className="h-11 border-none bg-white rounded-xl font-bold shadow-sm" />
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-4">
+                          <Label htmlFor="partner" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Teammate Partner</Label>
+                          <Input id="partner" name="partner" list="name-list" autoComplete="off" placeholder="Enter Partner Name" required={isDoubles} className="h-14 border-none bg-white rounded-2xl font-black text-lg shadow-sm" />
                         </div>
                       )}
                     </CardContent>
                   </Card>
 
-                  <Card className="border-none shadow-xl shadow-black/5 bg-muted/5 rounded-[1.2rem] md:rounded-[2rem] overflow-hidden">
-                    <CardHeader className="pb-4 bg-muted/20 px-5 pt-5">
-                      <CardTitle className="text-[9px] font-black uppercase tracking-widest flex items-center gap-2 text-muted-foreground">
-                        <Swords className="h-3 w-3" /> Side B (Rivals)
+                  <Card className="border-none shadow-2xl shadow-black/5 bg-muted/5 rounded-[2.5rem] overflow-hidden">
+                    <CardHeader className="pb-6 bg-muted/20 px-8 pt-8">
+                      <CardTitle className="text-[11px] font-black uppercase tracking-[0.3em] flex items-center gap-3 text-muted-foreground">
+                        <Swords className="h-4 w-4" /> Team Omega (Rivals)
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4 pt-5 px-5 pb-6">
-                      <div className="space-y-1.5">
-                        <Label htmlFor="opponent" className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Opponent 1</Label>
-                        <Input id="opponent" name="opponent" list="name-list" autoComplete="off" placeholder="Rival Name" required className="h-11 border-none bg-white rounded-xl font-bold shadow-sm" />
+                    <CardContent className="space-y-6 pt-8 px-8 pb-10">
+                      <div className="space-y-2">
+                        <Label htmlFor="opponent" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Lead Opponent</Label>
+                        <Input id="opponent" name="opponent" list="name-list" autoComplete="off" placeholder="Enter Rival Name" required className="h-14 border-none bg-white rounded-2xl font-black text-lg shadow-sm" />
                       </div>
                       {isDoubles && (
-                        <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2">
-                          <Label htmlFor="opponentPartner" className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Opponent 2</Label>
-                          <Input id="opponentPartner" name="opponentPartner" list="name-list" autoComplete="off" placeholder="Rival Partner" required={isDoubles} className="h-11 border-none bg-white rounded-xl font-bold shadow-sm" />
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-4">
+                          <Label htmlFor="opponentPartner" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Rival Partner</Label>
+                          <Input id="opponentPartner" name="opponentPartner" list="name-list" autoComplete="off" placeholder="Enter Rival Partner" required={isDoubles} className="h-14 border-none bg-white rounded-2xl font-black text-lg shadow-sm" />
                         </div>
                       )}
                     </CardContent>
@@ -287,59 +288,65 @@ export default function NewMatch() {
                   </datalist>
                 </div>
 
-                <div className="space-y-6 md:space-y-8 border-t border-muted/50 pt-8">
-                  <div className="flex items-center gap-2">
-                    <Target className="h-5 w-5 text-primary" />
-                    <Label className="font-black text-xs uppercase tracking-[0.2em]">Point Tally</Label>
+                <div className="space-y-12 border-t border-muted/30 pt-16">
+                  <div className="flex items-center gap-4 px-1">
+                    <Target className="h-8 w-8 text-primary" />
+                    <Label className="font-black text-xl md:text-2xl tracking-tighter uppercase">Set Performance Tally</Label>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                     {[1, 2, 3].map((set) => (
-                      <div key={set} className="space-y-3">
-                        <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground text-center block">
-                          {set === 3 ? "Set 3 (Decision)" : `Set ${set}`}
+                      <div key={set} className="space-y-4">
+                        <Label className="text-[11px] font-black uppercase tracking-[0.4em] text-muted-foreground text-center block">
+                          {set === 3 ? "Decision Set (3)" : `Tactical Set ${set}`}
                         </Label>
-                        <div className="flex items-center justify-center gap-4">
-                          <Input name={`set${set}_mine`} placeholder="YOU" type="number" required={set < 3} className="text-center h-14 w-20 font-black text-2xl bg-primary/5 border-none rounded-2xl shadow-inner" />
-                          <span className="text-muted-foreground font-black">:</span>
-                          <Input name={`set${set}_opp`} placeholder="THEM" type="number" required={set < 3} className="text-center h-14 w-20 font-black text-2xl bg-muted/20 border-none rounded-2xl shadow-inner" />
+                        <div className="flex items-center justify-center gap-6">
+                          <div className="flex flex-col items-center gap-2">
+                            <span className="text-[9px] font-black text-primary/40 uppercase tracking-widest">YOU</span>
+                            <Input name={`set${set}_mine`} placeholder="00" type="number" required={set < 3} className="text-center h-20 w-28 font-black text-4xl bg-primary/5 border-none rounded-3xl shadow-inner focus:ring-4 focus:ring-primary/10" />
+                          </div>
+                          <span className="text-muted-foreground/30 font-black text-4xl mt-6">:</span>
+                          <div className="flex flex-col items-center gap-2">
+                            <span className="text-[9px] font-black text-destructive/40 uppercase tracking-widest">RIVAL</span>
+                            <Input name={`set${set}_opp`} placeholder="00" type="number" required={set < 3} className="text-center h-20 w-28 font-black text-4xl bg-muted/20 border-none rounded-3xl shadow-inner focus:ring-4 focus:ring-primary/10" />
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <Label htmlFor="notes" className="font-black text-[10px] uppercase tracking-widest text-muted-foreground">Tactical Notes</Label>
+                <div className="space-y-4">
+                  <Label htmlFor="notes" className="font-black text-[11px] uppercase tracking-[0.3em] text-muted-foreground px-1">Tactical De-Brief</Label>
                   <Textarea 
                     id="notes" 
                     name="notes" 
-                    placeholder="Strategies, patterns, or physical notes..." 
-                    className="min-h-[160px] border-none bg-muted/10 rounded-2xl p-6 font-medium shadow-inner" 
+                    placeholder="Document patterns, physical fatigue notes, or winning strategies..." 
+                    className="min-h-[200px] border-none bg-muted/10 rounded-[2rem] p-8 text-lg font-medium shadow-inner focus:ring-4 focus:ring-primary/10" 
                   />
                 </div>
 
-                <div className="pt-10 flex flex-col gap-6">
+                <div className="pt-16 flex flex-col gap-8">
                   <Button 
                     type="submit" 
                     size="lg" 
-                    className="w-full h-24 md:h-16 font-black text-base md:text-sm uppercase tracking-widest shadow-2xl shadow-primary/30 rounded-2xl transition-all hover:-translate-y-1 active:translate-y-0" 
+                    className="w-full h-24 md:h-20 font-black text-xl md:text-2xl uppercase tracking-[0.2em] shadow-2xl shadow-primary/30 rounded-[2rem] transition-all hover:translate-y-[-4px] active:translate-y-0" 
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
-                      <><Loader2 className="h-5 w-5 animate-spin mr-3" /> COMMITTING...</>
+                      <><Loader2 className="h-8 w-8 animate-spin mr-4" /> COMMITING DATA...</>
                     ) : (
-                      <><Check className="h-6 w-6 mr-3" /> ARCHIVE PERFORMANCE</>
+                      <><Check className="h-8 w-8 mr-4" /> ARCHIVE PERFORMANCE</>
                     )}
                   </Button>
                   <Button 
                     type="button" 
                     variant="ghost" 
                     size="lg" 
-                    className="w-full h-14 md:h-16 font-black text-[10px] uppercase tracking-[0.3em] opacity-40 hover:opacity-100 transition-opacity" 
+                    className="w-full h-16 font-black text-[12px] uppercase tracking-[0.4em] opacity-40 hover:opacity-100 transition-opacity hover:bg-destructive/5 hover:text-destructive" 
                     asChild
                     disabled={isSubmitting}
                   >
-                    <Link href="/">ABORT ENTRY</Link>
+                    <Link href="/">ABORT RECORDING</Link>
                   </Button>
                 </div>
               </form>

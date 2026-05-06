@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -70,7 +71,6 @@ export default function SettingsPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Limit to 500KB to ensure Firestore doc size limits are respected
       if (file.size > 500 * 1024) { 
         toast({
           variant: "destructive",
@@ -107,8 +107,6 @@ export default function SettingsPage() {
 
       await setDoc(doc(db, 'userProfiles', user.uid), profileData, { merge: true });
 
-      // Important: We ONLY update Auth profile photo if it's a standard URL.
-      // Giant data URIs in Auth profile can cause session tokens to become too large (400 errors).
       const authUpdate: { displayName: string; photoURL?: string } = {
         displayName: `${formData.firstName} ${formData.lastName}`.trim(),
       };
@@ -121,7 +119,7 @@ export default function SettingsPage() {
 
       toast({
         title: "Profile Updated!",
-        description: "Your changes have been saved to your player profile.",
+        description: "Your elite player identity has been synchronized.",
       });
     } catch (error: any) {
       console.error("Update Profile Error:", error);
@@ -138,7 +136,7 @@ export default function SettingsPage() {
   if (isUserLoading || (user && profileLoading)) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
@@ -146,39 +144,39 @@ export default function SettingsPage() {
   if (!user) return null;
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-[#f8f9fc]">
       <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6">
+      <SidebarInset className="flex flex-col">
+        <header className="flex h-20 shrink-0 items-center gap-4 border-b bg-white/90 backdrop-blur-xl px-8 sticky top-0 z-50 shadow-sm w-full">
           <SidebarTrigger className="-ml-1" />
-          <h1 className="text-lg font-headline font-semibold">User Settings</h1>
+          <h1 className="text-xl md:text-2xl font-black tracking-tighter uppercase">Player Profile</h1>
         </header>
 
-        <main className="max-w-3xl mx-auto p-6 lg:p-10 w-full space-y-6">
-          <Card className="shadow-lg border-none">
-            <CardHeader className="bg-primary/5">
-              <CardTitle>Profile Information</CardTitle>
-              <CardDescription>Manage your public identity on ShuttleScore.</CardDescription>
+        <main className="max-w-[1000px] mx-auto p-6 md:p-12 lg:p-20 w-full space-y-12">
+          <Card className="shadow-2xl border-none rounded-[2.5rem] overflow-hidden bg-white">
+            <CardHeader className="bg-primary/5 p-8 md:p-12 border-b border-muted/30">
+              <CardTitle className="text-2xl md:text-4xl font-black tracking-tighter">Elite Information</CardTitle>
+              <CardDescription className="text-xs font-bold uppercase tracking-[0.3em] mt-2 opacity-60">Manage your public tactical identity</CardDescription>
             </CardHeader>
-            <CardContent className="p-6">
-              <form onSubmit={handleSave} className="space-y-8">
-                <div className="flex flex-col md:flex-row items-center gap-8">
+            <CardContent className="p-8 md:p-12">
+              <form onSubmit={handleSave} className="space-y-12">
+                <div className="flex flex-col md:flex-row items-center gap-12">
                   <div className="relative group">
-                    <Avatar className="h-28 w-28 border-4 border-white shadow-xl">
+                    <Avatar className="h-40 w-40 border-[8px] border-white shadow-2xl">
                       <AvatarImage src={formData.photoURL} className="object-cover" />
-                      <AvatarFallback className="text-3xl bg-primary/10 text-primary">
+                      <AvatarFallback className="text-5xl font-black bg-primary/10 text-primary uppercase">
                         {formData.firstName?.charAt(0) || user.email?.charAt(0).toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <button 
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="absolute inset-0 bg-black/40 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute inset-0 bg-black/50 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-sm"
                     >
-                      <Camera className="h-6 w-6" />
+                      <Camera className="h-10 w-10" />
                     </button>
-                    <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground p-2 rounded-full shadow-lg border-2 border-white pointer-events-none">
-                      <Upload className="h-4 w-4" />
+                    <div className="absolute -bottom-2 -right-2 bg-primary text-white p-3.5 rounded-full shadow-2xl border-4 border-white">
+                      <Upload className="h-6 w-6" />
                     </div>
                     <input 
                       type="file" 
@@ -189,78 +187,80 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div className="flex-1 space-y-4 w-full">
-                    <div className="space-y-2">
-                      <Label htmlFor="photoURL">Avatar Preview</Label>
-                      {formData.photoURL.startsWith('data:') ? (
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground italic bg-muted px-2 py-1 rounded">Image uploaded from local file</span>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-6 w-6 text-destructive"
-                            onClick={() => setFormData(prev => ({ ...prev, photoURL: '' }))}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <Input 
-                          id="photoURL" 
-                          name="photoURL" 
-                          placeholder="Or paste a direct URL here..." 
-                          value={formData.photoURL}
-                          onChange={handleChange}
-                        />
-                      )}
-                    </div>
+                    <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground px-1">Avatar Identity</Label>
+                    {formData.photoURL.startsWith('data:') ? (
+                      <div className="flex items-center gap-4 bg-muted/5 p-4 rounded-2xl border border-dashed border-primary/20">
+                        <span className="text-sm font-black text-primary italic">Custom image staged for upload</span>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-10 w-10 text-destructive hover:bg-destructive/10 rounded-xl"
+                          onClick={() => setFormData(prev => ({ ...prev, photoURL: '' }))}
+                        >
+                          <X className="h-5 w-5" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Input 
+                        id="photoURL" 
+                        name="photoURL" 
+                        placeholder="Paste global image URL..." 
+                        className="h-14 border-none bg-muted/10 rounded-2xl font-bold text-lg shadow-inner focus:ring-4 focus:ring-primary/10" 
+                        value={formData.photoURL}
+                        onChange={handleChange}
+                      />
+                    )}
                   </div>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
+                <div className="grid gap-10 md:grid-cols-2">
+                  <div className="space-y-3">
+                    <Label htmlFor="firstName" className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground px-1">First Name</Label>
                     <Input 
                       id="firstName" 
                       name="firstName" 
                       value={formData.firstName}
                       onChange={handleChange}
                       required 
+                      className="h-14 border-none bg-muted/10 rounded-2xl font-bold text-lg shadow-inner focus:ring-4 focus:ring-primary/10"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="lastName" className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground px-1">Last Name</Label>
                     <Input 
                       id="lastName" 
                       name="lastName" 
                       value={formData.lastName}
                       onChange={handleChange}
                       required 
+                      className="h-14 border-none bg-muted/10 rounded-2xl font-bold text-lg shadow-inner focus:ring-4 focus:ring-primary/10"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="username">Username / Display Name</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="username" className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground px-1">Roster Username</Label>
                   <Input 
                     id="username" 
                     name="username" 
-                    placeholder="shuttle_master" 
+                    placeholder="shuttle_master_pro" 
                     value={formData.username}
                     onChange={handleChange}
+                    className="h-14 border-none bg-muted/10 rounded-2xl font-black text-lg shadow-inner focus:ring-4 focus:ring-primary/10"
                   />
-                  <p className="text-[10px] text-muted-foreground">
-                    This is how other players will see you in match histories.
+                  <p className="text-[11px] text-muted-foreground font-bold px-1 opacity-60">
+                    This public ID identifies you in all archived match histories.
                   </p>
                 </div>
 
-                <div className="pt-6 border-t flex justify-end">
-                  <Button type="submit" className="w-full md:w-auto px-8 py-6 text-lg font-bold shadow-lg shadow-primary/20" disabled={saving}>
+                <div className="pt-12 border-t border-muted/30 flex justify-end">
+                  <Button type="submit" className="w-full h-20 md:w-auto px-16 text-xl font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/30 rounded-2xl transition-all hover:translate-y-[-4px] active:translate-y-0" disabled={saving}>
                     {saving ? (
-                      <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                      <Loader2 className="h-6 w-6 animate-spin mr-3" />
                     ) : (
-                      <Save className="h-5 w-5 mr-2" />
+                      <Save className="h-6 w-6 mr-3" />
                     )}
-                    Update Profile
+                    Update Identity
                   </Button>
                 </div>
               </form>

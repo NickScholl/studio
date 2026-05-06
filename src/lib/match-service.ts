@@ -1,3 +1,4 @@
+
 import { 
   collection, 
   addDoc, 
@@ -31,7 +32,7 @@ export const MatchService = {
   addMatch: async (db: Firestore, userId: string, match: any) => {
     const matchesRef = collection(db, 'matches');
     
-    // Combine date and time if provided separately
+    // Combine date and time to ensure exact precision
     let formattedDate;
     if (match.date && match.time) {
       formattedDate = new Date(`${match.date}T${match.time}`).toISOString();
