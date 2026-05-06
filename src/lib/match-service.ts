@@ -1,4 +1,3 @@
-
 import { 
   collection, 
   addDoc, 
@@ -38,13 +37,15 @@ export const MatchService = {
     const docData = {
       ...match,
       submittedByUserId: userId,
-      participantUserIds: [userId], // In a real doubles app, you'd add the partner's UID here too if they are a user
+      participantUserIds: [userId], 
       createdAt: serverTimestamp(),
       competitionName: match.competitionName || 'Casual / Friendly',
     };
 
-    // Non-blocking write
-    addDoc(matchesRef, docData).catch(async (error) => {
+    // Use a try/catch inside a promise to handle potential immediate local failures
+    // though the standard .catch is primarily for server-side permission denials
+    addDoc(matchesRef, docData).catch((error) => {
+      console.error("Firestore AddDoc Error:", error);
       const permissionError = new FirestorePermissionError({
         path: matchesRef.path,
         operation: 'create',
