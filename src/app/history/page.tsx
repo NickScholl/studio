@@ -331,7 +331,7 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
         </div>
       </DialogTrigger>
       
-      <DialogContent className="max-w-[95vw] md:max-w-[800px] w-full bg-white border-none rounded-[1.5rem] shadow-2xl p-0 overflow-hidden z-[100] flex flex-col max-h-[90vh] relative">
+      <DialogContent className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[95vw] md:max-w-[800px] w-full bg-white border-none rounded-[1.5rem] shadow-2xl p-0 overflow-hidden z-[100] flex flex-col max-h-[90vh]">
         <DialogHeader className="bg-slate-50 p-6 md:p-10 border-b border-muted/20 relative shrink-0">
           <div className="flex items-center justify-between mb-4 pr-12">
             <Badge variant="outline" className="bg-white text-primary border-primary/20 font-black uppercase text-[10px] tracking-widest px-3 py-1">
@@ -407,7 +407,7 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
               </div>
             </div>
 
-            <div className="space-y-4 pb-10">
+            <div className="space-y-4 pb-20">
               <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Tactical De-brief Notes</h3>
               <div className="bg-slate-50 p-6 rounded-2xl min-h-[120px]">
                 <p className="text-sm font-medium leading-relaxed text-slate-600 whitespace-pre-wrap">
