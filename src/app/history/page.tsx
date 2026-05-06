@@ -7,7 +7,6 @@ import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { BadmintonMatch } from '@/lib/match-service';
 import { 
-  Search, 
   X, 
   Activity, 
   Filter, 
@@ -22,7 +21,8 @@ import {
   Calendar,
   Swords,
   Info,
-  Target
+  Target,
+  Pencil
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -41,6 +41,7 @@ import {
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 export default function MatchHistory() {
   const { user, isUserLoading } = useUser();
@@ -49,8 +50,6 @@ export default function MatchHistory() {
 
   const [selectedPlayers, setSelectedPlayers] = React.useState<string[]>([]);
   const [selectedCompetitions, setSelectedCompetitions] = React.useState<string[]>([]);
-  const [filterType, setFilterType] = React.useState<string>('all');
-  const [filterResult, setFilterResult] = React.useState<string>('all');
   const [viewMode, setViewMode] = React.useState<'list' | 'competition'>('list');
 
   const matchesQuery = useMemoFirebase(() => {
@@ -94,12 +93,9 @@ export default function MatchHistory() {
       const compName = m.competitionName || 'Training';
       const matchesCompetition = selectedCompetitions.length === 0 || selectedCompetitions.includes(compName);
       
-      const matchesType = filterType === 'all' || m.matchType === filterType;
-      const matchesResult = filterResult === 'all' || m.result === filterResult;
-
-      return matchesPlayers && matchesCompetition && matchesType && matchesResult;
+      return matchesPlayers && matchesCompetition;
     });
-  }, [sortedMatches, selectedPlayers, selectedCompetitions, filterType, filterResult]);
+  }, [sortedMatches, selectedPlayers, selectedCompetitions]);
 
   const groupedByCompetition = React.useMemo(() => {
     const groups: Record<string, BadmintonMatch[]> = {};
@@ -114,14 +110,9 @@ export default function MatchHistory() {
   const clearFilters = () => {
     setSelectedPlayers([]);
     setSelectedCompetitions([]);
-    setFilterType('all');
-    setFilterResult('all');
   };
 
-  const hasFilters = selectedPlayers.length > 0 || 
-                     selectedCompetitions.length > 0 || 
-                     filterType !== 'all' || 
-                     filterResult !== 'all';
+  const hasFilters = selectedPlayers.length > 0 || selectedCompetitions.length > 0;
 
   React.useEffect(() => {
     if (!isUserLoading && !user) {
@@ -341,9 +332,16 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
         </div>
       </DialogTrigger>
       
-      <DialogContent className="max-w-[95vw] md:max-w-[800px] w-full bg-white border-none rounded-[1.5rem] shadow-2xl p-0 overflow-hidden z-[100]">
-        <DialogHeader className="bg-slate-50 p-6 md:p-10 border-b border-muted/20">
-          <div className="flex items-center justify-between mb-4">
+      <DialogContent className="max-w-[95vw] md:max-w-[800px] w-full bg-white border-none rounded-[1.5rem] shadow-2xl p-0 overflow-hidden z-[100] flex flex-col max-h-[90vh]">
+        <DialogHeader className="bg-slate-50 p-6 md:p-10 border-b border-muted/20 relative shrink-0">
+          <div className="absolute right-12 top-10 flex gap-2">
+            <Button variant="outline" size="icon" asChild className="rounded-full bg-white shadow-sm hover:text-primary transition-colors h-10 w-10">
+              <Link href={`/matches/${match.id}/edit`}>
+                <Pencil className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+          <div className="flex items-center justify-between mb-4 pr-12">
             <Badge variant="outline" className="bg-white text-primary border-primary/20 font-black uppercase text-[10px] tracking-widest px-3 py-1">
               {match.competitionName || 'Training Performance'}
             </Badge>
@@ -355,76 +353,78 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
           <p className="text-muted-foreground font-bold uppercase tracking-widest text-[9px] mt-1 opacity-60">Full Archival Match Analysis</p>
         </DialogHeader>
 
-        <div className="p-6 md:p-10 space-y-8 md:space-y-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-            <Card className="border-none bg-slate-50 rounded-2xl p-6">
-              <div className="flex items-center gap-4 mb-4">
-                <Users className="h-5 w-5 text-primary" />
-                <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Team Alpha (Elite)</h3>
-              </div>
-              <div className="space-y-1">
-                <p className="text-lg font-black text-primary">{match.myName}</p>
-                {match.partner && <p className="text-sm font-bold text-slate-400 italic">Teammate: {match.partner}</p>}
-              </div>
-            </Card>
-
-            <Card className="border-none bg-slate-50 rounded-2xl p-6">
-              <div className="flex items-center gap-4 mb-4">
-                <Swords className="h-5 w-5 text-destructive" />
-                <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Team Omega (Rivals)</h3>
-              </div>
-              <div className="space-y-1">
-                <p className="text-lg font-black text-slate-900">{match.opponent}</p>
-                {match.opponentPartner && <p className="text-sm font-bold text-slate-400 italic">Rival Partner: {match.opponentPartner}</p>}
-              </div>
-            </Card>
-          </div>
-
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <Target className="h-5 w-5 text-primary" />
-              <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Set Performance Center</h3>
-            </div>
-            <div className="grid grid-cols-3 gap-3 md:gap-6">
-              {match.myScore.map((s, i) => (
-                <div key={i} className="flex flex-col items-center gap-2 p-4 bg-white rounded-xl shadow-sm border border-slate-100">
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">SET {i+1}</span>
-                  <div className="flex items-center gap-3">
-                    <span className={`text-xl md:text-3xl font-black ${s > match.opponentScore[i] ? 'text-primary' : 'text-slate-400'}`}>{s}</span>
-                    <span className="text-slate-200 font-bold">:</span>
-                    <span className={`text-xl md:text-3xl font-black ${match.opponentScore[i] > s ? 'text-destructive' : 'text-slate-400'}`}>{match.opponentScore[i]}</span>
-                  </div>
+        <ScrollArea className="flex-1 overflow-y-auto">
+          <div className="p-6 md:p-10 space-y-8 md:space-y-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+              <Card className="border-none bg-slate-50 rounded-2xl p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <Users className="h-5 w-5 text-primary" />
+                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Team Alpha (Elite)</h3>
                 </div>
-              ))}
-            </div>
-          </div>
+                <div className="space-y-1">
+                  <p className="text-lg font-black text-primary">{match.myName}</p>
+                  {match.partner && <p className="text-sm font-bold text-slate-400 italic">Teammate: {match.partner}</p>}
+                </div>
+              </Card>
 
-          <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-8">
-            <div className="space-y-2">
-              <div className="flex items-center gap-3 text-slate-400">
-                <MapPin className="h-3.5 w-3.5" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Arena Venue</span>
-              </div>
-              <p className="text-sm font-bold text-slate-700">{match.location}</p>
+              <Card className="border-none bg-slate-50 rounded-2xl p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <Swords className="h-5 w-5 text-destructive" />
+                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Team Omega (Rivals)</h3>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-lg font-black text-slate-900">{match.opponent}</p>
+                  {match.opponentPartner && <p className="text-sm font-bold text-slate-400 italic">Rival Partner: {match.opponentPartner}</p>}
+                </div>
+              </Card>
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-3 text-slate-400">
-                <Calendar className="h-3.5 w-3.5" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Session Date</span>
-              </div>
-              <p className="text-sm font-bold text-slate-700">{new Date(match.matchDate).toLocaleDateString(undefined, { weekday: 'short', month: 'long', day: 'numeric' })}</p>
-            </div>
-          </div>
 
-          <div className="space-y-4">
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Tactical De-brief Notes</h3>
-            <div className="bg-slate-50 p-6 rounded-2xl min-h-[120px]">
-              <p className="text-sm font-medium leading-relaxed text-slate-600 whitespace-pre-wrap">
-                {match.notes || 'No tactical notes were recorded for this session.'}
-              </p>
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <Target className="h-5 w-5 text-primary" />
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Set Performance Center</h3>
+              </div>
+              <div className="grid grid-cols-3 gap-3 md:gap-6">
+                {match.myScore.map((s, i) => (
+                  <div key={i} className="flex flex-col items-center gap-2 p-4 bg-white rounded-xl shadow-sm border border-slate-100">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">SET {i+1}</span>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-xl md:text-3xl font-black ${s > match.opponentScore[i] ? 'text-primary' : 'text-slate-400'}`}>{s}</span>
+                      <span className="text-slate-200 font-bold">:</span>
+                      <span className={`text-xl md:text-3xl font-black ${match.opponentScore[i] > s ? 'text-destructive' : 'text-slate-400'}`}>{match.opponentScore[i]}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-8">
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 text-slate-400">
+                  <MapPin className="h-3.5 w-3.5" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Arena Venue</span>
+                </div>
+                <p className="text-sm font-bold text-slate-700">{match.location}</p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 text-slate-400">
+                  <Calendar className="h-3.5 w-3.5" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Session Date</span>
+                </div>
+                <p className="text-sm font-bold text-slate-700">{new Date(match.matchDate).toLocaleDateString(undefined, { weekday: 'short', month: 'long', day: 'numeric' })}</p>
+              </div>
+            </div>
+
+            <div className="space-y-4 pb-10">
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Tactical De-brief Notes</h3>
+              <div className="bg-slate-50 p-6 rounded-2xl min-h-[120px]">
+                <p className="text-sm font-medium leading-relaxed text-slate-600 whitespace-pre-wrap">
+                  {match.notes || 'No tactical notes were recorded for this session.'}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

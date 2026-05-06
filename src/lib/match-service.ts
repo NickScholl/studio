@@ -4,6 +4,9 @@ import {
   addDoc, 
   serverTimestamp, 
   Firestore,
+  doc,
+  updateDoc,
+  getDoc
 } from 'firebase/firestore';
 
 export type MatchType = 'Singles' | 'Doubles' | 'Mixed Doubles';
@@ -29,10 +32,18 @@ export interface BadmintonMatch {
 }
 
 export const MatchService = {
+  getMatch: async (db: Firestore, matchId: string) => {
+    const docRef = doc(db, 'matches', matchId);
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      return { id: snap.id, ...snap.data() } as BadmintonMatch;
+    }
+    return null;
+  },
+
   addMatch: async (db: Firestore, userId: string, match: any) => {
     const matchesRef = collection(db, 'matches');
     
-    // Combine date and time to ensure exact precision
     let formattedDate;
     if (match.date && match.time) {
       formattedDate = new Date(`${match.date}T${match.time}`).toISOString();
@@ -59,6 +70,35 @@ export const MatchService = {
     };
 
     return addDoc(matchesRef, docData);
+  },
+
+  updateMatch: async (db: Firestore, matchId: string, match: any) => {
+    const docRef = doc(db, 'matches', matchId);
+    
+    let formattedDate;
+    if (match.date && match.time) {
+      formattedDate = new Date(`${match.date}T${match.time}`).toISOString();
+    } else {
+      formattedDate = match.matchDate || new Date().toISOString();
+    }
+
+    const docData = {
+      matchDate: formattedDate,
+      matchType: match.matchType || match.type || 'Singles',
+      competitionName: match.competitionName || 'Casual / Friendly',
+      myName: match.myName || 'Player',
+      opponent: match.opponent || 'Opponent',
+      partner: match.partner || null,
+      opponentPartner: match.opponentPartner || null,
+      location: match.location || 'Unknown Venue',
+      myScore: match.myScore || [],
+      opponentScore: match.opponentScore || [],
+      result: match.result || 'Win',
+      notes: match.notes || '',
+      updatedAt: serverTimestamp(),
+    };
+
+    return updateDoc(docRef, docData);
   },
 
   calculateStats: (matches: BadmintonMatch[]) => {
