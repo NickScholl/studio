@@ -17,7 +17,8 @@ import {
   useAuth,
   useFirestore,
   useDoc,
-  useMemoFirebase
+  useMemoFirebase,
+  useSidebar
 } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { doc } from 'firebase/firestore';
@@ -40,6 +41,7 @@ export function AppSidebar() {
   const { user } = useUser();
   const auth = useAuth();
   const db = useFirestore();
+  const { setOpenMobile, isMobile } = useSidebar();
 
   // Fetch Firestore profile for the most up-to-date name/photo (especially for base64 photos)
   const profileRef = useMemoFirebase(() => {
@@ -50,8 +52,13 @@ export function AppSidebar() {
   const { data: profile } = useDoc(profileRef);
 
   const handleSignOut = async () => {
+    if (isMobile) setOpenMobile(false);
     await signOut(auth);
     router.push('/login');
+  };
+
+  const handleLinkClick = () => {
+    if (isMobile) setOpenMobile(false);
   };
 
   const navItems = [
@@ -66,15 +73,15 @@ export function AppSidebar() {
 
   return (
     <Sidebar variant="sidebar" collapsible="icon">
-      <SidebarHeader className="p-4">
+      <SidebarHeader className="p-4 bg-sidebar">
         <div className="flex items-center gap-3">
           <div className="bg-primary p-2 rounded-lg">
             <Trophy className="text-primary-foreground h-5 w-5" />
           </div>
-          <span className="font-headline font-bold text-xl group-data-[collapsible=icon]:hidden">ShuttleScore</span>
+          <span className="font-bold text-xl group-data-[collapsible=icon]:hidden text-sidebar-foreground">ShuttleScore</span>
         </div>
       </SidebarHeader>
-      <SidebarContent className="px-2">
+      <SidebarContent className="px-2 bg-sidebar">
         <SidebarMenu>
           {navItems.map((item) => (
             <SidebarMenuItem key={item.name}>
@@ -82,6 +89,7 @@ export function AppSidebar() {
                 asChild 
                 isActive={pathname === item.path}
                 tooltip={item.name}
+                onClick={handleLinkClick}
               >
                 <Link href={item.path}>
                   <item.icon />
@@ -92,19 +100,23 @@ export function AppSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarSeparator />
-      <SidebarFooter className="p-4">
+      <SidebarSeparator className="bg-sidebar-border" />
+      <SidebarFooter className="p-4 bg-sidebar">
         <SidebarMenu>
           {user ? (
             <>
               <SidebarMenuItem>
-                <Link href="/settings" className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center hover:bg-muted rounded-md transition-colors">
+                <Link 
+                  href="/settings" 
+                  onClick={handleLinkClick}
+                  className="flex items-center gap-3 p-2 group-data-[collapsible=icon]:justify-center hover:bg-sidebar-accent rounded-md transition-colors"
+                >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={photoURL} className="object-cover" />
                     <AvatarFallback>{displayName.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-                    <span className="text-sm font-medium truncate max-w-[120px]">
+                    <span className="text-sm font-medium truncate max-w-[120px] text-sidebar-foreground">
                       {displayName}
                     </span>
                     <span className="text-xs text-muted-foreground">Pro Account</span>
@@ -120,7 +132,7 @@ export function AppSidebar() {
             </>
           ) : (
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Sign In">
+              <SidebarMenuButton asChild tooltip="Sign In" onClick={handleLinkClick}>
                 <Link href="/login">
                   <LogIn className="h-4 w-4" />
                   <span>Sign In</span>
