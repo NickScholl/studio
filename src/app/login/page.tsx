@@ -11,7 +11,7 @@ import {
   createUserWithEmailAndPassword 
 } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Trophy, AlertCircle, Loader2, Mail, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -51,9 +51,9 @@ export default function LoginPage() {
       console.error("Google Auth Error:", err);
       let message = err.message;
       if (err.code === 'auth/popup-closed-by-user') {
-        message = "Popup closed. Please try again and keep the window open.";
+        message = "Login popup closed. Ensure popups are allowed in your browser.";
       } else if (err.code === 'auth/popup-blocked') {
-        message = "Popup blocked! Please allow popups in your browser settings.";
+        message = "Popup blocked! Please allow popups for this site.";
       }
       setError(message);
       setIsLoggingIn(false);
@@ -76,17 +76,16 @@ export default function LoginPage() {
       if (isSignUp) {
         await createUserWithEmailAndPassword(auth, email, password);
         toast({ 
-          title: "Account Created!", 
-          description: "Welcome to ShuttleScore.",
+          title: "Welcome to the Court!", 
+          description: "Your account is ready for action.",
         });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
     } catch (err: any) {
-      let message = "Check your credentials and try again.";
+      let message = "Invalid credentials. Try again.";
       if (err.code === 'auth/email-already-in-use') message = "Email already registered.";
       if (err.code === 'auth/invalid-email') message = "Invalid email address.";
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') message = "Invalid email or password.";
       setError(message);
       setIsLoggingIn(false);
     }
@@ -101,41 +100,41 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-muted/30 p-4">
-      <div className="w-full max-w-[480px] space-y-8 animate-in fade-in zoom-in duration-500">
-        <div className="text-center space-y-4">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-primary shadow-[0_10px_40px_-10px_rgba(var(--primary),0.5)] transition-transform hover:scale-105">
+    <div className="min-h-screen w-full flex items-center justify-center bg-muted/20 p-6">
+      <div className="w-full max-w-[480px] space-y-12 animate-in fade-in zoom-in duration-700">
+        <div className="text-center space-y-6">
+          <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-[2.5rem] bg-primary shadow-2xl shadow-primary/40 transition-transform hover:scale-105 active:scale-95 duration-300">
             <Trophy className="h-12 w-12 text-primary-foreground" />
           </div>
-          <div className="space-y-1">
-            <h1 className="text-5xl font-black tracking-tighter text-foreground">ShuttleScore</h1>
-            <p className="text-xs text-muted-foreground font-bold uppercase tracking-[0.3em]">Advanced Performance Hub</p>
+          <div className="space-y-2">
+            <h1 className="text-6xl font-black tracking-tighter text-foreground drop-shadow-sm">ShuttleScore</h1>
+            <p className="text-[11px] text-muted-foreground font-black uppercase tracking-[0.4em] opacity-80">Elite Badminton Analytics</p>
           </div>
         </div>
 
-        <Card className="shadow-[0_30px_60px_-12px_rgba(0,0,0,0.25)] border-none overflow-hidden bg-white/95 backdrop-blur-sm">
+        <Card className="shadow-[0_40px_100px_-20px_rgba(0,0,0,0.15)] border-none overflow-hidden bg-white/95 backdrop-blur-xl rounded-[2.5rem]">
           <Tabs defaultValue="login" className="w-full" onValueChange={(v) => {
             setIsSignUp(v === 'signup');
             setError(null);
           }}>
-            <TabsList className="grid w-full grid-cols-2 rounded-none h-16 bg-muted/10 p-0 border-b">
-              <TabsTrigger value="login" className="h-full rounded-none data-[state=active]:bg-white data-[state=active]:shadow-none font-bold text-sm border-r transition-all">SIGN IN</TabsTrigger>
-              <TabsTrigger value="signup" className="h-full rounded-none data-[state=active]:bg-white data-[state=active]:shadow-none font-bold text-sm transition-all">CREATE ACCOUNT</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 rounded-none h-20 bg-muted/5 p-0 border-b border-muted/20">
+              <TabsTrigger value="login" className="h-full rounded-none data-[state=active]:bg-white data-[state=active]:shadow-none font-black text-xs uppercase tracking-widest transition-all">SIGN IN</TabsTrigger>
+              <TabsTrigger value="signup" className="h-full rounded-none data-[state=active]:bg-white data-[state=active]:shadow-none font-black text-xs uppercase tracking-widest transition-all">SIGN UP</TabsTrigger>
             </TabsList>
             
-            <CardContent className="pt-10 px-10 pb-12 space-y-8">
+            <CardContent className="pt-12 px-10 pb-14 space-y-10">
               {error && (
-                <Alert variant="destructive" className="animate-in slide-in-from-top-4 border-2 shadow-lg">
+                <Alert variant="destructive" className="animate-in slide-in-from-top-4 border-none shadow-xl bg-destructive/5 rounded-2xl">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertTitle className="font-bold">Access Denied</AlertTitle>
-                  <AlertDescription>{error}</AlertDescription>
+                  <AlertTitle className="font-black text-xs uppercase tracking-widest">Auth Error</AlertTitle>
+                  <AlertDescription className="text-sm font-medium">{error}</AlertDescription>
                 </Alert>
               )}
 
               <Button 
                 onClick={handleGoogleLogin} 
                 variant="outline"
-                className="w-full h-14 text-sm font-bold gap-4 border-2 hover:bg-muted/30 transition-all shadow-md group active:scale-[0.98]" 
+                className="w-full h-16 text-sm font-black uppercase tracking-widest gap-4 border-2 border-muted/20 hover:bg-muted/30 transition-all shadow-xl shadow-black/5 rounded-2xl group active:scale-[0.98]" 
                 disabled={isLoggingIn}
               >
                 {isLoggingIn ? <Loader2 className="h-5 w-5 animate-spin" /> : (
@@ -153,23 +152,23 @@ export default function LoginPage() {
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-muted-foreground/20" />
+                  <span className="w-full border-t border-muted-foreground/10" />
                 </div>
                 <div className="relative flex justify-center text-[10px] uppercase">
-                  <span className="bg-white px-6 text-muted-foreground font-black tracking-widest">Secure Email Login</span>
+                  <span className="bg-white px-8 text-muted-foreground font-black tracking-[0.3em]">SECURE ACCESS</span>
                 </div>
               </div>
 
-              <form onSubmit={handleEmailAuth} className="space-y-5">
+              <form onSubmit={handleEmailAuth} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Email</Label>
+                  <Label htmlFor="email" className="font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground px-1">Email Identity</Label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+                    <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/40" />
                     <Input 
                       id="email" 
                       type="email" 
-                      placeholder="Enter your email" 
-                      className="pl-12 h-14 bg-muted/5 border-2 focus-visible:ring-primary shadow-sm transition-all text-sm font-medium"
+                      placeholder="player@pro.com" 
+                      className="pl-14 h-16 bg-muted/5 border-2 border-muted/10 focus-visible:ring-primary shadow-inner rounded-2xl text-base font-bold"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required 
@@ -177,31 +176,34 @@ export default function LoginPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Password</Label>
+                  <Label htmlFor="password" className="font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground px-1">Access Key</Label>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/40" />
                     <Input 
                       id="password" 
                       type="password" 
                       placeholder="••••••••" 
-                      className="pl-12 h-14 bg-muted/5 border-2 focus-visible:ring-primary shadow-sm transition-all text-sm font-medium"
+                      className="pl-14 h-16 bg-muted/5 border-2 border-muted/10 focus-visible:ring-primary shadow-inner rounded-2xl text-base font-bold"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required 
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full h-14 font-black text-sm uppercase tracking-widest shadow-xl shadow-primary/30 transition-all hover:translate-y-[-2px] active:translate-y-[1px]" disabled={isLoggingIn}>
+                <Button type="submit" className="w-full h-16 font-black text-sm uppercase tracking-widest shadow-2xl shadow-primary/30 rounded-2xl transition-all hover:translate-y-[-2px] active:translate-y-[1px] group" disabled={isLoggingIn}>
                   {isLoggingIn ? (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    <Loader2 className="mr-2 h-6 w-6 animate-spin" />
                   ) : (
-                    isSignUp ? "Create Account" : "Access Dashboard"
+                    <>
+                      {isSignUp ? "Register Account" : "Enter Dashboard"}
+                      <Trophy className="ml-3 h-5 w-5 transition-transform group-hover:rotate-12" />
+                    </>
                   )}
                 </Button>
               </form>
               
-              <p className="text-[10px] text-center text-muted-foreground leading-relaxed px-6 font-medium">
-                By entering, you agree to track your badminton performance and manage your stats on ShuttleScore.
+              <p className="text-[10px] text-center text-muted-foreground leading-relaxed px-8 font-black uppercase tracking-tighter opacity-60">
+                By entering, you agree to track elite performance stats on ShuttleScore.
               </p>
             </CardContent>
           </Tabs>

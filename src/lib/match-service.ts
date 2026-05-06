@@ -29,29 +29,31 @@ export interface BadmintonMatch {
 }
 
 export const MatchService = {
-  addMatch: async (db: Firestore, userId: string, match: Omit<BadmintonMatch, 'id' | 'submittedByUserId' | 'participantUserIds'>) => {
+  addMatch: async (db: Firestore, userId: string, match: any) => {
     const matchesRef = collection(db, 'matches');
     
-    // Explicitly construct the data for Firestore to ensure rules pass
+    // Ensure we use the right property names from the form
+    const rawDate = match.matchDate || match.date;
+    const formattedDate = rawDate ? new Date(rawDate).toISOString() : new Date().toISOString();
+
     const docData = {
-      matchDate: new Date(match.matchDate).toISOString(),
-      matchType: match.type || match.matchType,
+      matchDate: formattedDate,
+      matchType: match.matchType || match.type || 'Singles',
       competitionName: match.competitionName || 'Casual / Friendly',
-      myName: match.myName,
-      opponent: match.opponent,
+      myName: match.myName || 'Player',
+      opponent: match.opponent || 'Opponent',
       partner: match.partner || null,
       opponentPartner: match.opponentPartner || null,
-      location: match.location,
-      myScore: match.myScore,
-      opponentScore: match.opponentScore,
-      result: match.result,
+      location: match.location || 'Unknown Venue',
+      myScore: match.myScore || [],
+      opponentScore: match.opponentScore || [],
+      result: match.result || 'Win',
       notes: match.notes || '',
       submittedByUserId: userId,
       participantUserIds: [userId], 
       createdAt: serverTimestamp(),
     };
 
-    // Return the promise so the caller can await success
     return addDoc(matchesRef, docData);
   },
 
