@@ -16,6 +16,7 @@ import { ChevronLeft, MapPin, Target, User, Swords, Trophy, Loader2, Check, Cloc
 import Link from 'next/link';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
+import { UI_STRINGS } from '@/lib/ui-strings';
 
 export default function NewMatch() {
   const router = useRouter();
@@ -127,31 +128,31 @@ export default function NewMatch() {
             </Link>
           </Button>
           <div className="h-6 w-px bg-muted mx-2" />
-          <h1 className="text-lg md:text-xl font-black uppercase tracking-tight">Record Action</h1>
+          <h1 className="text-lg md:text-xl font-black uppercase tracking-tight">{UI_STRINGS.matchForm.recordAction}</h1>
         </header>
 
         <main className="max-w-4xl mx-auto p-4 md:p-10 w-full pb-24">
           <Card className="shadow-sm border-none rounded-2xl overflow-hidden bg-white">
             <CardHeader className="bg-primary/5 p-8 border-b border-muted/20">
-              <CardTitle className="text-2xl md:text-3xl font-black tracking-tight text-primary">Record Performance</CardTitle>
-              <CardDescription className="font-bold text-xs uppercase tracking-widest opacity-60">Archive a professional tactical session</CardDescription>
+              <CardTitle className="text-2xl md:text-3xl font-black tracking-tight text-primary">{UI_STRINGS.matchForm.recordPerformance}</CardTitle>
+              <CardDescription className="font-bold text-xs uppercase tracking-widest opacity-60">{UI_STRINGS.matchForm.archiveSession}</CardDescription>
             </CardHeader>
             <CardContent className="p-8">
               <form onSubmit={handleSubmit} className="space-y-10">
                 <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
                   <div className="space-y-2">
-                    <Label htmlFor="date" className="font-bold text-[10px] uppercase tracking-widest px-1">Tactical Date</Label>
+                    <Label htmlFor="date" className="font-bold text-[10px] uppercase tracking-widest px-1">{UI_STRINGS.matchForm.tacticalDate}</Label>
                     <Input id="date" name="date" type="date" required defaultValue={defaultDate} className="h-11 rounded-xl bg-muted/5 border-none shadow-sm" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="time" className="font-bold text-[10px] uppercase tracking-widest px-1">Start Time</Label>
+                    <Label htmlFor="time" className="font-bold text-[10px] uppercase tracking-widest px-1">{UI_STRINGS.matchForm.startTime}</Label>
                     <div className="relative">
                       <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/40" />
                       <Input id="time" name="time" type="time" required defaultValue={defaultTime} className="pl-10 h-11 rounded-xl bg-muted/5 border-none shadow-sm" />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="type" className="font-bold text-[10px] uppercase tracking-widest px-1">Format</Label>
+                    <Label htmlFor="type" className="font-bold text-[10px] uppercase tracking-widest px-1">{UI_STRINGS.matchForm.format}</Label>
                     <Select value={matchType} onValueChange={(v) => setMatchType(v as MatchType)}>
                       <SelectTrigger className="h-11 rounded-xl bg-muted/5 border-none shadow-sm">
                         <SelectValue />
@@ -167,20 +168,20 @@ export default function NewMatch() {
 
                 <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="competitionName" className="font-bold text-[10px] uppercase tracking-widest px-1">Tournament (Optional)</Label>
+                    <Label htmlFor="competitionName" className="font-bold text-[10px] uppercase tracking-widest px-1">{UI_STRINGS.matchForm.tournament}</Label>
                     <div className="relative">
                       <Trophy className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/40" />
-                      <Input id="competitionName" name="competitionName" list="competition-list" autoComplete="off" placeholder="Leave empty for Training" className="pl-10 h-11 rounded-xl bg-muted/5 border-none shadow-sm" />
+                      <Input id="competitionName" name="competitionName" list="competition-list" autoComplete="off" placeholder={UI_STRINGS.matchForm.leaveEmptyTraining} className="pl-10 h-11 rounded-xl bg-muted/5 border-none shadow-sm" />
                       <datalist id="competition-list">
                         {suggestions.competitions.map(c => <option key={c} value={c} />)}
                       </datalist>
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="location" className="font-bold text-[10px] uppercase tracking-widest px-1">Arena Venue</Label>
+                    <Label htmlFor="location" className="font-bold text-[10px] uppercase tracking-widest px-1">{UI_STRINGS.matchForm.arenaVenue}</Label>
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/40" />
-                      <Input id="location" name="location" list="location-list" autoComplete="off" placeholder="Location" className="pl-10 h-11 rounded-xl bg-muted/5 border-none shadow-sm" required />
+                      <Input id="location" name="location" list="location-list" autoComplete="off" placeholder={UI_STRINGS.matchForm.location} className="pl-10 h-11 rounded-xl bg-muted/5 border-none shadow-sm" required />
                       <datalist id="location-list">
                         {suggestions.locations.map(l => <option key={l} value={l} />)}
                       </datalist>
@@ -189,14 +190,14 @@ export default function NewMatch() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="result" className="font-bold text-[10px] uppercase tracking-widest px-1">Final Result</Label>
+                  <Label htmlFor="result" className="font-bold text-[10px] uppercase tracking-widest px-1">{UI_STRINGS.matchForm.finalResult}</Label>
                   <Select name="result" defaultValue="Win">
                     <SelectTrigger className="h-12 rounded-xl bg-muted/5 border-none shadow-sm font-bold uppercase tracking-widest">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-none shadow-xl z-[60]">
-                      <SelectItem value="Win" className="font-bold text-secondary py-3">PRO WIN</SelectItem>
-                      <SelectItem value="Loss" className="font-bold text-destructive py-3">PRO LOSS</SelectItem>
+                      <SelectItem value="Win" className="font-bold text-secondary py-3">{UI_STRINGS.common.proWin}</SelectItem>
+                      <SelectItem value="Loss" className="font-bold text-destructive py-3">{UI_STRINGS.common.proLoss}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -205,13 +206,13 @@ export default function NewMatch() {
                   <Card className="border-none bg-muted/5 rounded-2xl">
                     <CardHeader className="p-6 pb-4">
                       <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-primary">
-                        <User className="h-4 w-4" /> Team Alpha (You)
+                        <User className="h-4 w-4" /> {UI_STRINGS.matchForm.teamAlpha}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="px-6 pb-6 space-y-4">
                       <Input id="myName" name="myName" list="name-list" autoComplete="off" defaultValue={user?.displayName || ''} required className="h-10 rounded-lg bg-white border-none shadow-sm font-bold" />
                       {isDoubles && (
-                        <Input id="partner" name="partner" list="name-list" autoComplete="off" placeholder="Partner Name" required={isDoubles} className="h-10 rounded-lg bg-white border-none shadow-sm font-bold" />
+                        <Input id="partner" name="partner" list="name-list" autoComplete="off" placeholder={UI_STRINGS.matchForm.partnerName} required={isDoubles} className="h-10 rounded-lg bg-white border-none shadow-sm font-bold" />
                       )}
                     </CardContent>
                   </Card>
@@ -219,13 +220,13 @@ export default function NewMatch() {
                   <Card className="border-none bg-muted/5 rounded-2xl">
                     <CardHeader className="p-6 pb-4">
                       <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-muted-foreground">
-                        <Swords className="h-4 w-4" /> Team Omega (Rivals)
+                        <Swords className="h-4 w-4" /> {UI_STRINGS.matchForm.teamOmega}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="px-6 pb-6 space-y-4">
-                      <Input id="opponent" name="opponent" list="name-list" autoComplete="off" placeholder="Rival Name" required className="h-10 rounded-lg bg-white border-none shadow-sm font-bold" />
+                      <Input id="opponent" name="opponent" list="name-list" autoComplete="off" placeholder={UI_STRINGS.matchForm.rivalName} required className="h-10 rounded-lg bg-white border-none shadow-sm font-bold" />
                       {isDoubles && (
-                        <Input id="opponentPartner" name="opponentPartner" list="name-list" autoComplete="off" placeholder="Rival Partner" required={isDoubles} className="h-10 rounded-lg bg-white border-none shadow-sm font-bold" />
+                        <Input id="opponentPartner" name="opponentPartner" list="name-list" autoComplete="off" placeholder={UI_STRINGS.matchForm.rivalPartner} required={isDoubles} className="h-10 rounded-lg bg-white border-none shadow-sm font-bold" />
                       )}
                     </CardContent>
                   </Card>
@@ -234,7 +235,7 @@ export default function NewMatch() {
                 <div className="space-y-6 pt-6 border-t border-muted/20">
                   <div className="flex items-center gap-3">
                     <Target className="h-5 w-5 text-primary" />
-                    <Label className="font-black text-lg uppercase tracking-tight">Set Scores</Label>
+                    <Label className="font-black text-lg uppercase tracking-tight">{UI_STRINGS.matchForm.setScores}</Label>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {[1, 2, 3].map((set) => (
@@ -251,13 +252,13 @@ export default function NewMatch() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="notes" className="font-bold text-[10px] uppercase tracking-widest px-1">Tactical De-brief</Label>
-                  <Textarea id="notes" name="notes" placeholder="Notes on strategy, physical state, or patterns..." className="min-h-[150px] rounded-2xl border-none bg-muted/5 p-4 shadow-sm" />
+                  <Label htmlFor="notes" className="font-bold text-[10px] uppercase tracking-widest px-1">{UI_STRINGS.history.deBriefNotes}</Label>
+                  <Textarea id="notes" name="notes" placeholder={UI_STRINGS.matchForm.deBriefPlaceholder} className="min-h-[150px] rounded-2xl border-none bg-muted/5 p-4 shadow-sm" />
                 </div>
 
                 <div className="pt-8 space-y-4">
                   <Button type="submit" size="lg" className="w-full h-14 md:h-16 font-black uppercase tracking-widest shadow-xl shadow-primary/20 rounded-xl" disabled={isSubmitting}>
-                    {isSubmitting ? <><Loader2 className="h-5 w-5 animate-spin mr-3" /> ARCHIVING...</> : <><Check className="h-5 w-5 mr-3" /> ARCHIVE PERFORMANCE</>}
+                    {isSubmitting ? <><Loader2 className="h-5 w-5 animate-spin mr-3" /> {UI_STRINGS.common.archiving}</> : <><Check className="h-5 w-5 mr-3" /> {UI_STRINGS.common.archivePerformance}</>}
                   </Button>
                 </div>
               </form>

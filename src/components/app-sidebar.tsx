@@ -34,6 +34,7 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UI_STRINGS } from "@/lib/ui-strings";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -61,10 +62,10 @@ export function AppSidebar() {
   };
 
   const navItems = [
-    { name: "Dashboard", icon: LayoutDashboard, path: "/" },
-    { name: "Submit Match", icon: PlusCircle, path: "/matches/new" },
-    { name: "Match History", icon: History, path: "/history" },
-    { name: "Settings", icon: Settings, path: "/settings" },
+    { name: UI_STRINGS.sidebar.dashboard, icon: LayoutDashboard, path: "/" },
+    { name: UI_STRINGS.sidebar.submitMatch, icon: PlusCircle, path: "/matches/new" },
+    { name: UI_STRINGS.sidebar.matchHistory, icon: History, path: "/history" },
+    { name: UI_STRINGS.sidebar.settings, icon: Settings, path: "/settings" },
   ];
 
   const displayName = profile?.username || (profile?.firstName ? `${profile.firstName} ${profile.lastName}`.trim() : user?.displayName || 'Player');
@@ -77,7 +78,7 @@ export function AppSidebar() {
           <div className="bg-primary p-2 rounded-lg">
             <Trophy className="text-primary-foreground h-5 w-5" />
           </div>
-          <span className="font-bold text-xl group-data-[collapsible=icon]:hidden text-sidebar-foreground">ShuttleScore</span>
+          <span className="font-bold text-xl group-data-[collapsible=icon]:hidden text-sidebar-foreground">{UI_STRINGS.common.appTitle}</span>
         </div>
       </SidebarHeader>
       <SidebarContent className="px-2 bg-sidebar">
@@ -118,23 +119,23 @@ export function AppSidebar() {
                     <span className="text-sm font-medium truncate max-w-[120px] text-sidebar-foreground">
                       {displayName}
                     </span>
-                    <span className="text-xs text-muted-foreground">Pro Account</span>
+                    <span className="text-xs text-muted-foreground">{UI_STRINGS.sidebar.proAccount}</span>
                   </div>
                 </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={handleSignOut} tooltip="Sign Out">
+                <SidebarMenuButton onClick={handleSignOut} tooltip={UI_STRINGS.sidebar.signOut}>
                   <LogOut className="h-4 w-4" />
-                  <span>Sign Out</span>
+                  <span>{UI_STRINGS.sidebar.signOut}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </>
           ) : (
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Sign In" onClick={handleLinkClick}>
+              <SidebarMenuButton asChild tooltip={UI_STRINGS.sidebar.signIn} onClick={handleLinkClick}>
                 <Link href="/login">
                   <LogIn className="h-4 w-4" />
-                  <span>Sign In</span>
+                  <span>{UI_STRINGS.sidebar.signIn}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

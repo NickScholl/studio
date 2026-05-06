@@ -14,6 +14,7 @@ import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Camera, Loader2, Save, Upload, X } from 'lucide-react';
 import { updateProfile } from 'firebase/auth';
+import { UI_STRINGS } from '@/lib/ui-strings';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -122,14 +123,14 @@ export default function SettingsPage() {
       <SidebarInset className="flex flex-col bg-[#f8f9fc] w-full min-w-0">
         <header className="flex h-16 md:h-20 shrink-0 items-center gap-4 border-b bg-white/95 backdrop-blur-xl px-4 md:px-8 sticky top-0 z-50 shadow-sm w-full">
           <SidebarTrigger />
-          <h1 className="text-lg md:text-xl font-black uppercase tracking-tight">Player Identity</h1>
+          <h1 className="text-lg md:text-xl font-black uppercase tracking-tight">{UI_STRINGS.settings.playerIdentity}</h1>
         </header>
 
         <main className="max-w-3xl mx-auto p-4 md:p-10 w-full space-y-8">
           <Card className="shadow-sm border-none rounded-2xl overflow-hidden bg-white">
             <CardHeader className="bg-primary/5 p-8 border-b border-muted/20">
-              <CardTitle className="text-xl md:text-2xl font-black tracking-tight">Elite Profile</CardTitle>
-              <CardDescription className="font-bold text-xs uppercase tracking-widest opacity-60">Manage your tactical roster information</CardDescription>
+              <CardTitle className="text-xl md:text-2xl font-black tracking-tight">{UI_STRINGS.settings.eliteProfile}</CardTitle>
+              <CardDescription className="font-bold text-xs uppercase tracking-widest opacity-60">{UI_STRINGS.settings.manageRosterInfo}</CardDescription>
             </CardHeader>
             <CardContent className="p-8">
               <form onSubmit={handleSave} className="space-y-8">
@@ -147,31 +148,31 @@ export default function SettingsPage() {
                     <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
                   </div>
                   <div className="flex-1 space-y-2 w-full">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Avatar Source URL</Label>
-                    <Input name="photoURL" placeholder="Global image URL..." value={formData.photoURL} onChange={handleChange} className="h-10 border-none bg-muted/5 rounded-xl shadow-inner font-medium" />
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">{UI_STRINGS.settings.avatarSource}</Label>
+                    <Input name="photoURL" placeholder={UI_STRINGS.settings.avatarPlaceholder} value={formData.photoURL} onChange={handleChange} className="h-10 border-none bg-muted/5 rounded-xl shadow-inner font-medium" />
                   </div>
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">First Name</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">{UI_STRINGS.settings.firstName}</Label>
                     <Input name="firstName" value={formData.firstName} onChange={handleChange} required className="h-10 border-none bg-muted/5 rounded-xl shadow-inner font-bold" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Last Name</Label>
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">{UI_STRINGS.settings.lastName}</Label>
                     <Input name="lastName" value={formData.lastName} onChange={handleChange} required className="h-10 border-none bg-muted/5 rounded-xl shadow-inner font-bold" />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Roster Username</Label>
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">{UI_STRINGS.settings.rosterUsername}</Label>
                   <Input name="username" value={formData.username} onChange={handleChange} className="h-10 border-none bg-muted/5 rounded-xl shadow-inner font-bold" />
                 </div>
 
                 <div className="pt-6 border-t border-muted/10 flex justify-end">
                   <Button type="submit" disabled={saving} className="rounded-xl font-black uppercase tracking-widest px-8">
                     {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-                    Update Identity
+                    {UI_STRINGS.settings.updateIdentity}
                   </Button>
                 </div>
               </form>

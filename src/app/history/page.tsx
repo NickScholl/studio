@@ -41,6 +41,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import { UI_STRINGS } from '@/lib/ui-strings';
 
 export default function MatchHistory() {
   const { user, isUserLoading } = useUser();
@@ -80,7 +81,7 @@ export default function MatchHistory() {
   }, [sortedMatches]);
 
   const uniqueCompetitions = React.useMemo(() => {
-    const competitions = sortedMatches.map(m => m.competitionName || 'Training').filter(Boolean);
+    const competitions = sortedMatches.map(m => m.competitionName || UI_STRINGS.common.training).filter(Boolean);
     return Array.from(new Set(competitions)).sort();
   }, [sortedMatches]);
 
@@ -89,7 +90,7 @@ export default function MatchHistory() {
       const playerPool = [m.myName, m.opponent, m.partner, m.opponentPartner].filter(Boolean);
       const matchesPlayers = selectedPlayers.length === 0 || selectedPlayers.some(p => playerPool.includes(p));
       
-      const compName = m.competitionName || 'Training';
+      const compName = m.competitionName || UI_STRINGS.common.training;
       const matchesCompetition = selectedCompetitions.length === 0 || selectedCompetitions.includes(compName);
       
       return matchesPlayers && matchesCompetition;
@@ -99,7 +100,7 @@ export default function MatchHistory() {
   const groupedByCompetition = React.useMemo(() => {
     const groups: Record<string, BadmintonMatch[]> = {};
     filteredMatches.forEach(m => {
-      const comp = m.competitionName || 'Training';
+      const comp = m.competitionName || UI_STRINGS.common.training;
       if (!groups[comp]) groups[comp] = [];
       groups[comp].push(m);
     });
@@ -136,15 +137,15 @@ export default function MatchHistory() {
         <header className="flex h-16 md:h-20 shrink-0 items-center justify-between gap-4 border-b bg-white/95 backdrop-blur-xl px-4 md:px-8 sticky top-0 z-50 shadow-sm w-full">
           <div className="flex items-center gap-3">
             <SidebarTrigger className="-ml-1" />
-            <h1 className="text-lg md:text-xl font-black tracking-tight uppercase">History</h1>
+            <h1 className="text-lg md:text-xl font-black tracking-tight uppercase">{UI_STRINGS.history.historyTitle}</h1>
           </div>
           <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)} className="block">
             <TabsList className="bg-muted/50 rounded-full h-10 p-1">
               <TabsTrigger value="list" className="gap-2 rounded-full font-bold px-4 text-xs">
-                <ListIcon className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Timeline</span>
+                <ListIcon className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{UI_STRINGS.history.timeline}</span>
               </TabsTrigger>
               <TabsTrigger value="competition" className="gap-2 rounded-full font-bold px-4 text-xs">
-                <Trophy className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Groups</span>
+                <Trophy className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{UI_STRINGS.history.groups}</span>
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -155,17 +156,17 @@ export default function MatchHistory() {
             <CardHeader className="pb-4 border-b border-muted/30 bg-muted/5">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Filter className="h-4 w-4" />
-                <CardTitle className="text-[10px] md:text-xs font-black uppercase tracking-widest">Tactical Filters</CardTitle>
+                <CardTitle className="text-[10px] md:text-xs font-black uppercase tracking-widest">{UI_STRINGS.history.tacticalFilters}</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-1">Roster</Label>
+                <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-1">{UI_STRINGS.history.roster}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-between bg-muted/10 border-none rounded-xl font-bold text-xs h-10">
                       <span className="truncate">
-                        {selectedPlayers.length === 0 ? "All Players" : `${selectedPlayers.length} Selected`}
+                        {selectedPlayers.length === 0 ? UI_STRINGS.history.allPlayers : `${selectedPlayers.length} Selected`}
                       </span>
                       <ChevronDown className="h-4 w-4 opacity-50" />
                     </Button>
@@ -188,12 +189,12 @@ export default function MatchHistory() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-1">Event</Label>
+                <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-1">{UI_STRINGS.history.event}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-between bg-muted/10 border-none rounded-xl font-bold text-xs h-10">
                       <span className="truncate">
-                        {selectedCompetitions.length === 0 ? "All Events" : `${selectedCompetitions.length} Selected`}
+                        {selectedCompetitions.length === 0 ? UI_STRINGS.history.allEvents : `${selectedCompetitions.length} Selected`}
                       </span>
                       <ChevronDown className="h-4 w-4 opacity-50" />
                     </Button>
@@ -223,7 +224,7 @@ export default function MatchHistory() {
                   className={`w-full h-10 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all ${hasFilters ? 'text-primary bg-primary/5 hover:bg-primary/10' : 'opacity-20 pointer-events-none'}`}
                 >
                   <X className="h-3 w-3 mr-2" />
-                  Reset Tactical
+                  {UI_STRINGS.history.resetTactical}
                 </Button>
               </div>
             </CardContent>
@@ -231,15 +232,15 @@ export default function MatchHistory() {
 
           <div className="space-y-8 pb-24">
             {viewMode === 'list' ? (
-              <MatchTable title="Tactical History" matches={filteredMatches} />
+              <MatchTable title={UI_STRINGS.history.tacticalHistory} matches={filteredMatches} />
             ) : (
               Object.entries(groupedByCompetition).map(([comp, compMatches]) => (
                 <MatchTable 
                   key={comp} 
                   title={comp} 
                   matches={compMatches} 
-                  icon={comp === 'Training' ? <Dumbbell className="h-4 w-4 text-muted-foreground" /> : <Trophy className="h-4 w-4 text-primary" />} 
-                  isOfficial={comp !== 'Training'}
+                  icon={comp === UI_STRINGS.common.training ? <Dumbbell className="h-4 w-4 text-muted-foreground" /> : <Trophy className="h-4 w-4 text-primary" />} 
+                  isOfficial={comp !== UI_STRINGS.common.training}
                 />
               ))
             )}
@@ -247,8 +248,8 @@ export default function MatchHistory() {
             {filteredMatches.length === 0 && (
               <div className="text-center py-20 bg-white rounded-2xl shadow-sm border-2 border-dashed flex flex-col items-center justify-center space-y-4">
                 <Activity className="h-10 w-10 text-muted-foreground opacity-20" />
-                <p className="text-muted-foreground font-bold text-sm tracking-tight">No match data found.</p>
-                <Button onClick={clearFilters} variant="outline" size="sm" className="rounded-full px-6 font-bold uppercase text-[10px] tracking-widest">Clear Tactical Filters</Button>
+                <p className="text-muted-foreground font-bold text-sm tracking-tight">{UI_STRINGS.history.noMatchData}</p>
+                <Button onClick={clearFilters} variant="outline" size="sm" className="rounded-full px-6 font-bold uppercase text-[10px] tracking-widest">{UI_STRINGS.history.clearFilters}</Button>
               </div>
             )}
           </div>
@@ -272,7 +273,7 @@ function MatchTable({ title, matches, icon, isOfficial }: { title: string, match
           {isOfficial && (
             <div className="flex items-center gap-1.5 text-primary">
               <Check className="h-3 w-3" />
-              <span className="text-[8px] font-black uppercase tracking-widest opacity-60">Official Performance</span>
+              <span className="text-[8px] font-black uppercase tracking-widest opacity-60">{UI_STRINGS.common.officialPerformance}</span>
             </div>
           )}
         </div>
@@ -323,7 +324,7 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
             </div>
             <div className="flex items-center gap-3">
               <Badge variant={match.result === 'Win' ? 'secondary' : 'destructive'} className="px-3 py-1 font-black uppercase text-[8px] tracking-widest rounded-lg">
-                {match.result === 'Win' ? 'WIN' : 'LOSS'}
+                {match.result === 'Win' ? UI_STRINGS.common.win : UI_STRINGS.common.loss}
               </Badge>
               <Info className="h-4 w-4 text-muted-foreground opacity-20 group-hover:opacity-100 transition-opacity" />
             </div>
@@ -335,14 +336,14 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
         <DialogHeader className="bg-slate-50 p-6 md:p-10 border-b border-muted/20 relative shrink-0">
           <div className="flex items-center justify-between mb-4 pr-12">
             <Badge variant="outline" className="bg-white text-primary border-primary/20 font-black uppercase text-[10px] tracking-widest px-3 py-1">
-              {match.competitionName || 'Training Performance'}
+              {match.competitionName || UI_STRINGS.history.trainingPerformance}
             </Badge>
             <span className="text-muted-foreground font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
               <Clock className="h-3 w-3" /> {new Date(match.matchDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
           </div>
-          <DialogTitle className="text-2xl md:text-4xl font-black tracking-tight text-slate-900">Tactical De-brief</DialogTitle>
-          <p className="text-muted-foreground font-bold uppercase tracking-widest text-[9px] mt-1 opacity-60">Full Archival Match Analysis</p>
+          <DialogTitle className="text-2xl md:text-4xl font-black tracking-tight text-slate-900">{UI_STRINGS.history.tacticalDeBrief}</DialogTitle>
+          <p className="text-muted-foreground font-bold uppercase tracking-widest text-[9px] mt-1 opacity-60">{UI_STRINGS.history.fullArchivalMatch}</p>
         </DialogHeader>
 
         <ScrollArea className="flex-1 overflow-y-auto">
@@ -351,22 +352,22 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
               <Card className="border-none bg-slate-50 rounded-2xl p-6">
                 <div className="flex items-center gap-4 mb-4">
                   <Users className="h-5 w-5 text-primary" />
-                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Team Alpha (Elite)</h3>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">{UI_STRINGS.history.teamAlpha}</h3>
                 </div>
                 <div className="space-y-1">
                   <p className="text-lg font-black text-primary">{match.myName}</p>
-                  {match.partner && <p className="text-sm font-bold text-slate-400 italic">Teammate: {match.partner}</p>}
+                  {match.partner && <p className="text-sm font-bold text-slate-400 italic">{UI_STRINGS.history.teammate}: {match.partner}</p>}
                 </div>
               </Card>
 
               <Card className="border-none bg-slate-50 rounded-2xl p-6">
                 <div className="flex items-center gap-4 mb-4">
                   <Swords className="h-5 w-5 text-destructive" />
-                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Team Omega (Rivals)</h3>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">{UI_STRINGS.history.teamOmega}</h3>
                 </div>
                 <div className="space-y-1">
                   <p className="text-lg font-black text-slate-900">{match.opponent}</p>
-                  {match.opponentPartner && <p className="text-sm font-bold text-slate-400 italic">Rival Partner: {match.opponentPartner}</p>}
+                  {match.opponentPartner && <p className="text-sm font-bold text-slate-400 italic">{UI_STRINGS.history.rivalPartner}: {match.opponentPartner}</p>}
                 </div>
               </Card>
             </div>
@@ -374,7 +375,7 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
             <div className="space-y-6">
               <div className="flex items-center gap-4">
                 <Target className="h-5 w-5 text-primary" />
-                <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Set Performance Center</h3>
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">{UI_STRINGS.history.setPerformance}</h3>
               </div>
               <div className="grid grid-cols-3 gap-3 md:gap-6">
                 {match.myScore.map((s, i) => (
@@ -394,24 +395,24 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
               <div className="space-y-2">
                 <div className="flex items-center gap-3 text-slate-400">
                   <MapPin className="h-3.5 w-3.5" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Arena Venue</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">{UI_STRINGS.history.arenaVenue}</span>
                 </div>
                 <p className="text-sm font-bold text-slate-700">{match.location}</p>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-3 text-slate-400">
                   <Calendar className="h-3.5 w-3.5" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Session Date</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">{UI_STRINGS.history.sessionDate}</span>
                 </div>
                 <p className="text-sm font-bold text-slate-700">{new Date(match.matchDate).toLocaleDateString(undefined, { weekday: 'short', month: 'long', day: 'numeric' })}</p>
               </div>
             </div>
 
             <div className="space-y-4 pb-20">
-              <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">Tactical De-brief Notes</h3>
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">{UI_STRINGS.history.deBriefNotes}</h3>
               <div className="bg-slate-50 p-6 rounded-2xl min-h-[120px]">
                 <p className="text-sm font-medium leading-relaxed text-slate-600 whitespace-pre-wrap">
-                  {match.notes || 'No tactical notes were recorded for this session.'}
+                  {match.notes || UI_STRINGS.history.noNotes}
                 </p>
               </div>
             </div>
@@ -422,7 +423,7 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
         <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 z-[110]">
           <Button variant="secondary" size="sm" asChild className="rounded-lg shadow-lg h-7 px-5 flex items-center justify-center font-black text-[9px] uppercase tracking-[0.15em] bg-secondary text-white hover:scale-105 transition-transform opacity-90 hover:opacity-100">
             <Link href={`/matches/${match.id}/edit`}>
-              EDIT
+              {UI_STRINGS.common.edit}
             </Link>
           </Button>
         </div>
