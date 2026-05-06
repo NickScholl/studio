@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -334,7 +335,7 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
       <DialogContent className="fixed top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 max-w-[95vw] md:max-w-[800px] w-full bg-white border-none rounded-[1.5rem] shadow-2xl p-0 overflow-hidden z-[100] flex flex-col max-h-[90vh]">
         <DialogHeader className="bg-slate-50 p-6 md:p-8 border-b border-muted/20 relative shrink-0">
           <div className="flex items-center justify-between mb-4 pr-12">
-            <Badge variant="outline" className="bg-white text-primary border-primary/20 font-black uppercase text-[11px] md:text-sm tracking-widest px-4 py-1.5 shadow-sm">
+            <Badge variant="outline" className="bg-white text-primary border-primary/20 font-black uppercase text-sm tracking-widest px-4 py-1.5 shadow-sm">
               {match.competitionName || UI_STRINGS.history.trainingPerformance}
             </Badge>
             <span className="text-muted-foreground font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
