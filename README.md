@@ -1,30 +1,24 @@
 
 # ShuttleScore | Badminton Performance Tracker
 
-This project is built with Next.js 15 and Firebase. Follow these steps to deploy your site.
+This project is built with Next.js 15 and Firebase. Follow these steps to resolve 404 errors or build issues.
 
-## 🚀 Deployment Options
+## 1. Fix "Could not find the next executable"
+If you see this error in your terminal, it usually means your local dependencies need a refresh:
+1. Run `npm install` in your terminal to ensure Next.js is locally available.
+2. Run `firebase experiments:enable webframeworks`.
+3. Run `firebase deploy`.
 
-### 1. Firebase (Standard Hosting)
-The project is already configured with `firebase.json`.
-1. Ensure you have the Firebase CLI: `npm install -g firebase-tools`
-2. Login: `firebase login`
-3. Deploy: `firebase deploy`
-
-### 2. Firebase App Hosting (Easiest & Recommended)
-If you want automatic deployments on every push:
+## 2. Authorized Domains
+After your site is live (e.g., `shuttlescore.web.app`), you **must** add that URL to your Firebase project:
 1. Go to the [Firebase Console](https://console.firebase.google.com/).
-2. Select **App Hosting** and connect your GitHub repository.
-3. It will automatically build and deploy your Next.js app on every push to your main branch.
+2. Select **Authentication** > **Settings** > **Authorized Domains**.
+3. Add your live URL (e.g., `https://shuttlescore.web.app`) to the list.
 
-### 3. Cloudflare Pages + Firebase (Hybrid Setup)
-If you want to host the UI on Cloudflare but keep using your Firebase backend:
-1. Push your code to a GitHub repository.
-2. In the **Cloudflare Dashboard**, go to **Workers & Pages** > **Create application** > **Pages** > **Connect to Git**.
-3. Select your repository.
-4. For "Build settings", select **Next.js**.
-5. **Crucial Step**: Go to the **Environment Variables** tab in your Cloudflare project settings and add your Firebase config keys (API_KEY, AUTH_DOMAIN, etc.) if you are using process.env, or ensure your `src/firebase/config.ts` is committed with the correct values.
-6. Click **Save and Deploy**. Cloudflare will host the frontend, and the app will communicate with Firebase via the client SDK as it does now.
+## 3. Option B: Firebase App Hosting (Easiest)
+If you want to avoid CLI errors entirely, use **App Hosting**:
+1. Connect your GitHub repository in the Firebase Console under "App Hosting".
+2. It will automatically build and deploy your Next.js app on every push.
 
 ---
 *Built with ❤️ for Badminton Players.*
