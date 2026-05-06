@@ -10,7 +10,7 @@ export type MatchResult = 'Win' | 'Loss';
 
 export interface BadmintonMatch {
   id: string;
-  matchDate: string;
+  matchDate: string; // ISO string including time
   matchType: MatchType;
   competitionName?: string;
   myName: string;
@@ -31,8 +31,13 @@ export const MatchService = {
   addMatch: async (db: Firestore, userId: string, match: any) => {
     const matchesRef = collection(db, 'matches');
     
-    const rawDate = match.matchDate || match.date;
-    const formattedDate = rawDate ? new Date(rawDate).toISOString() : new Date().toISOString();
+    // Combine date and time if provided separately
+    let formattedDate;
+    if (match.date && match.time) {
+      formattedDate = new Date(`${match.date}T${match.time}`).toISOString();
+    } else {
+      formattedDate = match.matchDate || new Date().toISOString();
+    }
 
     const docData = {
       matchDate: formattedDate,
