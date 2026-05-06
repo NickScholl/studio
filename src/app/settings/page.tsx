@@ -72,18 +72,11 @@ export default function SettingsPage() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 500 * 1024) { 
-        toast({
-          variant: "destructive",
-          title: "File too large",
-          description: "Please select an image smaller than 500KB.",
-        });
+        toast({ variant: "destructive", title: "File too large", description: "Limit: 500KB." });
         return;
       }
-
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, photoURL: reader.result as string }));
-      };
+      reader.onloadend = () => setFormData(prev => ({ ...prev, photoURL: reader.result as string }));
       reader.readAsDataURL(file);
     }
   };
@@ -104,30 +97,11 @@ export default function SettingsPage() {
         updatedAt: serverTimestamp(),
         createdAt: profile?.createdAt || serverTimestamp(),
       };
-
       await setDoc(doc(db, 'userProfiles', user.uid), profileData, { merge: true });
-
-      const authUpdate: { displayName: string; photoURL?: string } = {
-        displayName: `${formData.firstName} ${formData.lastName}`.trim(),
-      };
-      
-      if (formData.photoURL && !formData.photoURL.startsWith('data:')) {
-        authUpdate.photoURL = formData.photoURL;
-      }
-
-      await updateProfile(user, authUpdate);
-
-      toast({
-        title: "Profile Updated!",
-        description: "Your elite player identity has been synchronized.",
-      });
+      await updateProfile(user, { displayName: `${formData.firstName} ${formData.lastName}`.trim() });
+      toast({ title: "Identity Updated", description: "Roster details synchronized." });
     } catch (error: any) {
-      console.error("Update Profile Error:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to update profile.",
-      });
+      toast({ variant: "destructive", title: "Error", description: error.message });
     } finally {
       setSaving(false);
     }
@@ -136,7 +110,7 @@ export default function SettingsPage() {
   if (isUserLoading || (user && profileLoading)) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -146,120 +120,58 @@ export default function SettingsPage() {
   return (
     <>
       <AppSidebar />
-      <SidebarInset className="flex flex-col bg-[#f8f9fc]">
-        <header className="flex h-24 shrink-0 items-center gap-6 border-b bg-white/95 backdrop-blur-xl px-8 sticky top-0 z-50 shadow-sm w-full max-w-none">
-          <SidebarTrigger className="-ml-1 h-12 w-12" />
-          <h1 className="text-2xl md:text-3xl font-black tracking-tighter uppercase">Player Profile</h1>
+      <SidebarInset className="flex flex-col bg-[#f8f9fc] w-full min-w-0">
+        <header className="flex h-16 md:h-20 shrink-0 items-center gap-4 border-b bg-white/95 backdrop-blur-xl px-4 md:px-8 sticky top-0 z-50 shadow-sm w-full">
+          <SidebarTrigger />
+          <h1 className="text-lg md:text-xl font-black uppercase tracking-tight">Player Identity</h1>
         </header>
 
-        <main className="max-w-[1200px] mx-auto p-10 md:p-20 w-full space-y-16">
-          <Card className="shadow-2xl border-none rounded-[4rem] overflow-hidden bg-white">
-            <CardHeader className="bg-primary/5 p-12 md:p-20 border-b border-muted/30">
-              <CardTitle className="text-4xl md:text-6xl font-black tracking-tighter">Elite Information</CardTitle>
-              <CardDescription className="text-sm font-bold uppercase tracking-[0.3em] mt-4 opacity-60">Manage your public tactical identity</CardDescription>
+        <main className="max-w-3xl mx-auto p-4 md:p-10 w-full space-y-8">
+          <Card className="shadow-sm border-none rounded-2xl overflow-hidden bg-white">
+            <CardHeader className="bg-primary/5 p-8 border-b border-muted/20">
+              <CardTitle className="text-xl md:text-2xl font-black tracking-tight">Elite Profile</CardTitle>
+              <CardDescription className="font-bold text-xs uppercase tracking-widest opacity-60">Manage your tactical roster information</CardDescription>
             </CardHeader>
-            <CardContent className="p-12 md:p-20">
-              <form onSubmit={handleSave} className="space-y-16">
-                <div className="flex flex-col md:flex-row items-center gap-16">
-                  <div className="relative group">
-                    <Avatar className="h-48 w-48 border-[10px] border-white shadow-2xl">
+            <CardContent className="p-8">
+              <form onSubmit={handleSave} className="space-y-8">
+                <div className="flex flex-col items-center gap-6 md:flex-row">
+                  <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                    <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
                       <AvatarImage src={formData.photoURL} className="object-cover" />
-                      <AvatarFallback className="text-6xl font-black bg-primary/10 text-primary uppercase">
-                        {formData.firstName?.charAt(0) || user.email?.charAt(0).toUpperCase() || 'U'}
+                      <AvatarFallback className="text-2xl font-black bg-primary/10 text-primary">
+                        {formData.firstName?.charAt(0) || 'U'}
                       </AvatarFallback>
                     </Avatar>
-                    <button 
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="absolute inset-0 bg-black/50 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-sm"
-                    >
-                      <Camera className="h-12 w-12" />
-                    </button>
-                    <div className="absolute -bottom-2 -right-2 bg-primary text-white p-5 rounded-full shadow-2xl border-4 border-white">
-                      <Upload className="h-8 w-8" />
+                    <div className="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Camera className="h-6 w-6 text-white" />
                     </div>
-                    <input 
-                      type="file" 
-                      ref={fileInputRef} 
-                      className="hidden" 
-                      accept="image/*"
-                      onChange={handleFileChange}
-                    />
+                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
                   </div>
-                  <div className="flex-1 space-y-6 w-full">
-                    <Label className="text-[13px] font-black uppercase tracking-[0.2em] text-muted-foreground px-1">Avatar Identity</Label>
-                    {formData.photoURL.startsWith('data:') ? (
-                      <div className="flex items-center gap-6 bg-muted/5 p-6 rounded-3xl border-2 border-dashed border-primary/20">
-                        <span className="text-lg font-black text-primary italic">Custom image staged for upload</span>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-12 w-12 text-destructive hover:bg-destructive/10 rounded-2xl"
-                          onClick={() => setFormData(prev => ({ ...prev, photoURL: '' }))}
-                        >
-                          <X className="h-6 w-6" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <Input 
-                        id="photoURL" 
-                        name="photoURL" 
-                        placeholder="Paste global image URL..." 
-                        className="h-16 border-none bg-muted/10 rounded-2xl font-bold text-xl shadow-inner focus:ring-8 focus:ring-primary/10" 
-                        value={formData.photoURL}
-                        onChange={handleChange}
-                      />
-                    )}
+                  <div className="flex-1 space-y-2 w-full">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Avatar Source URL</Label>
+                    <Input name="photoURL" placeholder="Global image URL..." value={formData.photoURL} onChange={handleChange} className="h-10 border-none bg-muted/5 rounded-xl shadow-inner font-medium" />
                   </div>
                 </div>
 
-                <div className="grid gap-12 md:grid-cols-2">
-                  <div className="space-y-4">
-                    <Label htmlFor="firstName" className="text-[13px] font-black uppercase tracking-[0.2em] text-muted-foreground px-1">First Name</Label>
-                    <Input 
-                      id="firstName" 
-                      name="firstName" 
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      required 
-                      className="h-16 border-none bg-muted/10 rounded-2xl font-bold text-xl shadow-inner focus:ring-8 focus:ring-primary/10"
-                    />
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">First Name</Label>
+                    <Input name="firstName" value={formData.firstName} onChange={handleChange} required className="h-10 border-none bg-muted/5 rounded-xl shadow-inner font-bold" />
                   </div>
-                  <div className="space-y-4">
-                    <Label htmlFor="lastName" className="text-[13px] font-black uppercase tracking-[0.2em] text-muted-foreground px-1">Last Name</Label>
-                    <Input 
-                      id="lastName" 
-                      name="lastName" 
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      required 
-                      className="h-16 border-none bg-muted/10 rounded-2xl font-bold text-xl shadow-inner focus:ring-8 focus:ring-primary/10"
-                    />
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Last Name</Label>
+                    <Input name="lastName" value={formData.lastName} onChange={handleChange} required className="h-10 border-none bg-muted/5 rounded-xl shadow-inner font-bold" />
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <Label htmlFor="username" className="text-[13px] font-black uppercase tracking-[0.2em] text-muted-foreground px-1">Roster Username</Label>
-                  <Input 
-                    id="username" 
-                    name="username" 
-                    placeholder="shuttle_master_pro" 
-                    value={formData.username}
-                    onChange={handleChange}
-                    className="h-16 border-none bg-muted/10 rounded-2xl font-black text-xl shadow-inner focus:ring-8 focus:ring-primary/10"
-                  />
-                  <p className="text-[13px] text-muted-foreground font-bold px-1 opacity-60">
-                    This public ID identifies you in all archived match histories.
-                  </p>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">Roster Username</Label>
+                  <Input name="username" value={formData.username} onChange={handleChange} className="h-10 border-none bg-muted/5 rounded-xl shadow-inner font-bold" />
                 </div>
 
-                <div className="pt-16 border-t border-muted/30 flex justify-end">
-                  <Button type="submit" className="w-full h-24 md:w-auto px-20 text-2xl font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/30 rounded-3xl transition-all hover:translate-y-[-6px] active:translate-y-0" disabled={saving}>
-                    {saving ? (
-                      <Loader2 className="h-8 w-8 animate-spin mr-4" />
-                    ) : (
-                      <Save className="h-8 w-8 mr-4" />
-                    )}
+                <div className="pt-6 border-t border-muted/10 flex justify-end">
+                  <Button type="submit" disabled={saving} className="rounded-xl font-black uppercase tracking-widest px-8">
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
                     Update Identity
                   </Button>
                 </div>
