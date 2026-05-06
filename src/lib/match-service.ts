@@ -32,7 +32,6 @@ export const MatchService = {
   addMatch: async (db: Firestore, userId: string, match: any) => {
     const matchesRef = collection(db, 'matches');
     
-    // Ensure we use the right property names from the form
     const rawDate = match.matchDate || match.date;
     const formattedDate = rawDate ? new Date(rawDate).toISOString() : new Date().toISOString();
 
@@ -63,6 +62,38 @@ export const MatchService = {
     const losses = totalMatches - wins;
     const winRatio = totalMatches > 0 ? (wins / totalMatches) * 100 : 0;
 
+    // Advanced analytics
+    const partnerCounts: Record<string, number> = {};
+    const winPartnerCounts: Record<string, number> = {};
+    const lossOpponentCounts: Record<string, number> = {};
+
+    matches.forEach(m => {
+      if (m.partner) {
+        partnerCounts[m.partner] = (partnerCounts[m.partner] || 0) + 1;
+        if (m.result === 'Win') {
+          winPartnerCounts[m.partner] = (winPartnerCounts[m.partner] || 0) + 1;
+        }
+      }
+      if (m.result === 'Loss') {
+        lossOpponentCounts[m.opponent] = (lossOpponentCounts[m.opponent] || 0) + 1;
+        if (m.opponentPartner) {
+          lossOpponentCounts[m.opponentPartner] = (lossOpponentCounts[m.opponentPartner] || 0) + 1;
+        }
+      }
+    });
+
+    const findMax = (counts: Record<string, number>) => {
+      let maxVal = 0;
+      let maxKey = 'N/A';
+      Object.entries(counts).forEach(([key, val]) => {
+        if (val > maxVal) {
+          maxVal = val;
+          maxKey = key;
+        }
+      });
+      return maxVal > 0 ? maxKey : 'N/A';
+    };
+
     return {
       totalMatches,
       wins,
@@ -72,7 +103,10 @@ export const MatchService = {
         Singles: matches.filter(m => m.matchType === 'Singles').length,
         Doubles: matches.filter(m => m.matchType === 'Doubles').length,
         MixedDoubles: matches.filter(m => m.matchType === 'Mixed Doubles').length,
-      }
+      },
+      bestAlly: findMax(winPartnerCounts),
+      frequentPartner: findMax(partnerCounts),
+      nemesis: findMax(lossOpponentCounts)
     };
   }
 };

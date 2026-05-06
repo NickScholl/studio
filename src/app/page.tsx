@@ -20,7 +20,10 @@ import {
   LayoutGrid,
   MapPin,
   ChevronRight,
-  ArrowUpRight
+  ArrowUpRight,
+  UserPlus,
+  Zap,
+  Swords
 } from 'lucide-react';
 import { 
   ChartContainer, 
@@ -148,6 +151,32 @@ export default function Dashboard() {
 
           {matches.length > 0 ? (
             <>
+              {/* Rivalries & Alliances */}
+              <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-3">
+                {[
+                  { icon: Zap, title: "Best Ally", value: stats.bestAlly, color: "secondary", subtitle: "Most wins together" },
+                  { icon: UserPlus, title: "Frequent Partner", value: stats.frequentPartner, color: "primary", subtitle: "Most matches played" },
+                  { icon: Swords, title: "Nemesis", value: stats.nemesis, color: "destructive", subtitle: "Hardest opponent to beat" }
+                ].map((stat, i) => (
+                  <Card key={i} className="border-none shadow-2xl shadow-black/5 hover:translate-y-[-6px] transition-all duration-300 rounded-[2.5rem] bg-white overflow-hidden group">
+                    <CardHeader className="pb-2 px-8 pt-8">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+                          <stat.icon className={`h-3 w-3 text-${stat.color}`} /> {stat.title}
+                        </CardTitle>
+                        <div className={`p-2 bg-${stat.color}/10 rounded-xl group-hover:rotate-12 transition-transform`}>
+                          <stat.icon className={`h-4 w-4 text-${stat.color}`} />
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="px-8 pb-8">
+                      <div className="text-3xl font-black tracking-tighter truncate">{stat.value}</div>
+                      <p className="text-[10px] mt-2 font-black uppercase tracking-widest text-muted-foreground/60">{stat.subtitle}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
               {/* Quick Stats Grid */}
               <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
                 {[
