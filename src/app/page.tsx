@@ -18,7 +18,6 @@ import {
   Calendar,
   LayoutGrid,
   MapPin,
-  ChevronRight,
   ArrowUpRight,
   UserPlus,
   Zap,
@@ -204,10 +203,15 @@ export default function Dashboard() {
                             <div className={`h-12 w-12 rounded-xl flex items-center justify-center shadow-lg ${match.result === 'Win' ? 'bg-secondary text-white shadow-secondary/20' : 'bg-destructive text-white shadow-destructive/20'}`}>
                               {match.result === 'Win' ? <Trophy className="h-6 w-6" /> : <Frown className="h-6 w-6" />}
                             </div>
-                            <div className="truncate max-w-[120px] sm:max-w-none">
-                              <p className="text-base font-black group-hover:text-primary transition-colors tracking-tight truncate">vs {match.opponent}</p>
-                              <div className="flex items-center text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1 truncate">
-                                <MapPin className="h-3 w-3 mr-1 text-primary/60" /> {match.location}
+                            <div className="truncate">
+                              <div className="flex flex-col">
+                                <div className="flex items-center gap-1">
+                                  <p className="text-sm font-black group-hover:text-primary transition-colors tracking-tight truncate">{match.opponent}</p>
+                                  {match.opponentPartner && <span className="text-[10px] text-muted-foreground font-bold ml-1">& {match.opponentPartner}</span>}
+                                </div>
+                                <div className="flex items-center text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-0.5 truncate">
+                                  <MapPin className="h-3 w-3 mr-1 text-primary/60" /> {match.location}
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -250,9 +254,9 @@ export default function Dashboard() {
                           </Bar>
                         </BarChart>
                       </ResponsiveContainer>
-                    </ChartContainer>
-                  </CardContent>
-                </Card>
+                    </BarChart>
+                  </ChartContainer>
+                </CardContent>
               </div>
 
               {/* Quick Stats Grid */}

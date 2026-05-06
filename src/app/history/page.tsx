@@ -271,12 +271,26 @@ function MatchTable({ title, matches, icon }: { title: string, matches: Badminto
                           {match.matchType}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-3 text-sm">
-                        <span className="font-black text-primary text-base">{match.myName}</span>
-                        {match.partner && <span className="text-muted-foreground font-bold text-xs">/ {match.partner}</span>}
-                        <Swords className="h-4 w-4 mx-2 text-muted-foreground/40" />
-                        <span className="font-black text-base">{match.opponent}</span>
-                        {match.opponentPartner && <span className="text-muted-foreground font-bold text-xs">/ {match.opponentPartner}</span>}
+                      <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 text-sm">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-black text-primary text-base">{match.myName}</span>
+                          {match.partner && (
+                            <>
+                              <span className="text-muted-foreground/50 font-light">&</span>
+                              <span className="font-bold text-muted-foreground text-sm">{match.partner}</span>
+                            </>
+                          )}
+                        </div>
+                        <Swords className="h-4 w-4 mx-2 text-muted-foreground/30 hidden md:block" />
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-black text-base">{match.opponent}</span>
+                          {match.opponentPartner && (
+                            <>
+                              <span className="text-muted-foreground/50 font-light">&</span>
+                              <span className="font-bold text-muted-foreground text-sm">{match.opponentPartner}</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </TableCell>
