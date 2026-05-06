@@ -18,8 +18,8 @@ import {
   useFirestore,
   useDoc,
   useMemoFirebase,
-  useSidebar
 } from "@/firebase";
+import { useSidebar } from "@/components/ui/sidebar";
 import { signOut } from "firebase/auth";
 import { doc } from 'firebase/firestore';
 
@@ -43,7 +43,6 @@ export function AppSidebar() {
   const db = useFirestore();
   const { setOpenMobile, isMobile } = useSidebar();
 
-  // Fetch Firestore profile for the most up-to-date name/photo (especially for base64 photos)
   const profileRef = useMemoFirebase(() => {
     if (!db || !user) return null;
     return doc(db, 'userProfiles', user.uid);
@@ -72,7 +71,7 @@ export function AppSidebar() {
   const photoURL = profile?.photoURL || user?.photoURL || undefined;
 
   return (
-    <Sidebar variant="sidebar" collapsible="icon">
+    <Sidebar variant="sidebar" collapsible="icon" className="bg-white border-r">
       <SidebarHeader className="p-4 bg-sidebar">
         <div className="flex items-center gap-3">
           <div className="bg-primary p-2 rounded-lg">
