@@ -8,6 +8,8 @@ const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 };
-
+console.log("ENV CHECK:", {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+});
 export const app =
   getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
