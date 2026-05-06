@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -332,15 +331,8 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
         </div>
       </DialogTrigger>
       
-      <DialogContent className="max-w-[95vw] md:max-w-[800px] w-full bg-white border-none rounded-[1.5rem] shadow-2xl p-0 overflow-hidden z-[100] flex flex-col max-h-[90vh]">
+      <DialogContent className="max-w-[95vw] md:max-w-[800px] w-full bg-white border-none rounded-[1.5rem] shadow-2xl p-0 overflow-hidden z-[100] flex flex-col max-h-[90vh] relative">
         <DialogHeader className="bg-slate-50 p-6 md:p-10 border-b border-muted/20 relative shrink-0">
-          <div className="absolute right-12 top-10 flex gap-2">
-            <Button variant="outline" size="icon" asChild className="rounded-full bg-white shadow-sm hover:text-primary transition-colors h-10 w-10">
-              <Link href={`/matches/${match.id}/edit`}>
-                <Pencil className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
           <div className="flex items-center justify-between mb-4 pr-12">
             <Badge variant="outline" className="bg-white text-primary border-primary/20 font-black uppercase text-[10px] tracking-widest px-3 py-1">
               {match.competitionName || 'Training Performance'}
@@ -425,6 +417,15 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
             </div>
           </div>
         </ScrollArea>
+
+        {/* Floating Edit Action at Bottom Right */}
+        <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 z-[110]">
+          <Button variant="default" size="icon" asChild className="rounded-full shadow-2xl h-14 w-14 md:h-16 md:w-16 p-0 flex items-center justify-center hover:scale-110 transition-transform">
+            <Link href={`/matches/${match.id}/edit`}>
+              <Pencil className="h-6 w-6" />
+            </Link>
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
