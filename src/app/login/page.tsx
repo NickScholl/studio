@@ -41,18 +41,19 @@ export default function LoginPage() {
     if (isLoggingIn) return;
     setIsLoggingIn(true);
     setError(null);
-    const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
     
     try {
+      const provider = new GoogleAuthProvider();
+      // select_account helps prevent silent failures if multiple accounts are present
+      provider.setCustomParameters({ prompt: 'select_account' });
       await signInWithPopup(auth, provider);
     } catch (err: any) {
       console.error("Google Auth Error:", err);
       let message = err.message;
       if (err.code === 'auth/popup-closed-by-user') {
-        message = "Login window closed. Please try again and keep the window open.";
+        message = "Login window closed. Please try again and keep the window open until finished.";
       } else if (err.code === 'auth/popup-blocked') {
-        message = "Popup blocked! Please enable popups for this site.";
+        message = "Popup blocked! Please enable popups for this site in your browser settings.";
       }
       setError(message);
       setIsLoggingIn(false);
@@ -99,11 +100,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-muted/20 p-6">
-      <div className="w-full max-w-[480px] space-y-12 animate-in fade-in zoom-in duration-700">
+    <div className="min-h-screen w-full flex items-center justify-center bg-muted/20 p-6 sm:p-10">
+      <div className="w-full max-w-[480px] space-y-12 flex flex-col items-center animate-in fade-in zoom-in duration-700">
         <div className="text-center space-y-6">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[2rem] bg-primary shadow-2xl shadow-primary/40 transition-transform hover:scale-105 active:scale-95 duration-300">
-            <Trophy className="h-10 w-10 text-primary-foreground" />
+          <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-[2.5rem] bg-primary shadow-[0_20px_50px_rgba(var(--primary),0.3)] transition-transform hover:scale-105 active:scale-95 duration-300">
+            <Trophy className="h-12 w-12 text-primary-foreground" />
           </div>
           <div className="space-y-2">
             <h1 className="text-5xl font-black tracking-tighter text-foreground drop-shadow-sm">ShuttleScore</h1>
@@ -111,7 +112,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <Card className="shadow-[0_40px_100px_-20px_rgba(0,0,0,0.2)] border-none overflow-hidden bg-white rounded-[2.5rem]">
+        <Card className="w-full shadow-[0_40px_100px_-20px_rgba(0,0,0,0.15)] border-none overflow-hidden bg-white rounded-[2.5rem]">
           <Tabs defaultValue="login" className="w-full" onValueChange={(v) => {
             setIsSignUp(v === 'signup');
             setError(null);

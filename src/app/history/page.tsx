@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -44,7 +43,6 @@ export default function MatchHistory() {
 
   const matchesQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
-    // We fetch and sort in memory to avoid mandatory index requirements
     return query(
       collection(db, 'matches'),
       where('participantUserIds', 'array-contains', user.uid)
@@ -124,8 +122,8 @@ export default function MatchHistory() {
   return (
     <div className="flex min-h-screen bg-[#f8f9fc]">
       <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-6 bg-white/80 backdrop-blur-md sticky top-0 z-10 shadow-sm">
+      <SidebarInset className="flex flex-col">
+        <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b bg-white/80 backdrop-blur-md px-6 sticky top-0 z-20 shadow-sm w-full">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />
             <h1 className="text-lg font-black tracking-tight">Match History</h1>
@@ -142,7 +140,7 @@ export default function MatchHistory() {
           </Tabs>
         </header>
 
-        <main className="p-6 lg:p-10 space-y-8 max-w-7xl mx-auto w-full">
+        <main className="p-6 lg:p-10 space-y-8 max-w-full mx-auto w-full">
           <Card className="border-none shadow-xl shadow-black/5 bg-white rounded-3xl overflow-hidden">
             <CardHeader className="pb-4 border-b border-muted/50 bg-muted/10 px-8">
               <div className="flex items-center gap-2 text-muted-foreground">

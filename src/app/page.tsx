@@ -97,8 +97,8 @@ export default function Dashboard() {
   return (
     <div className="flex min-h-screen bg-[#f8f9fc]">
       <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b bg-white/80 backdrop-blur-md px-6 sticky top-0 z-20 shadow-sm">
+      <SidebarInset className="flex flex-col">
+        <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b bg-white/80 backdrop-blur-md px-6 sticky top-0 z-20 shadow-sm w-full">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />
             <div className="flex flex-col">
@@ -114,7 +114,7 @@ export default function Dashboard() {
           </Button>
         </header>
 
-        <main className="flex-1 space-y-10 p-6 lg:p-10 max-w-[1400px] mx-auto w-full">
+        <main className="flex-1 space-y-10 p-6 lg:p-10 max-w-full mx-auto w-full">
           {/* Hero Section */}
           <div className="relative w-full h-[360px] md:h-[400px] rounded-[2.5rem] overflow-hidden shadow-2xl bg-primary animate-in fade-in duration-1000">
             {heroImage && (
@@ -152,21 +152,21 @@ export default function Dashboard() {
           {matches.length > 0 ? (
             <>
               {/* Rivalries & Alliances */}
-              <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4">
+              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 {[
-                  { icon: Zap, title: "Best Ally", value: stats.bestAlly, color: "secondary", subtitle: "Most wins together" },
-                  { icon: UserPlus, title: "Frequent Partner", value: stats.frequentPartner, color: "primary", subtitle: "Most sessions together" },
-                  { icon: Swords, title: "Nemesis", value: stats.nemesis, color: "destructive", subtitle: "Hardest to beat" },
-                  { icon: Heart, title: "Favorite Rival", value: stats.favoriteRival, color: "secondary", subtitle: "Most wins against" }
+                  { icon: Zap, title: "Best Ally", value: stats.bestAlly, color: "text-secondary", bgColor: "bg-secondary/10", subtitle: "Most wins together" },
+                  { icon: UserPlus, title: "Frequent Partner", value: stats.frequentPartner, color: "text-primary", bgColor: "bg-primary/10", subtitle: "Most sessions together" },
+                  { icon: Swords, title: "Nemesis", value: stats.nemesis, color: "text-destructive", bgColor: "bg-destructive/10", subtitle: "Hardest to beat" },
+                  { icon: Heart, title: "Favorite Rival", value: stats.favoriteRival, color: "text-secondary", bgColor: "bg-secondary/10", subtitle: "Most wins against" }
                 ].map((stat, i) => (
                   <Card key={i} className="border-none shadow-xl shadow-black/5 hover:translate-y-[-4px] transition-all duration-300 rounded-[2rem] bg-white overflow-hidden group">
                     <CardHeader className="pb-2 px-6 pt-6">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
-                          <stat.icon className={`h-3 w-3 text-${stat.color}`} /> {stat.title}
+                          <stat.icon className={`h-3 w-3 ${stat.color}`} /> {stat.title}
                         </CardTitle>
-                        <div className={`p-1.5 bg-${stat.color}/10 rounded-lg`}>
-                          <stat.icon className={`h-3.5 w-3.5 text-${stat.color}`} />
+                        <div className={`p-1.5 ${stat.bgColor} rounded-lg`}>
+                          <stat.icon className={`h-3.5 w-3.5 ${stat.color}`} />
                         </div>
                       </div>
                     </CardHeader>
@@ -179,7 +179,7 @@ export default function Dashboard() {
               </div>
 
               {/* Main Analytics Hub */}
-              <div className="grid gap-8 lg:grid-cols-5">
+              <div className="grid gap-8 grid-cols-1 lg:grid-cols-5">
                 {/* Recent Action */}
                 <Card className="lg:col-span-2 border-none shadow-2xl shadow-black/5 flex flex-col overflow-hidden bg-white rounded-[2.5rem]">
                   <CardHeader className="border-b bg-muted/5 p-8">
@@ -204,14 +204,14 @@ export default function Dashboard() {
                             <div className={`h-12 w-12 rounded-xl flex items-center justify-center shadow-lg ${match.result === 'Win' ? 'bg-secondary text-white shadow-secondary/20' : 'bg-destructive text-white shadow-destructive/20'}`}>
                               {match.result === 'Win' ? <Trophy className="h-6 w-6" /> : <Frown className="h-6 w-6" />}
                             </div>
-                            <div>
-                              <p className="text-base font-black group-hover:text-primary transition-colors tracking-tight">vs {match.opponent}</p>
-                              <div className="flex items-center text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1">
+                            <div className="truncate max-w-[120px] sm:max-w-none">
+                              <p className="text-base font-black group-hover:text-primary transition-colors tracking-tight truncate">vs {match.opponent}</p>
+                              <div className="flex items-center text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1 truncate">
                                 <MapPin className="h-3 w-3 mr-1 text-primary/60" /> {match.location}
                               </div>
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right shrink-0">
                             <Badge variant={match.result === 'Win' ? 'secondary' : 'destructive'} className="text-[8px] px-2 py-0.5 font-black uppercase tracking-widest">
                               {match.result}
                             </Badge>
@@ -237,8 +237,8 @@ export default function Dashboard() {
                     </div>
                   </CardHeader>
                   <CardContent className="flex-1 p-8 flex items-center justify-center min-h-[360px]">
-                    <ChartContainer config={config} className="w-full">
-                      <ResponsiveContainer width="100%" height={280}>
+                    <ChartContainer config={config} className="w-full h-full min-h-[280px]">
+                      <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={chartData}>
                           <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: '900', letterSpacing: '0.1em' }} />
                           <YAxis hide />
@@ -256,7 +256,7 @@ export default function Dashboard() {
               </div>
 
               {/* Quick Stats Grid */}
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 {[
                   { icon: Activity, title: "Matches", value: stats.totalMatches, color: "primary", subtitle: "Total Archive" },
                   { icon: Target, title: "Efficiency", value: `${stats.winRatio}%`, color: "secondary", subtitle: "Win Rate" },

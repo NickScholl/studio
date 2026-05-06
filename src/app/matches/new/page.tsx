@@ -124,16 +124,18 @@ export default function NewMatch() {
   return (
     <div className="flex min-h-screen bg-[#f8f9fc]">
       <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6 bg-white sticky top-0 z-20 shadow-sm">
-          <SidebarTrigger className="-ml-1" />
-          <Button variant="ghost" size="icon" asChild className="h-9 w-9">
-            <Link href="/">
-              <ChevronLeft className="h-5 w-5" />
-            </Link>
-          </Button>
-          <div className="h-4 w-px bg-muted mx-2" />
-          <h1 className="text-xs font-black uppercase tracking-widest text-primary">Performance Entry</h1>
+      <SidebarInset className="flex flex-col">
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-white/80 backdrop-blur-md px-6 sticky top-0 z-20 shadow-sm w-full">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger className="-ml-1" />
+            <Button variant="ghost" size="icon" asChild className="h-9 w-9">
+              <Link href="/">
+                <ChevronLeft className="h-5 w-5" />
+              </Link>
+            </Button>
+            <div className="h-4 w-px bg-muted mx-2" />
+            <h1 className="text-xs font-black uppercase tracking-widest text-primary">Performance Entry</h1>
+          </div>
         </header>
 
         <main className="max-w-4xl mx-auto p-6 lg:p-10 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -162,7 +164,7 @@ export default function NewMatch() {
                       <SelectTrigger className="h-14 border-none bg-muted/10 rounded-xl focus:ring-primary font-bold shadow-inner">
                         <SelectValue placeholder="Format" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white border-none shadow-2xl z-50">
+                      <SelectContent className="bg-white border-none shadow-2xl z-50 opacity-100">
                         <SelectItem value="Singles" className="font-bold">Singles</SelectItem>
                         <SelectItem value="Doubles" className="font-bold">Doubles</SelectItem>
                         <SelectItem value="Mixed Doubles" className="font-bold">Mixed Doubles</SelectItem>
@@ -180,6 +182,7 @@ export default function NewMatch() {
                         id="competitionName" 
                         name="competitionName" 
                         list="competition-list"
+                        autoComplete="off"
                         placeholder="e.g. City Open" 
                         className="pl-12 h-14 border-none bg-muted/10 rounded-xl focus-visible:ring-primary font-bold shadow-inner" 
                       />
@@ -196,6 +199,7 @@ export default function NewMatch() {
                         id="location" 
                         name="location" 
                         list="location-list"
+                        autoComplete="off"
                         placeholder="e.g. Center Court" 
                         className="pl-12 h-14 border-none bg-muted/10 rounded-xl focus-visible:ring-primary font-bold shadow-inner" 
                         required 
@@ -213,7 +217,7 @@ export default function NewMatch() {
                     <SelectTrigger className="h-14 border-none bg-muted/10 rounded-xl focus:ring-primary font-black uppercase text-xs tracking-widest shadow-inner">
                       <SelectValue placeholder="Outcome" />
                     </SelectTrigger>
-                    <SelectContent className="bg-white border-none shadow-2xl z-50">
+                    <SelectContent className="bg-white border-none shadow-2xl z-50 opacity-100">
                       <SelectItem value="Win" className="font-black text-secondary">VICTORY (WIN)</SelectItem>
                       <SelectItem value="Loss" className="font-black text-destructive">DEFEAT (LOSS)</SelectItem>
                     </SelectContent>
@@ -230,12 +234,12 @@ export default function NewMatch() {
                     <CardContent className="space-y-6 pt-6 px-6 pb-8">
                       <div className="space-y-2">
                         <Label htmlFor="myName" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Primary Player</Label>
-                        <Input id="myName" name="myName" list="name-list" defaultValue={user?.displayName || ''} required className="h-12 border-none bg-white rounded-xl font-bold shadow-sm" />
+                        <Input id="myName" name="myName" list="name-list" autoComplete="off" defaultValue={user?.displayName || ''} required className="h-12 border-none bg-white rounded-xl font-bold shadow-sm" />
                       </div>
                       {isDoubles && (
                         <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                           <Label htmlFor="partner" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Partner</Label>
-                          <Input id="partner" name="partner" list="name-list" placeholder="Teammate Name" required={isDoubles} className="h-12 border-none bg-white rounded-xl font-bold shadow-sm" />
+                          <Input id="partner" name="partner" list="name-list" autoComplete="off" placeholder="Teammate Name" required={isDoubles} className="h-12 border-none bg-white rounded-xl font-bold shadow-sm" />
                         </div>
                       )}
                     </CardContent>
@@ -250,12 +254,12 @@ export default function NewMatch() {
                     <CardContent className="space-y-6 pt-6 px-6 pb-8">
                       <div className="space-y-2">
                         <Label htmlFor="opponent" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Opponent 1</Label>
-                        <Input id="opponent" name="opponent" list="name-list" placeholder="Rival Name" required className="h-12 border-none bg-white rounded-xl font-bold shadow-sm" />
+                        <Input id="opponent" name="opponent" list="name-list" autoComplete="off" placeholder="Rival Name" required className="h-12 border-none bg-white rounded-xl font-bold shadow-sm" />
                       </div>
                       {isDoubles && (
                         <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                           <Label htmlFor="opponentPartner" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Opponent 2</Label>
-                          <Input id="opponentPartner" name="opponentPartner" list="name-list" placeholder="Rival Partner" required={isDoubles} className="h-12 border-none bg-white rounded-xl font-bold shadow-sm" />
+                          <Input id="opponentPartner" name="opponentPartner" list="name-list" autoComplete="off" placeholder="Rival Partner" required={isDoubles} className="h-12 border-none bg-white rounded-xl font-bold shadow-sm" />
                         </div>
                       )}
                     </CardContent>
