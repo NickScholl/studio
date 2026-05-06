@@ -1,27 +1,33 @@
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"main": ".open-next/worker.js",
-	"name": "badminton-site",
-	"compatibility_date": "2026-05-06",
-	"compatibility_flags": [
-		"nodejs_compat",
-		"global_fetch_strictly_public"
-	],
-	"assets": {
-		"directory": ".open-next/assets",
-		"binding": "ASSETS"
-	},
-	"services": [
-		{
-			// Self-reference service binding, the service name must match the worker name
-			// see https://opennext.js.org/cloudflare/caching
-			"binding": "WORKER_SELF_REFERENCE",
-			"service": "badminton-site"
-		}
-	],
-	"images": {
-		// Enable image optimization
-		// see https://opennext.js.org/cloudflare/howtos/image
-		"binding": "IMAGES"
-	}
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "badminton-site",
+  "compatibility_date": "2026-05-06",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public"
+  ],
+
+  "vars": {
+    "NEXT_PUBLIC_FIREBASE_API_KEY": "your_key",
+    "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN": "your_domain",
+    "NEXT_PUBLIC_FIREBASE_PROJECT_ID": "your_project",
+    "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET": "your_bucket",
+    "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "your_sender",
+    "NEXT_PUBLIC_FIREBASE_APP_ID": "your_app_id"
+  },
+
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "badminton-site"
+    }
+  ],
+  "images": {
+    "binding": "IMAGES"
+  }
 }
