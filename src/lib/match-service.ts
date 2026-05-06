@@ -66,18 +66,27 @@ export const MatchService = {
     const partnerCounts: Record<string, number> = {};
     const winPartnerCounts: Record<string, number> = {};
     const lossOpponentCounts: Record<string, number> = {};
+    const winOpponentCounts: Record<string, number> = {};
 
     matches.forEach(m => {
+      // Partner Stats
       if (m.partner) {
         partnerCounts[m.partner] = (partnerCounts[m.partner] || 0) + 1;
         if (m.result === 'Win') {
           winPartnerCounts[m.partner] = (winPartnerCounts[m.partner] || 0) + 1;
         }
       }
+
+      // Opponent Stats
       if (m.result === 'Loss') {
         lossOpponentCounts[m.opponent] = (lossOpponentCounts[m.opponent] || 0) + 1;
         if (m.opponentPartner) {
           lossOpponentCounts[m.opponentPartner] = (lossOpponentCounts[m.opponentPartner] || 0) + 1;
+        }
+      } else if (m.result === 'Win') {
+        winOpponentCounts[m.opponent] = (winOpponentCounts[m.opponent] || 0) + 1;
+        if (m.opponentPartner) {
+          winOpponentCounts[m.opponentPartner] = (winOpponentCounts[m.opponentPartner] || 0) + 1;
         }
       }
     });
@@ -106,7 +115,8 @@ export const MatchService = {
       },
       bestAlly: findMax(winPartnerCounts),
       frequentPartner: findMax(partnerCounts),
-      nemesis: findMax(lossOpponentCounts)
+      nemesis: findMax(lossOpponentCounts),
+      favoriteRival: findMax(winOpponentCounts)
     };
   }
 };

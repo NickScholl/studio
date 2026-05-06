@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -29,7 +28,6 @@ export default function NewMatch() {
 
   const isDoubles = matchType === 'Doubles' || matchType === 'Mixed Doubles';
 
-  // Fetch previous matches to provide suggestions for names and competitions
   const matchesQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
     return query(
@@ -112,7 +110,6 @@ export default function NewMatch() {
         description: `Your statistics have been updated successfully.`,
       });
       
-      // Navigate only after success
       router.push('/');
     } catch (error: any) {
       console.error("Save Match Error:", error);
@@ -131,21 +128,22 @@ export default function NewMatch() {
     <div className="flex min-h-screen bg-[#f8f9fc]">
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6 bg-white sticky top-0 z-20">
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6 bg-white sticky top-0 z-20 shadow-sm">
           <SidebarTrigger className="-ml-1" />
-          <Button variant="ghost" size="icon" asChild className="mr-2">
+          <Button variant="ghost" size="icon" asChild className="h-9 w-9">
             <Link href="/">
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-5 w-5" />
             </Link>
           </Button>
-          <h1 className="text-lg font-black uppercase tracking-tight">Record Performance</h1>
+          <div className="h-4 w-px bg-muted mx-2" />
+          <h1 className="text-sm font-black uppercase tracking-widest text-primary">Record Performance</h1>
         </header>
 
         <main className="max-w-3xl mx-auto p-6 lg:p-10 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <Card className="shadow-2xl shadow-black/5 border-none rounded-[2rem] overflow-hidden bg-white">
+          <Card className="shadow-2xl shadow-black/5 border-none rounded-[2.5rem] overflow-hidden bg-white">
             <CardHeader className="bg-primary/5 px-8 pt-10 pb-8 border-b border-muted/50">
               <CardTitle className="text-3xl font-black tracking-tighter text-primary">Match Log</CardTitle>
-              <CardDescription className="text-sm font-bold uppercase tracking-widest text-muted-foreground opacity-70">Capture every shuttlecock flight</CardDescription>
+              <CardDescription className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">Capture every shuttlecock flight</CardDescription>
             </CardHeader>
             <CardContent className="p-8 lg:p-12">
               <form onSubmit={handleSubmit} className="space-y-12">
@@ -228,17 +226,17 @@ export default function NewMatch() {
                 <div className="grid gap-8 md:grid-cols-2">
                   <Card className="border-none shadow-xl shadow-black/5 bg-muted/5 rounded-3xl overflow-hidden">
                     <CardHeader className="pb-4 bg-primary/10">
-                      <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-primary">
-                        <User className="h-4 w-4" /> Team Alpha
+                      <CardTitle className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-primary">
+                        <User className="h-3 w-3" /> Team Alpha
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6 pt-6 px-6">
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         <Label htmlFor="myName" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Your Name</Label>
                         <Input id="myName" name="myName" list="name-list" defaultValue={user?.displayName || ''} required className="h-12 border-none bg-white rounded-xl font-bold" />
                       </div>
                       {isDoubles && (
-                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                           <Label htmlFor="partner" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Partner</Label>
                           <Input id="partner" name="partner" list="name-list" placeholder="Teammate Name" required={isDoubles} className="h-12 border-none bg-white rounded-xl font-bold" />
                         </div>
@@ -248,17 +246,17 @@ export default function NewMatch() {
 
                   <Card className="border-none shadow-xl shadow-black/5 bg-muted/5 rounded-3xl overflow-hidden">
                     <CardHeader className="pb-4 bg-muted/20">
-                      <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-muted-foreground">
-                        <Swords className="h-4 w-4" /> Team Bravo
+                      <CardTitle className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-muted-foreground">
+                        <Swords className="h-3 w-3" /> Team Bravo
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6 pt-6 px-6">
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         <Label htmlFor="opponent" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Opponent 1</Label>
                         <Input id="opponent" name="opponent" list="name-list" placeholder="Rival Name" required className="h-12 border-none bg-white rounded-xl font-bold" />
                       </div>
                       {isDoubles && (
-                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                           <Label htmlFor="opponentPartner" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Opponent 2</Label>
                           <Input id="opponentPartner" name="opponentPartner" list="name-list" placeholder="Rival Partner" required={isDoubles} className="h-12 border-none bg-white rounded-xl font-bold" />
                         </div>
