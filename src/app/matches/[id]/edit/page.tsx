@@ -109,24 +109,24 @@ export default function EditMatch() {
     <>
       <AppSidebar />
       <SidebarInset className="flex flex-col bg-[#f8f9fc] w-full min-w-0">
-        <header className="flex h-16 md:h-20 shrink-0 items-center gap-4 border-b bg-white/95 backdrop-blur-xl px-4 md:px-8 sticky top-0 z-50 shadow-sm w-full">
+        <header className="flex h-14 md:h-16 shrink-0 items-center gap-4 border-b bg-white/95 backdrop-blur-xl px-4 md:px-8 sticky top-0 z-50 shadow-sm w-full">
           <SidebarTrigger />
-          <Button variant="ghost" size="icon" asChild className="rounded-full">
+          <Button variant="ghost" size="icon" asChild className="rounded-full h-8 w-8">
             <Link href="/history">
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-4 w-4" />
             </Link>
           </Button>
-          <div className="h-6 w-px bg-muted mx-2" />
-          <h1 className="text-lg md:text-xl font-black uppercase tracking-tight">{UI_STRINGS.matchForm.rewriteArchive}</h1>
+          <div className="h-4 w-px bg-muted mx-1" />
+          <h1 className="text-xs font-black uppercase tracking-[0.2em] opacity-40">{UI_STRINGS.matchForm.rewriteArchive}</h1>
         </header>
 
         <main className="max-w-4xl mx-auto p-4 md:p-10 w-full pb-24">
           <Card className="shadow-sm border-none rounded-2xl overflow-hidden bg-white">
-            <CardHeader className="bg-primary/5 p-8 border-b border-muted/20">
-              <CardTitle className="text-2xl md:text-3xl font-black tracking-tight text-primary">{UI_STRINGS.matchForm.editPerformance}</CardTitle>
-              <CardDescription className="font-bold text-xs uppercase tracking-widest opacity-60">{UI_STRINGS.matchForm.updateRecord}</CardDescription>
+            <CardHeader className="bg-primary/5 p-6 md:p-8 border-b border-muted/20">
+              <CardTitle className="text-xl md:text-2xl font-black tracking-tight text-primary">{UI_STRINGS.matchForm.editPerformance}</CardTitle>
+              <CardDescription className="font-bold text-[10px] uppercase tracking-widest opacity-60">{UI_STRINGS.matchForm.updateRecord}</CardDescription>
             </CardHeader>
-            <CardContent className="p-8">
+            <CardContent className="p-6 md:p-8">
               <form onSubmit={handleSubmit} className="space-y-10">
                 <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
                   <div className="space-y-2">
@@ -157,10 +157,10 @@ export default function EditMatch() {
 
                 <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="competitionName" className="font-bold text-[10px] uppercase tracking-widest px-1">{UI_STRINGS.matchForm.tournament}</Label>
+                    <Label htmlFor="competitionName" className="font-black text-[11px] uppercase tracking-widest px-1 text-primary">{UI_STRINGS.matchForm.tournament}</Label>
                     <div className="relative">
-                      <Trophy className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/40" />
-                      <Input id="competitionName" name="competitionName" defaultValue={match.competitionName} className="pl-10 h-11 rounded-xl bg-muted/5 border-none shadow-sm" />
+                      <Trophy className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                      <Input id="competitionName" name="competitionName" defaultValue={match.competitionName} className="pl-10 h-12 rounded-xl bg-muted/5 border-2 border-primary/10 shadow-sm font-black" />
                     </div>
                   </div>
                   <div className="space-y-2">
