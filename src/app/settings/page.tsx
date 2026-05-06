@@ -144,27 +144,27 @@ export default function SettingsPage() {
   if (!user) return null;
 
   return (
-    <div className="flex min-h-screen bg-[#f8f9fc]">
+    <>
       <AppSidebar />
-      <SidebarInset className="flex flex-col">
-        <header className="flex h-20 shrink-0 items-center gap-4 border-b bg-white/90 backdrop-blur-xl px-8 sticky top-0 z-50 shadow-sm w-full">
-          <SidebarTrigger className="-ml-1" />
-          <h1 className="text-xl md:text-2xl font-black tracking-tighter uppercase">Player Profile</h1>
+      <SidebarInset className="flex flex-col bg-[#f8f9fc]">
+        <header className="flex h-24 shrink-0 items-center gap-6 border-b bg-white/95 backdrop-blur-xl px-8 sticky top-0 z-50 shadow-sm w-full max-w-none">
+          <SidebarTrigger className="-ml-1 h-12 w-12" />
+          <h1 className="text-2xl md:text-3xl font-black tracking-tighter uppercase">Player Profile</h1>
         </header>
 
-        <main className="max-w-[1000px] mx-auto p-6 md:p-12 lg:p-20 w-full space-y-12">
-          <Card className="shadow-2xl border-none rounded-[2.5rem] overflow-hidden bg-white">
-            <CardHeader className="bg-primary/5 p-8 md:p-12 border-b border-muted/30">
-              <CardTitle className="text-2xl md:text-4xl font-black tracking-tighter">Elite Information</CardTitle>
-              <CardDescription className="text-xs font-bold uppercase tracking-[0.3em] mt-2 opacity-60">Manage your public tactical identity</CardDescription>
+        <main className="max-w-[1200px] mx-auto p-10 md:p-20 w-full space-y-16">
+          <Card className="shadow-2xl border-none rounded-[4rem] overflow-hidden bg-white">
+            <CardHeader className="bg-primary/5 p-12 md:p-20 border-b border-muted/30">
+              <CardTitle className="text-4xl md:text-6xl font-black tracking-tighter">Elite Information</CardTitle>
+              <CardDescription className="text-sm font-bold uppercase tracking-[0.3em] mt-4 opacity-60">Manage your public tactical identity</CardDescription>
             </CardHeader>
-            <CardContent className="p-8 md:p-12">
-              <form onSubmit={handleSave} className="space-y-12">
-                <div className="flex flex-col md:flex-row items-center gap-12">
+            <CardContent className="p-12 md:p-20">
+              <form onSubmit={handleSave} className="space-y-16">
+                <div className="flex flex-col md:flex-row items-center gap-16">
                   <div className="relative group">
-                    <Avatar className="h-40 w-40 border-[8px] border-white shadow-2xl">
+                    <Avatar className="h-48 w-48 border-[10px] border-white shadow-2xl">
                       <AvatarImage src={formData.photoURL} className="object-cover" />
-                      <AvatarFallback className="text-5xl font-black bg-primary/10 text-primary uppercase">
+                      <AvatarFallback className="text-6xl font-black bg-primary/10 text-primary uppercase">
                         {formData.firstName?.charAt(0) || user.email?.charAt(0).toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
@@ -173,10 +173,10 @@ export default function SettingsPage() {
                       onClick={() => fileInputRef.current?.click()}
                       className="absolute inset-0 bg-black/50 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-sm"
                     >
-                      <Camera className="h-10 w-10" />
+                      <Camera className="h-12 w-12" />
                     </button>
-                    <div className="absolute -bottom-2 -right-2 bg-primary text-white p-3.5 rounded-full shadow-2xl border-4 border-white">
-                      <Upload className="h-6 w-6" />
+                    <div className="absolute -bottom-2 -right-2 bg-primary text-white p-5 rounded-full shadow-2xl border-4 border-white">
+                      <Upload className="h-8 w-8" />
                     </div>
                     <input 
                       type="file" 
@@ -186,18 +186,18 @@ export default function SettingsPage() {
                       onChange={handleFileChange}
                     />
                   </div>
-                  <div className="flex-1 space-y-4 w-full">
-                    <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground px-1">Avatar Identity</Label>
+                  <div className="flex-1 space-y-6 w-full">
+                    <Label className="text-[13px] font-black uppercase tracking-[0.2em] text-muted-foreground px-1">Avatar Identity</Label>
                     {formData.photoURL.startsWith('data:') ? (
-                      <div className="flex items-center gap-4 bg-muted/5 p-4 rounded-2xl border border-dashed border-primary/20">
-                        <span className="text-sm font-black text-primary italic">Custom image staged for upload</span>
+                      <div className="flex items-center gap-6 bg-muted/5 p-6 rounded-3xl border-2 border-dashed border-primary/20">
+                        <span className="text-lg font-black text-primary italic">Custom image staged for upload</span>
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="h-10 w-10 text-destructive hover:bg-destructive/10 rounded-xl"
+                          className="h-12 w-12 text-destructive hover:bg-destructive/10 rounded-2xl"
                           onClick={() => setFormData(prev => ({ ...prev, photoURL: '' }))}
                         >
-                          <X className="h-5 w-5" />
+                          <X className="h-6 w-6" />
                         </Button>
                       </div>
                     ) : (
@@ -205,7 +205,7 @@ export default function SettingsPage() {
                         id="photoURL" 
                         name="photoURL" 
                         placeholder="Paste global image URL..." 
-                        className="h-14 border-none bg-muted/10 rounded-2xl font-bold text-lg shadow-inner focus:ring-4 focus:ring-primary/10" 
+                        className="h-16 border-none bg-muted/10 rounded-2xl font-bold text-xl shadow-inner focus:ring-8 focus:ring-primary/10" 
                         value={formData.photoURL}
                         onChange={handleChange}
                       />
@@ -213,52 +213,52 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="grid gap-10 md:grid-cols-2">
-                  <div className="space-y-3">
-                    <Label htmlFor="firstName" className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground px-1">First Name</Label>
+                <div className="grid gap-12 md:grid-cols-2">
+                  <div className="space-y-4">
+                    <Label htmlFor="firstName" className="text-[13px] font-black uppercase tracking-[0.2em] text-muted-foreground px-1">First Name</Label>
                     <Input 
                       id="firstName" 
                       name="firstName" 
                       value={formData.firstName}
                       onChange={handleChange}
                       required 
-                      className="h-14 border-none bg-muted/10 rounded-2xl font-bold text-lg shadow-inner focus:ring-4 focus:ring-primary/10"
+                      className="h-16 border-none bg-muted/10 rounded-2xl font-bold text-xl shadow-inner focus:ring-8 focus:ring-primary/10"
                     />
                   </div>
-                  <div className="space-y-3">
-                    <Label htmlFor="lastName" className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground px-1">Last Name</Label>
+                  <div className="space-y-4">
+                    <Label htmlFor="lastName" className="text-[13px] font-black uppercase tracking-[0.2em] text-muted-foreground px-1">Last Name</Label>
                     <Input 
                       id="lastName" 
                       name="lastName" 
                       value={formData.lastName}
                       onChange={handleChange}
                       required 
-                      className="h-14 border-none bg-muted/10 rounded-2xl font-bold text-lg shadow-inner focus:ring-4 focus:ring-primary/10"
+                      className="h-16 border-none bg-muted/10 rounded-2xl font-bold text-xl shadow-inner focus:ring-8 focus:ring-primary/10"
                     />
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <Label htmlFor="username" className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground px-1">Roster Username</Label>
+                <div className="space-y-4">
+                  <Label htmlFor="username" className="text-[13px] font-black uppercase tracking-[0.2em] text-muted-foreground px-1">Roster Username</Label>
                   <Input 
                     id="username" 
                     name="username" 
                     placeholder="shuttle_master_pro" 
                     value={formData.username}
                     onChange={handleChange}
-                    className="h-14 border-none bg-muted/10 rounded-2xl font-black text-lg shadow-inner focus:ring-4 focus:ring-primary/10"
+                    className="h-16 border-none bg-muted/10 rounded-2xl font-black text-xl shadow-inner focus:ring-8 focus:ring-primary/10"
                   />
-                  <p className="text-[11px] text-muted-foreground font-bold px-1 opacity-60">
+                  <p className="text-[13px] text-muted-foreground font-bold px-1 opacity-60">
                     This public ID identifies you in all archived match histories.
                   </p>
                 </div>
 
-                <div className="pt-12 border-t border-muted/30 flex justify-end">
-                  <Button type="submit" className="w-full h-20 md:w-auto px-16 text-xl font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/30 rounded-2xl transition-all hover:translate-y-[-4px] active:translate-y-0" disabled={saving}>
+                <div className="pt-16 border-t border-muted/30 flex justify-end">
+                  <Button type="submit" className="w-full h-24 md:w-auto px-20 text-2xl font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/30 rounded-3xl transition-all hover:translate-y-[-6px] active:translate-y-0" disabled={saving}>
                     {saving ? (
-                      <Loader2 className="h-6 w-6 animate-spin mr-3" />
+                      <Loader2 className="h-8 w-8 animate-spin mr-4" />
                     ) : (
-                      <Save className="h-6 w-6 mr-3" />
+                      <Save className="h-8 w-8 mr-4" />
                     )}
                     Update Identity
                   </Button>
@@ -268,6 +268,6 @@ export default function SettingsPage() {
           </Card>
         </main>
       </SidebarInset>
-    </div>
+    </>
   );
 }
