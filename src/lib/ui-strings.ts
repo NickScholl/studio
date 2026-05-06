@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview Centralized UI strings for the ShuttleScore application.
  * This file serves as the single source of truth for all user-facing text,
@@ -60,7 +61,7 @@ export const UI_STRINGS = {
     featureAnalyticsDesc: "Unlock tactical trends and automated visualizations for your game.",
   },
   history: {
-    historyTitle: "History",
+    historyTitle: "Match History",
     timeline: "Timeline",
     groups: "Groups",
     tacticalFilters: "Tactical Filters",
@@ -71,7 +72,7 @@ export const UI_STRINGS = {
     resetTactical: "Reset Tactical",
     noMatchData: "No match data found.",
     clearFilters: "Clear Tactical Filters",
-    tacticalHistory: "Tactical History",
+    tacticalHistory: "Match History",
     tacticalDeBrief: "Tactical De-brief",
     fullArchivalMatch: "Full Archival Match Analysis",
     teamAlpha: "Team Alpha (Elite)",

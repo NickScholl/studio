@@ -141,7 +141,7 @@ export default function MatchHistory() {
             <h1 className="text-lg md:text-xl font-black tracking-tight uppercase">{UI_STRINGS.history.historyTitle}</h1>
           </div>
           <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)} className="block">
-            <TabsList className="bg-muted/50 rounded-full h-10 p-1">
+            <TabsList className="bg-muted/5 rounded-full h-10 p-1">
               <TabsTrigger value="list" className="gap-2 rounded-full font-bold px-4 text-xs">
                 <ListIcon className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{UI_STRINGS.history.timeline}</span>
               </TabsTrigger>
@@ -278,7 +278,7 @@ function MatchTable({ title, matches, icon, isOfficial }: { title: string, match
             </div>
           )}
         </div>
-      </header>
+      </CardHeader>
       <CardContent className="p-0">
         <div className="grid grid-cols-1 divide-y divide-muted/10">
           {matches.map((match) => (
