@@ -418,9 +418,9 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
           </div>
         </ScrollArea>
 
-        {/* Floating Edit Action at Bottom Right - Boxy rectangle with cute curved edges */}
-        <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 z-[110]">
-          <Button variant="secondary" size="sm" asChild className="rounded-xl shadow-xl h-10 px-8 flex items-center justify-center font-black text-[10px] uppercase tracking-[0.2em] bg-secondary text-white hover:scale-105 transition-transform">
+        {/* Floating Edit Action at Bottom Right - Smaller Boxy rectangle with cute curved edges */}
+        <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 z-[110]">
+          <Button variant="secondary" size="sm" asChild className="rounded-lg shadow-lg h-7 px-5 flex items-center justify-center font-black text-[9px] uppercase tracking-[0.15em] bg-secondary text-white hover:scale-105 transition-transform opacity-90 hover:opacity-100">
             <Link href={`/matches/${match.id}/edit`}>
               EDIT
             </Link>
