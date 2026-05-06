@@ -1,4 +1,3 @@
-
 /**
  * @fileOverview Centralized UI strings for the ShuttleScore application.
  * This file serves as the single source of truth for all user-facing text,

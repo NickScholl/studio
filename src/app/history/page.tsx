@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -22,7 +21,6 @@ import {
   Swords,
   Info,
   Target,
-  Pencil
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -233,7 +231,7 @@ export default function MatchHistory() {
 
           <div className="space-y-8 pb-24">
             {viewMode === 'list' ? (
-              <MatchTable title={UI_STRINGS.history.tacticalHistory} matches={filteredMatches} />
+              <MatchTable title={UI_STRINGS.history.historyTitle} matches={filteredMatches} />
             ) : (
               Object.entries(groupedByCompetition).map(([comp, compMatches]) => (
                 <MatchTable 
@@ -334,16 +332,16 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
       </DialogTrigger>
       
       <DialogContent className="fixed top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 max-w-[95vw] md:max-w-[800px] w-full bg-white border-none rounded-[1.5rem] shadow-2xl p-0 overflow-hidden z-[100] flex flex-col max-h-[90vh]">
-        <DialogHeader className="bg-slate-50 p-6 md:p-10 border-b border-muted/20 relative shrink-0">
+        <DialogHeader className="bg-slate-50 p-6 md:p-8 border-b border-muted/20 relative shrink-0">
           <div className="flex items-center justify-between mb-4 pr-12">
-            <Badge variant="outline" className="bg-white text-primary border-primary/20 font-black uppercase text-[10px] tracking-widest px-3 py-1">
+            <Badge variant="outline" className="bg-white text-primary border-primary/20 font-black uppercase text-[11px] md:text-sm tracking-widest px-4 py-1.5 shadow-sm">
               {match.competitionName || UI_STRINGS.history.trainingPerformance}
             </Badge>
             <span className="text-muted-foreground font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
               <Clock className="h-3 w-3" /> {new Date(match.matchDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
           </div>
-          <DialogTitle className="text-2xl md:text-4xl font-black tracking-tight text-slate-900">{UI_STRINGS.history.tacticalDeBrief}</DialogTitle>
+          <DialogTitle className="text-xl md:text-2xl font-black tracking-tight text-slate-900">{UI_STRINGS.history.tacticalDeBrief}</DialogTitle>
           <p className="text-muted-foreground font-bold uppercase tracking-widest text-[9px] mt-1 opacity-60">{UI_STRINGS.history.fullArchivalMatch}</p>
         </DialogHeader>
 
