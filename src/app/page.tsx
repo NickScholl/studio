@@ -18,7 +18,9 @@ import {
   Loader2,
   Calendar,
   LayoutGrid,
-  MapPin
+  MapPin,
+  ChevronRight,
+  ArrowUpRight
 } from 'lucide-react';
 import { 
   ChartContainer, 
@@ -42,7 +44,6 @@ export default function Dashboard() {
 
   const matchesQuery = useMemoFirebase(() => {
     if (!db || !user) return null;
-    // We remove the orderBy here to avoid mandatory composite index errors
     return query(
       collection(db, 'matches'),
       where('participantUserIds', 'array-contains', user.uid)
@@ -51,7 +52,6 @@ export default function Dashboard() {
 
   const { data: rawMatches, isLoading: matchesLoading } = useCollection<BadmintonMatch>(matchesQuery);
 
-  // Sort matches in-memory to ensure they show up even without composite indexes
   const matches = React.useMemo(() => {
     if (!rawMatches) return [];
     return [...rawMatches].sort((a, b) => 
@@ -70,7 +70,7 @@ export default function Dashboard() {
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <div className="text-center space-y-4">
           <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
-          <p className="text-sm text-muted-foreground animate-pulse font-medium">Syncing court data...</p>
+          <p className="text-sm text-muted-foreground animate-pulse font-black uppercase tracking-widest">Syncing Pro Stats...</p>
         </div>
       </div>
     );
@@ -92,27 +92,28 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#f0f2f5]">
+    <div className="flex min-h-screen bg-[#f8f9fc]">
       <AppSidebar />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b bg-white/80 backdrop-blur-md px-6 sticky top-0 z-20 shadow-sm">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />
             <div className="flex flex-col">
-              <h1 className="text-lg font-bold text-foreground">Performance Dashboard</h1>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Player: {user.displayName || user.email?.split('@')[0]}</p>
+              <h1 className="text-lg font-black tracking-tight text-foreground uppercase">Court Intel</h1>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black opacity-60">{user.displayName || 'Elite Player'}</p>
             </div>
           </div>
-          <Button asChild variant="default" className="gap-2 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 transition-all rounded-full px-6">
+          <Button asChild className="gap-2 shadow-2xl shadow-primary/20 bg-primary hover:bg-primary/90 transition-all rounded-full px-8 h-10 font-black uppercase text-xs tracking-widest">
             <Link href="/matches/new">
               <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">New Match</span>
+              <span>Record Match</span>
             </Link>
           </Button>
         </header>
 
-        <main className="flex-1 space-y-8 p-6 lg:p-10">
-          <div className="relative w-full h-[320px] md:h-[400px] rounded-[2rem] overflow-hidden shadow-2xl bg-primary">
+        <main className="flex-1 space-y-10 p-6 lg:p-10 max-w-[1600px] mx-auto w-full">
+          {/* Hero Section */}
+          <div className="relative w-full h-[360px] md:h-[440px] rounded-[3rem] overflow-hidden shadow-2xl bg-primary animate-in fade-in duration-1000">
             {heroImage && (
               <Image 
                 src={heroImage.imageUrl} 
@@ -123,148 +124,93 @@ export default function Dashboard() {
                 priority
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-tr from-primary via-primary/60 to-transparent flex flex-col justify-center px-10 md:px-20">
-              <Badge className="w-fit mb-6 bg-white/10 hover:bg-white/20 text-white backdrop-blur-xl border-white/20 px-4 py-1" variant="outline">
-                {matches.length === 0 ? 'READY FOR ACTION' : 'ELITE PERFORMANCE'}
+            <div className="absolute inset-0 bg-gradient-to-tr from-primary via-primary/70 to-transparent flex flex-col justify-center px-10 md:px-20">
+              <Badge className="w-fit mb-8 bg-white/10 hover:bg-white/20 text-white backdrop-blur-xl border-white/20 px-6 py-2 font-black uppercase tracking-[0.2em] text-[10px]" variant="outline">
+                {matches.length === 0 ? 'ROOKIE STATUS' : 'ELITE COMPETITOR'}
               </Badge>
-              <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white mb-6 drop-shadow-md">
-                {matches.length === 0 ? "Begin Your Legacy" : `Smash It, ${user.displayName?.split(' ')[0] || 'Champ'}!`}
+              <h2 className="text-6xl md:text-8xl font-black tracking-tighter text-white mb-6 drop-shadow-2xl">
+                {matches.length === 0 ? "Dominate" : "Smash It!"}
               </h2>
-              <p className="max-w-xl text-white/90 text-xl leading-relaxed mb-10 font-medium">
+              <p className="max-w-xl text-white/90 text-xl md:text-2xl leading-tight mb-12 font-bold tracking-tight opacity-90">
                 {matches.length === 0 
-                  ? "Transform your game. Track every point, analyze every set, and climb the rankings."
-                  : `Total domination. You've conquered ${matches.length} matches. Keep that ${stats.winRatio}% win rate soaring.`}
+                  ? "Track every shuttlecock, analyze every set, and climb the global rankings."
+                  : `You've conquered ${matches.length} matches with a ${stats.winRatio}% win rate. The court is yours.`}
               </p>
               <div className="flex flex-wrap gap-5">
-                <Button asChild size="lg" className="rounded-full h-14 px-12 shadow-2xl bg-white text-primary hover:bg-white/90 font-black text-lg border-none transition-transform hover:scale-105 active:scale-95">
-                   <Link href="/matches/new">{matches.length === 0 ? 'First Match' : 'New Victory'}</Link>
+                <Button asChild size="lg" className="rounded-2xl h-16 px-12 shadow-2xl bg-white text-primary hover:bg-white/90 font-black text-lg border-none transition-all hover:scale-105 active:scale-95 group">
+                   <Link href="/matches/new" className="flex items-center">
+                    New Victory <ArrowUpRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+                   </Link>
                 </Button>
-                {matches.length > 0 && (
-                  <Button variant="outline" asChild size="lg" className="rounded-full h-14 px-12 bg-white/5 text-white border-white/40 backdrop-blur-xl hover:bg-white/10 transition-transform hover:scale-105 active:scale-95">
-                     <Link href="/history">Full History</Link>
-                  </Button>
-                )}
               </div>
             </div>
           </div>
 
-          {matches.length > 0 && (
+          {matches.length > 0 ? (
             <>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                <Card className="border-none shadow-xl shadow-black/5 hover:translate-y-[-4px] transition-all duration-300">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-xs font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
-                      <Activity className="h-3 w-3 text-primary" /> Total Matches
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-5xl font-black tracking-tighter">{stats.totalMatches}</div>
-                    <p className="text-[11px] text-muted-foreground mt-2 font-bold uppercase">Matches tracked</p>
-                  </CardContent>
-                </Card>
-                <Card className="border-none shadow-xl shadow-black/5 hover:translate-y-[-4px] transition-all duration-300">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-xs font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
-                      <Target className="h-3 w-3 text-secondary" /> Win Rate
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-5xl font-black tracking-tighter text-secondary">{stats.winRatio}%</div>
-                    <div className="h-2 w-full bg-muted rounded-full mt-4 overflow-hidden">
-                      <div className="h-full bg-secondary transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(var(--secondary),0.5)]" style={{ width: `${stats.winRatio}%` }} />
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="border-none shadow-xl shadow-primary/20 bg-primary text-primary-foreground hover:translate-y-[-4px] transition-all duration-300">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-xs font-black uppercase opacity-80 tracking-widest flex items-center gap-2">
-                      <Trophy className="h-3 w-3" /> Victories
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-5xl font-black tracking-tighter">{stats.wins}</div>
-                    <p className="text-[11px] opacity-70 mt-2 font-bold uppercase">Games won</p>
-                  </CardContent>
-                </Card>
-                <Card className="border-none shadow-xl shadow-black/5 hover:translate-y-[-4px] transition-all duration-300">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-xs font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
-                      <Frown className="h-3 w-3 text-destructive" /> Losses
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-5xl font-black tracking-tighter text-destructive">{stats.losses}</div>
-                    <p className="text-[11px] text-muted-foreground mt-2 font-bold uppercase">Learning moments</p>
-                  </CardContent>
-                </Card>
+              {/* Quick Stats Grid */}
+              <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                {[
+                  { icon: Activity, title: "Total Matches", value: stats.totalMatches, color: "primary", subtitle: "Archived sessions" },
+                  { icon: Target, title: "Efficiency", value: `${stats.winRatio}%`, color: "secondary", subtitle: "Win percentage" },
+                  { icon: Trophy, title: "Victories", value: stats.wins, color: "primary", invert: true, subtitle: "Matches won" },
+                  { icon: Frown, title: "Learning", value: stats.losses, color: "destructive", subtitle: "Match defeats" }
+                ].map((stat, i) => (
+                  <Card key={i} className={`border-none shadow-2xl shadow-black/5 hover:translate-y-[-6px] transition-all duration-300 rounded-[2rem] overflow-hidden ${stat.invert ? 'bg-primary text-primary-foreground shadow-primary/30' : 'bg-white'}`}>
+                    <CardHeader className="pb-2 px-8 pt-8">
+                      <CardTitle className={`text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 ${stat.invert ? 'opacity-80' : 'text-muted-foreground'}`}>
+                        <stat.icon className={`h-3 w-3 ${stat.invert ? '' : `text-${stat.color}`}`} /> {stat.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="px-8 pb-8">
+                      <div className="text-6xl font-black tracking-tighter">{stat.value}</div>
+                      <p className={`text-[10px] mt-2 font-black uppercase tracking-widest ${stat.invert ? 'opacity-60' : 'text-muted-foreground/60'}`}>{stat.subtitle}</p>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
 
-              <div className="grid gap-8 lg:grid-cols-3">
-                <Card className="lg:col-span-2 border-none shadow-2xl shadow-black/5 flex flex-col overflow-hidden bg-white">
-                  <CardHeader className="border-b bg-muted/5 p-8">
-                    <div className="flex items-center gap-3">
-                      <div className="p-3 bg-primary/10 rounded-2xl">
-                        <LayoutGrid className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-xl font-black tracking-tight">Performance Breakdown</CardTitle>
-                        <CardDescription className="text-xs font-bold uppercase tracking-wider">Visual analytics</CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex-1 p-8 flex items-center justify-center min-h-[400px]">
-                    <ChartContainer config={config} className="w-full max-w-xl">
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={chartData}>
-                          <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: '900' }} />
-                          <YAxis hide />
-                          <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                          <Bar dataKey="value" radius={[12, 12, 0, 0]} barSize={90}>
-                            {chartData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.fill} className="filter drop-shadow-lg" />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </ChartContainer>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-none shadow-2xl shadow-black/5 flex flex-col overflow-hidden bg-white">
-                  <CardHeader className="border-b bg-muted/5 p-8">
+              {/* Main Analytics Hub */}
+              <div className="grid gap-10 lg:grid-cols-5">
+                {/* Recent Action - Summarized History */}
+                <Card className="lg:col-span-2 border-none shadow-2xl shadow-black/5 flex flex-col overflow-hidden bg-white rounded-[3rem]">
+                  <CardHeader className="border-b bg-muted/5 p-10">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 bg-secondary/10 rounded-2xl">
-                          <Calendar className="h-5 w-5 text-secondary" />
+                      <div className="flex items-center gap-4">
+                        <div className="p-4 bg-secondary/10 rounded-2xl">
+                          <Calendar className="h-6 w-6 text-secondary" />
                         </div>
-                        <CardTitle className="text-xl font-black tracking-tight">Recent Action</CardTitle>
+                        <div>
+                          <CardTitle className="text-2xl font-black tracking-tight uppercase">Recent Action</CardTitle>
+                          <CardDescription className="text-[10px] font-black uppercase tracking-widest opacity-60">Last 5 Sessions</CardDescription>
+                        </div>
                       </div>
-                      <Button variant="ghost" size="sm" asChild className="h-10 px-4 text-primary hover:bg-primary/5 font-black uppercase text-xs tracking-widest">
-                        <Link href="/history">View All</Link>
+                      <Button variant="ghost" size="sm" asChild className="h-10 px-5 text-primary hover:bg-primary/5 font-black uppercase text-[10px] tracking-widest rounded-full">
+                        <Link href="/history">Full Log</Link>
                       </Button>
                     </div>
                   </CardHeader>
                   <CardContent className="flex-1 p-0">
-                    <div className="divide-y">
+                    <div className="divide-y divide-muted/30">
                       {recentMatches.map((match) => (
-                        <div key={match.id} className="flex items-center justify-between p-6 hover:bg-muted/30 transition-all group cursor-default">
-                          <div className="flex items-center gap-5">
-                            <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform ${match.result === 'Win' ? 'bg-secondary text-white' : 'bg-destructive text-white'}`}>
-                              {match.result === 'Win' ? <Trophy className="h-6 w-6" /> : <Frown className="h-6 w-6" />}
+                        <div key={match.id} className="flex items-center justify-between p-8 hover:bg-muted/10 transition-all group cursor-default">
+                          <div className="flex items-center gap-6">
+                            <div className={`h-14 w-14 rounded-2xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform ${match.result === 'Win' ? 'bg-secondary text-white shadow-secondary/40' : 'bg-destructive text-white shadow-destructive/40'}`}>
+                              {match.result === 'Win' ? <Trophy className="h-7 w-7" /> : <Frown className="h-7 w-7" />}
                             </div>
                             <div>
-                              <p className="text-base font-black group-hover:text-primary transition-colors">vs {match.opponent}</p>
-                              <div className="flex items-center text-[11px] text-muted-foreground uppercase font-black tracking-tighter mt-1">
-                                <MapPin className="h-3 w-3 mr-1 text-primary/60" /> {match.location}
+                              <p className="text-lg font-black group-hover:text-primary transition-colors tracking-tight">vs {match.opponent}</p>
+                              <div className="flex items-center text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1 opacity-70">
+                                <MapPin className="h-3 w-3 mr-2 text-primary/60" /> {match.location}
                               </div>
                             </div>
                           </div>
                           <div className="text-right">
-                            <Badge variant={match.result === 'Win' ? 'secondary' : 'destructive'} className="text-[10px] px-3 py-1 font-black uppercase tracking-widest">
+                            <Badge variant={match.result === 'Win' ? 'secondary' : 'destructive'} className="text-[9px] px-3 py-1 font-black uppercase tracking-widest shadow-lg">
                               {match.result}
                             </Badge>
-                            <p className="text-sm mt-2 font-mono font-black text-foreground/80">
-                              {match.myScore.join('-')} / {match.opponentScore.join('-')}
+                            <p className="text-base mt-2 font-mono font-black text-foreground/80 tracking-tighter">
+                              {match.myScore.join('-')} | {match.opponentScore.join('-')}
                             </p>
                           </div>
                         </div>
@@ -272,24 +218,54 @@ export default function Dashboard() {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Performance Breakdown - Charts */}
+                <Card className="lg:col-span-3 border-none shadow-2xl shadow-black/5 flex flex-col overflow-hidden bg-white rounded-[3rem]">
+                  <CardHeader className="border-b bg-muted/5 p-10">
+                    <div className="flex items-center gap-4">
+                      <div className="p-4 bg-primary/10 rounded-2xl">
+                        <LayoutGrid className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-2xl font-black tracking-tight uppercase">Win Distribution</CardTitle>
+                        <CardDescription className="text-[10px] font-black uppercase tracking-widest opacity-60">Success metrics visualization</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex-1 p-10 flex items-center justify-center min-h-[440px]">
+                    <ChartContainer config={config} className="w-full max-w-2xl">
+                      <ResponsiveContainer width="100%" height={340}>
+                        <BarChart data={chartData}>
+                          <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: '900', letterSpacing: '0.1em' }} />
+                          <YAxis hide />
+                          <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                          <Bar dataKey="value" radius={[16, 16, 4, 4]} barSize={120}>
+                            {chartData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.fill} className="filter drop-shadow-2xl" />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
               </div>
             </>
-          )}
-
-          {matches.length === 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+          ) : (
+            /* Empty State Features */
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-12">
               {[
-                { icon: Target, title: "Track Accuracy", desc: "Log every point scored and conceded to see your shot consistency and identify patterns." },
-                { icon: Trophy, title: "Win Tournaments", desc: "Group matches by competition to track your path to the podium and view tournament progress." },
-                { icon: TrendingUp, title: "Visual Trends", desc: "Get professional insights into your performance through automated win-loss data visualizations." }
+                { icon: Target, title: "Shot Precision", desc: "Log every point to visualize your efficiency and technical consistency over time." },
+                { icon: Trophy, title: "Event Archiving", desc: "Group matches by tournament to track your championship trajectory and podium finishes." },
+                { icon: TrendingUp, title: "Elite Analytics", desc: "Unlock professional performance trends and automated win-loss data visualizations." }
               ].map((feature, i) => (
-                <Card key={i} className="border-none shadow-xl shadow-black/5 hover:scale-[1.02] transition-all p-6 bg-white rounded-[2rem]">
-                  <CardContent className="pt-6">
-                    <div className="h-16 w-16 rounded-[1.5rem] bg-primary/10 flex items-center justify-center mb-8">
-                      <feature.icon className="h-8 w-8 text-primary" />
+                <Card key={i} className="border-none shadow-2xl shadow-black/5 hover:scale-[1.03] transition-all p-10 bg-white rounded-[3rem]">
+                  <CardContent className="p-0">
+                    <div className="h-20 w-20 rounded-[2rem] bg-primary/10 flex items-center justify-center mb-10 shadow-inner">
+                      <feature.icon className="h-10 w-10 text-primary" />
                     </div>
-                    <h3 className="font-black text-2xl mb-3 tracking-tight">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed font-medium">{feature.desc}</p>
+                    <h3 className="font-black text-3xl mb-4 tracking-tighter uppercase">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed font-bold opacity-70">{feature.desc}</p>
                   </CardContent>
                 </Card>
               ))}
