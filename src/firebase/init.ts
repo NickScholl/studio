@@ -1,5 +1,3 @@
-'use client';
-
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
@@ -13,11 +11,27 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 };
 
-function createFirebaseApp(): FirebaseApp {
-  if (getApps().length > 0) return getApp();
-  return initializeApp(firebaseConfig);
+export function getFirebaseApp(): FirebaseApp {
+  return getApps().length ? getApp() : initializeApp(firebaseConfig);
 }
 
-export const app = createFirebaseApp();
-export const auth: Auth = getAuth(app);
-export const db: Firestore = getFirestore(app);
+export function getFirebaseAuth(app: FirebaseApp): Auth {
+  return getAuth(app);
+}
+
+export function getFirebaseDb(app: FirebaseApp): Firestore {
+  return getFirestore(app);
+}
+
+// client-only exports
+let app: FirebaseApp;
+let auth: Auth;
+let db: Firestore;
+
+if (typeof window !== 'undefined') {
+  app = getFirebaseApp();
+  auth = getFirebaseAuth(app);
+  db = getFirebaseDb(app);
+}
+
+export { app, auth, db };
