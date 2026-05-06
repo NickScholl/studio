@@ -39,25 +39,22 @@ export default function NewMatch() {
   const { data: previousMatches } = useCollection<BadmintonMatch>(matchesQuery);
 
   const suggestions = React.useMemo(() => {
+    const data = { names: new Set<string>(), competitions: new Set<string>(), locations: new Set<string>() };
     if (!previousMatches) return { names: [], competitions: [], locations: [] };
     
-    const names = new Set<string>();
-    const competitions = new Set<string>();
-    const locations = new Set<string>();
-
     previousMatches.forEach(m => {
-      if (m.myName) names.add(m.myName);
-      if (m.opponent) names.add(m.opponent);
-      if (m.partner) names.add(m.partner);
-      if (m.opponentPartner) names.add(m.opponentPartner);
-      if (m.competitionName) competitions.add(m.competitionName);
-      if (m.location) locations.add(m.location);
+      if (m.myName) data.names.add(m.myName);
+      if (m.opponent) data.names.add(m.opponent);
+      if (m.partner) data.names.add(m.partner);
+      if (m.opponentPartner) data.names.add(m.opponentPartner);
+      if (m.competitionName) data.competitions.add(m.competitionName);
+      if (m.location) data.locations.add(m.location);
     });
 
     return {
-      names: Array.from(names).sort(),
-      competitions: Array.from(competitions).sort(),
-      locations: Array.from(locations).sort()
+      names: Array.from(data.names).sort(),
+      competitions: Array.from(data.competitions).sort(),
+      locations: Array.from(data.locations).sort()
     };
   }, [previousMatches]);
 
@@ -106,7 +103,7 @@ export default function NewMatch() {
       await MatchService.addMatch(db, user.uid, matchData);
       
       toast({
-        title: "Match Recorded!",
+        title: "Match Archived",
         description: `Your statistics have been updated successfully.`,
       });
       
@@ -115,8 +112,8 @@ export default function NewMatch() {
       console.error("Save Match Error:", error);
       toast({
         variant: "destructive",
-        title: "Submission Failed",
-        description: error.message || "Could not save match data. Please try again.",
+        title: "Submission Error",
+        description: error.message || "Failed to archive match data.",
       });
       setIsSubmitting(false);
     }
@@ -136,14 +133,14 @@ export default function NewMatch() {
             </Link>
           </Button>
           <div className="h-4 w-px bg-muted mx-2" />
-          <h1 className="text-sm font-black uppercase tracking-widest text-primary">Record Performance</h1>
+          <h1 className="text-xs font-black uppercase tracking-widest text-primary">Performance Entry</h1>
         </header>
 
-        <main className="max-w-3xl mx-auto p-6 lg:p-10 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <main className="max-w-4xl mx-auto p-6 lg:p-10 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
           <Card className="shadow-2xl shadow-black/5 border-none rounded-[2.5rem] overflow-hidden bg-white">
             <CardHeader className="bg-primary/5 px-8 pt-10 pb-8 border-b border-muted/50">
-              <CardTitle className="text-3xl font-black tracking-tighter text-primary">Match Log</CardTitle>
-              <CardDescription className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">Capture every shuttlecock flight</CardDescription>
+              <CardTitle className="text-4xl font-black tracking-tighter text-primary">Match Log</CardTitle>
+              <CardDescription className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground opacity-60">Record every flight of the shuttle</CardDescription>
             </CardHeader>
             <CardContent className="p-8 lg:p-12">
               <form onSubmit={handleSubmit} className="space-y-12">
@@ -156,14 +153,14 @@ export default function NewMatch() {
                       type="date" 
                       required 
                       defaultValue={defaultDate} 
-                      className="h-14 border-none bg-muted/10 rounded-xl focus-visible:ring-primary font-bold"
+                      className="h-14 border-none bg-muted/10 rounded-xl focus-visible:ring-primary font-bold shadow-inner"
                     />
                   </div>
                   <div className="space-y-3">
                     <Label htmlFor="type" className="font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Match Format</Label>
                     <Select value={matchType} onValueChange={(v) => setMatchType(v as MatchType)}>
-                      <SelectTrigger className="h-14 border-none bg-muted/10 rounded-xl focus:ring-primary font-bold">
-                        <SelectValue placeholder="Select type" />
+                      <SelectTrigger className="h-14 border-none bg-muted/10 rounded-xl focus:ring-primary font-bold shadow-inner">
+                        <SelectValue placeholder="Format" />
                       </SelectTrigger>
                       <SelectContent className="bg-white border-none shadow-2xl z-50">
                         <SelectItem value="Singles" className="font-bold">Singles</SelectItem>
@@ -176,15 +173,15 @@ export default function NewMatch() {
 
                 <div className="grid gap-8 md:grid-cols-2">
                   <div className="space-y-3">
-                    <Label htmlFor="competitionName" className="font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Competition / Tournament</Label>
+                    <Label htmlFor="competitionName" className="font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Tournament / Event</Label>
                     <div className="relative">
                       <Trophy className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                       <Input 
                         id="competitionName" 
                         name="competitionName" 
                         list="competition-list"
-                        placeholder="e.g. Club Finals" 
-                        className="pl-12 h-14 border-none bg-muted/10 rounded-xl focus-visible:ring-primary font-bold" 
+                        placeholder="e.g. City Open" 
+                        className="pl-12 h-14 border-none bg-muted/10 rounded-xl focus-visible:ring-primary font-bold shadow-inner" 
                       />
                       <datalist id="competition-list">
                         {suggestions.competitions.map(c => <option key={c} value={c} />)}
@@ -192,15 +189,15 @@ export default function NewMatch() {
                     </div>
                   </div>
                   <div className="space-y-3">
-                    <Label htmlFor="location" className="font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Arena / Location</Label>
+                    <Label htmlFor="location" className="font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Arena Venue</Label>
                     <div className="relative">
                       <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
                       <Input 
                         id="location" 
                         name="location" 
                         list="location-list"
-                        placeholder="e.g. National Stadium" 
-                        className="pl-12 h-14 border-none bg-muted/10 rounded-xl focus-visible:ring-primary font-bold" 
+                        placeholder="e.g. Center Court" 
+                        className="pl-12 h-14 border-none bg-muted/10 rounded-xl focus-visible:ring-primary font-bold shadow-inner" 
                         required 
                       />
                       <datalist id="location-list">
@@ -211,10 +208,10 @@ export default function NewMatch() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="result" className="font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Overall Outcome</Label>
+                  <Label htmlFor="result" className="font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Match Outcome</Label>
                   <Select name="result" defaultValue="Win">
-                    <SelectTrigger className="h-14 border-none bg-muted/10 rounded-xl focus:ring-primary font-black uppercase text-xs tracking-widest">
-                      <SelectValue placeholder="Match outcome" />
+                    <SelectTrigger className="h-14 border-none bg-muted/10 rounded-xl focus:ring-primary font-black uppercase text-xs tracking-widest shadow-inner">
+                      <SelectValue placeholder="Outcome" />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-none shadow-2xl z-50">
                       <SelectItem value="Win" className="font-black text-secondary">VICTORY (WIN)</SelectItem>
@@ -225,40 +222,40 @@ export default function NewMatch() {
 
                 <div className="grid gap-8 md:grid-cols-2">
                   <Card className="border-none shadow-xl shadow-black/5 bg-muted/5 rounded-3xl overflow-hidden">
-                    <CardHeader className="pb-4 bg-primary/10">
+                    <CardHeader className="pb-4 bg-primary/10 px-6 pt-6">
                       <CardTitle className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-primary">
-                        <User className="h-3 w-3" /> Team Alpha
+                        <User className="h-3 w-3" /> Side A (You)
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-6 pt-6 px-6">
+                    <CardContent className="space-y-6 pt-6 px-6 pb-8">
                       <div className="space-y-2">
-                        <Label htmlFor="myName" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Your Name</Label>
-                        <Input id="myName" name="myName" list="name-list" defaultValue={user?.displayName || ''} required className="h-12 border-none bg-white rounded-xl font-bold" />
+                        <Label htmlFor="myName" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Primary Player</Label>
+                        <Input id="myName" name="myName" list="name-list" defaultValue={user?.displayName || ''} required className="h-12 border-none bg-white rounded-xl font-bold shadow-sm" />
                       </div>
                       {isDoubles && (
                         <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                           <Label htmlFor="partner" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Partner</Label>
-                          <Input id="partner" name="partner" list="name-list" placeholder="Teammate Name" required={isDoubles} className="h-12 border-none bg-white rounded-xl font-bold" />
+                          <Input id="partner" name="partner" list="name-list" placeholder="Teammate Name" required={isDoubles} className="h-12 border-none bg-white rounded-xl font-bold shadow-sm" />
                         </div>
                       )}
                     </CardContent>
                   </Card>
 
                   <Card className="border-none shadow-xl shadow-black/5 bg-muted/5 rounded-3xl overflow-hidden">
-                    <CardHeader className="pb-4 bg-muted/20">
+                    <CardHeader className="pb-4 bg-muted/20 px-6 pt-6">
                       <CardTitle className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-muted-foreground">
-                        <Swords className="h-3 w-3" /> Team Bravo
+                        <Swords className="h-3 w-3" /> Side B (Rivals)
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-6 pt-6 px-6">
+                    <CardContent className="space-y-6 pt-6 px-6 pb-8">
                       <div className="space-y-2">
                         <Label htmlFor="opponent" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Opponent 1</Label>
-                        <Input id="opponent" name="opponent" list="name-list" placeholder="Rival Name" required className="h-12 border-none bg-white rounded-xl font-bold" />
+                        <Input id="opponent" name="opponent" list="name-list" placeholder="Rival Name" required className="h-12 border-none bg-white rounded-xl font-bold shadow-sm" />
                       </div>
                       {isDoubles && (
                         <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                           <Label htmlFor="opponentPartner" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Opponent 2</Label>
-                          <Input id="opponentPartner" name="opponentPartner" list="name-list" placeholder="Rival Partner" required={isDoubles} className="h-12 border-none bg-white rounded-xl font-bold" />
+                          <Input id="opponentPartner" name="opponentPartner" list="name-list" placeholder="Rival Partner" required={isDoubles} className="h-12 border-none bg-white rounded-xl font-bold shadow-sm" />
                         </div>
                       )}
                     </CardContent>
@@ -278,12 +275,12 @@ export default function NewMatch() {
                     {[1, 2, 3].map((set) => (
                       <div key={set} className="space-y-4">
                         <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                          {set === 3 ? "Set 3 (Tie-breaker)" : `Set ${set}`}
+                          {set === 3 ? "Set 3 (Decision)" : `Set ${set}`}
                         </Label>
                         <div className="flex items-center gap-3">
-                          <Input name={`set${set}_mine`} placeholder="You" type="number" required={set < 3} className="text-center h-14 font-black text-lg bg-primary/5 border-none rounded-xl" />
+                          <Input name={`set${set}_mine`} placeholder="A" type="number" required={set < 3} className="text-center h-14 font-black text-xl bg-primary/5 border-none rounded-xl shadow-inner" />
                           <span className="text-muted-foreground font-black">:</span>
-                          <Input name={`set${set}_opp`} placeholder="Opp" type="number" required={set < 3} className="text-center h-14 font-black text-lg bg-muted/20 border-none rounded-xl" />
+                          <Input name={`set${set}_opp`} placeholder="B" type="number" required={set < 3} className="text-center h-14 font-black text-xl bg-muted/20 border-none rounded-xl shadow-inner" />
                         </div>
                       </div>
                     ))}
@@ -291,12 +288,12 @@ export default function NewMatch() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="notes" className="font-black text-[10px] uppercase tracking-widest text-muted-foreground">Technical Notes</Label>
+                  <Label htmlFor="notes" className="font-black text-[10px] uppercase tracking-widest text-muted-foreground">Tactical Notes</Label>
                   <Textarea 
                     id="notes" 
                     name="notes" 
-                    placeholder="Strategies, shot patterns, or physical state..." 
-                    className="min-h-[140px] border-none bg-muted/10 rounded-2xl p-6 font-medium focus-visible:ring-primary" 
+                    placeholder="Strategies, patterns, or physical notes..." 
+                    className="min-h-[160px] border-none bg-muted/10 rounded-2xl p-6 font-medium focus-visible:ring-primary shadow-inner" 
                   />
                 </div>
 
@@ -308,9 +305,9 @@ export default function NewMatch() {
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
-                      <><Loader2 className="h-5 w-5 animate-spin mr-3" /> ARCHIVING DATA...</>
+                      <><Loader2 className="h-5 w-5 animate-spin mr-3" /> COMMITTING DATA...</>
                     ) : (
-                      <><Check className="h-5 w-5 mr-3" /> COMMIT PERFORMANCE</>
+                      <><Check className="h-5 w-5 mr-3" /> ARCHIVE PERFORMANCE</>
                     )}
                   </Button>
                   <Button 
@@ -321,7 +318,7 @@ export default function NewMatch() {
                     asChild
                     disabled={isSubmitting}
                   >
-                    <Link href="/">ABORT</Link>
+                    <Link href="/">CANCEL</Link>
                   </Button>
                 </div>
               </form>
