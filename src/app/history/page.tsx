@@ -331,7 +331,7 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
         </div>
       </DialogTrigger>
       
-      <DialogContent className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[95vw] md:max-w-[800px] w-full bg-white border-none rounded-[1.5rem] shadow-2xl p-0 overflow-hidden z-[100] flex flex-col max-h-[90vh]">
+      <DialogContent className="fixed top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 max-w-[95vw] md:max-w-[800px] w-full bg-white border-none rounded-[1.5rem] shadow-2xl p-0 overflow-hidden z-[100] flex flex-col max-h-[90vh]">
         <DialogHeader className="bg-slate-50 p-6 md:p-10 border-b border-muted/20 relative shrink-0">
           <div className="flex items-center justify-between mb-4 pr-12">
             <Badge variant="outline" className="bg-white text-primary border-primary/20 font-black uppercase text-[10px] tracking-widest px-3 py-1">
@@ -418,9 +418,9 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
           </div>
         </ScrollArea>
 
-        {/* Floating Edit Action at Bottom Right */}
+        {/* Floating Edit Action at Bottom Right - Boxy rectangle with cute curved edges */}
         <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 z-[110]">
-          <Button variant="secondary" size="sm" asChild className="rounded-full shadow-2xl h-10 px-6 p-0 flex items-center justify-center hover:scale-110 transition-transform font-black text-[10px] uppercase tracking-[0.2em] bg-secondary text-white">
+          <Button variant="secondary" size="sm" asChild className="rounded-xl shadow-xl h-10 px-8 flex items-center justify-center font-black text-[10px] uppercase tracking-[0.2em] bg-secondary text-white hover:scale-105 transition-transform">
             <Link href={`/matches/${match.id}/edit`}>
               EDIT
             </Link>
