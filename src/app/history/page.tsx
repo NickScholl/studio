@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -277,7 +278,7 @@ function MatchTable({ title, matches, icon, isOfficial }: { title: string, match
             </div>
           )}
         </div>
-      </CardHeader>
+      </header>
       <CardContent className="p-0">
         <div className="grid grid-cols-1 divide-y divide-muted/10">
           {matches.map((match) => (

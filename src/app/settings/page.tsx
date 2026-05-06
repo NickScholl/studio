@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -14,6 +15,7 @@ import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Camera, Loader2, Save, Upload, X } from 'lucide-react';
 import { updateProfile } from 'firebase/auth';
+import placeholderData from '@/app/lib/placeholder-images.json';
 import { UI_STRINGS } from '@/lib/ui-strings';
 
 export default function SettingsPage() {
@@ -23,6 +25,8 @@ export default function SettingsPage() {
   const db = useFirestore();
   const [saving, setSaving] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const defaultAvatar = placeholderData.placeholderImages.find(img => img.id === 'user-avatar')?.imageUrl;
 
   const userProfileRef = useMemoFirebase(() => {
     if (!db || !user) return null;
@@ -50,7 +54,7 @@ export default function SettingsPage() {
         firstName: profile.firstName || '',
         lastName: profile.lastName || '',
         username: profile.username || '',
-        photoURL: profile.photoURL || '',
+        photoURL: profile.photoURL || defaultAvatar || '',
       });
     } else if (user) {
       const names = user.displayName?.split(' ') || ['', ''];
@@ -58,10 +62,10 @@ export default function SettingsPage() {
         firstName: names[0] || '',
         lastName: names.slice(1).join(' ') || '',
         username: user.email?.split('@')[0] || '',
-        photoURL: user.photoURL || '',
+        photoURL: user.photoURL || defaultAvatar || '',
       });
     }
-  }, [profile, user]);
+  }, [profile, user, defaultAvatar]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
