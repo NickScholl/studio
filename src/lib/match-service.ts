@@ -62,14 +62,12 @@ export const MatchService = {
     const losses = totalMatches - wins;
     const winRatio = totalMatches > 0 ? (wins / totalMatches) * 100 : 0;
 
-    // Advanced analytics
     const partnerCounts: Record<string, number> = {};
     const winPartnerCounts: Record<string, number> = {};
     const lossOpponentCounts: Record<string, number> = {};
     const winOpponentCounts: Record<string, number> = {};
 
     matches.forEach(m => {
-      // Partner Stats
       if (m.partner) {
         partnerCounts[m.partner] = (partnerCounts[m.partner] || 0) + 1;
         if (m.result === 'Win') {
@@ -77,7 +75,6 @@ export const MatchService = {
         }
       }
 
-      // Opponent Stats
       if (m.result === 'Loss') {
         lossOpponentCounts[m.opponent] = (lossOpponentCounts[m.opponent] || 0) + 1;
         if (m.opponentPartner) {
@@ -108,11 +105,6 @@ export const MatchService = {
       wins,
       losses,
       winRatio: Math.round(winRatio * 10) / 10,
-      matchesByType: {
-        Singles: matches.filter(m => m.matchType === 'Singles').length,
-        Doubles: matches.filter(m => m.matchType === 'Doubles').length,
-        MixedDoubles: matches.filter(m => m.matchType === 'Mixed Doubles').length,
-      },
       bestAlly: findMax(winPartnerCounts),
       frequentPartner: findMax(partnerCounts),
       nemesis: findMax(lossOpponentCounts),

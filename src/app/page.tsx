@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -67,6 +68,19 @@ export default function Dashboard() {
     }
   }, [user, isUserLoading, router]);
 
+  const stats = React.useMemo(() => MatchService.calculateStats(matches), [matches]);
+  const recentMatches = React.useMemo(() => matches.slice(0, 5), [matches]);
+
+  const chartData = React.useMemo(() => [
+    { name: 'Wins', value: stats.wins, fill: 'hsl(var(--secondary))' },
+    { name: 'Losses', value: stats.losses, fill: 'hsl(var(--destructive))' },
+  ], [stats]);
+
+  const chartConfig = {
+    wins: { label: "Wins", color: "hsl(var(--secondary))" },
+    losses: { label: "Losses", color: "hsl(var(--destructive))" },
+  };
+
   if (isUserLoading || (user && matchesLoading)) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -79,19 +93,6 @@ export default function Dashboard() {
   }
 
   if (!user) return null;
-
-  const stats = MatchService.calculateStats(matches);
-  const recentMatches = matches.slice(0, 5);
-
-  const chartData = [
-    { name: 'Wins', value: stats.wins, fill: 'hsl(var(--secondary))' },
-    { name: 'Losses', value: stats.losses, fill: 'hsl(var(--destructive))' },
-  ];
-
-  const config = {
-    wins: { label: "Wins", color: "hsl(var(--secondary))" },
-    losses: { label: "Losses", color: "hsl(var(--destructive))" },
-  };
 
   return (
     <div className="flex min-h-screen bg-[#f8f9fc]">
@@ -114,7 +115,6 @@ export default function Dashboard() {
         </header>
 
         <main className="flex-1 space-y-10 p-6 lg:p-10 max-w-full mx-auto w-full">
-          {/* Hero Section */}
           <div className="relative w-full h-[360px] md:h-[400px] rounded-[2.5rem] overflow-hidden shadow-2xl bg-primary animate-in fade-in duration-1000">
             {heroImage && (
               <Image 
@@ -136,7 +136,7 @@ export default function Dashboard() {
               <p className="max-w-xl text-white/90 text-lg md:text-xl leading-tight mb-10 font-bold tracking-tight opacity-90">
                 {matches.length === 0 
                   ? "Track every shuttlecock, analyze every set, and climb the rankings."
-                  : `Conquered ${matches.length} matches with a ${stats.winRatio}% win rate. The court is yours.`}
+                  : `Conquered ${matches.length} matches with a ${stats.winRatio}% win rate.`}
               </p>
               <div className="flex flex-wrap gap-4">
                 <Button asChild size="lg" className="rounded-xl h-14 px-10 shadow-xl bg-white text-primary hover:bg-white/90 font-black text-base border-none transition-all hover:scale-105 active:scale-95 group">
@@ -150,7 +150,6 @@ export default function Dashboard() {
 
           {matches.length > 0 ? (
             <>
-              {/* Rivalries & Alliances */}
               <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 {[
                   { icon: Zap, title: "Best Ally", value: stats.bestAlly, color: "text-secondary", bgColor: "bg-secondary/10", subtitle: "Most wins together" },
@@ -177,9 +176,7 @@ export default function Dashboard() {
                 ))}
               </div>
 
-              {/* Main Analytics Hub */}
               <div className="grid gap-8 grid-cols-1 lg:grid-cols-5">
-                {/* Recent Action */}
                 <Card className="lg:col-span-2 border-none shadow-2xl shadow-black/5 flex flex-col overflow-hidden bg-white rounded-[2.5rem]">
                   <CardHeader className="border-b bg-muted/5 p-8">
                     <div className="flex items-center justify-between">
@@ -229,7 +226,6 @@ export default function Dashboard() {
                   </CardContent>
                 </Card>
 
-                {/* Performance Breakdown */}
                 <Card className="lg:col-span-3 border-none shadow-2xl shadow-black/5 flex flex-col overflow-hidden bg-white rounded-[2.5rem]">
                   <CardHeader className="border-b bg-muted/5 p-8">
                     <div className="flex items-center gap-4">
@@ -241,7 +237,7 @@ export default function Dashboard() {
                     </div>
                   </CardHeader>
                   <CardContent className="flex-1 p-8 flex items-center justify-center min-h-[360px]">
-                    <ChartContainer config={config} className="w-full h-full min-h-[280px]">
+                    <ChartContainer config={chartConfig} className="w-full h-full min-h-[280px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={chartData}>
                           <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: '900', letterSpacing: '0.1em' }} />
@@ -259,7 +255,6 @@ export default function Dashboard() {
                 </CardContent>
               </div>
 
-              {/* Quick Stats Grid */}
               <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 {[
                   { icon: Activity, title: "Matches", value: stats.totalMatches, color: "primary", subtitle: "Total Archive" },
