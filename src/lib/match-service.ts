@@ -40,18 +40,22 @@ export const MatchService = {
       participantUserIds: [userId], 
       createdAt: serverTimestamp(),
       competitionName: match.competitionName || 'Casual / Friendly',
+      // Ensure date is in ISO format if not already
+      matchDate: new Date(match.matchDate).toISOString(),
     };
 
     // Use a try/catch inside a promise to handle potential immediate local failures
-    // though the standard .catch is primarily for server-side permission denials
-    addDoc(matchesRef, docData).catch((error) => {
+    return addDoc(matchesRef, docData).catch((error) => {
       console.error("Firestore AddDoc Error:", error);
-      const permissionError = new FirestorePermissionError({
-        path: matchesRef.path,
-        operation: 'create',
-        requestResourceData: docData,
-      });
-      errorEmitter.emit('permission-error', permissionError);
+      if (error.code === 'permission-denied') {
+        const permissionError = new FirestorePermissionError({
+          path: matchesRef.path,
+          operation: 'create',
+          requestResourceData: docData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      }
+      throw error;
     });
   },
 
