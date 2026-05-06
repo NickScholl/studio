@@ -7,28 +7,29 @@ import { getFirestore, Firestore } from 'firebase/firestore';
 
 /**
  * Robust Firebase initialization for Cloudflare and SSR environments.
- * Ensures initializeApp is always called with the explicit config.
+ * This pattern ensures we never attempt "automatic" initialization which fails on Cloudflare.
  */
-export function initializeFirebase(): { firebaseApp: FirebaseApp; auth: Auth; firestore: Firestore } {
-  let firebaseApp: FirebaseApp;
+let firebaseApp: FirebaseApp;
+let auth: Auth;
+let firestore: Firestore;
 
+export function initializeFirebase(): { firebaseApp: FirebaseApp; auth: Auth; firestore: Firestore } {
   const apps = getApps();
+  
   if (apps.length > 0) {
     firebaseApp = apps[0];
   } else {
-    // We catch potential initialization errors during edge cases
-    try {
-      firebaseApp = initializeApp(firebaseConfig);
-    } catch (e) {
-      // If initialization still fails, we attempt to retrieve the existing app
-      firebaseApp = getApp();
-    }
+    // Explicitly initialize with config to avoid "app/no-options" error on Cloudflare
+    firebaseApp = initializeApp(firebaseConfig);
   }
+
+  auth = getAuth(firebaseApp);
+  firestore = getFirestore(firebaseApp);
 
   return {
     firebaseApp,
-    auth: getAuth(firebaseApp),
-    firestore: getFirestore(firebaseApp)
+    auth,
+    firestore
   };
 }
 
