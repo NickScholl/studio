@@ -6,16 +6,6 @@ import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { BadmintonMatch } from '@/lib/match-service';
 import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
   Search, 
   X, 
   Activity, 
@@ -30,7 +20,8 @@ import {
   MapPin,
   Calendar,
   Swords,
-  Info
+  Info,
+  Target
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -47,6 +38,8 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 export default function MatchHistory() {
   const { user, isUserLoading } = useUser();
