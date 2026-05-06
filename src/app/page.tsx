@@ -115,7 +115,7 @@ export default function Dashboard() {
         </header>
 
         <main className="flex-1 space-y-6 md:space-y-10 p-4 md:p-10 max-w-full mx-auto w-full">
-          <div className="relative w-full h-[320px] md:h-[400px] rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl bg-primary animate-in fade-in duration-1000">
+          <div className="relative w-full h-[280px] md:h-[350px] rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl bg-primary animate-in fade-in duration-1000">
             {heroImage && (
               <Image 
                 src={heroImage.imageUrl} 
@@ -130,10 +130,10 @@ export default function Dashboard() {
               <Badge className="w-fit mb-4 md:mb-6 bg-white/10 hover:bg-white/20 text-white backdrop-blur-xl border-white/20 px-3 py-1 font-black uppercase tracking-[0.2em] text-[9px] md:text-[10px]" variant="outline">
                 {matches.length === 0 ? 'ROOKIE STATUS' : 'ELITE COMPETITOR'}
               </Badge>
-              <h2 className="text-3xl md:text-7xl font-black tracking-tighter text-white mb-2 md:mb-4 drop-shadow-2xl leading-tight">
+              <h2 className="text-3xl md:text-6xl font-black tracking-tighter text-white mb-2 md:mb-4 drop-shadow-2xl leading-tight">
                 {matches.length === 0 ? "Dominate the Court" : "Smash the Limits"}
               </h2>
-              <p className="max-w-xl text-white/90 text-sm md:text-xl leading-tight mb-6 md:mb-10 font-bold tracking-tight opacity-90">
+              <p className="max-w-xl text-white/90 text-sm md:text-lg leading-tight mb-6 md:mb-8 font-bold tracking-tight opacity-90">
                 {matches.length === 0 
                   ? "Track every shuttlecock, analyze every set, and climb the rankings."
                   : `Conquered ${matches.length} matches with a ${stats.winRatio}% win rate.`}
@@ -166,7 +166,7 @@ export default function Dashboard() {
                       </div>
                     </CardHeader>
                     <CardContent className="px-4 pb-4 md:px-6 md:pb-6">
-                      <div className="text-sm md:text-xl font-black tracking-tighter truncate">{stat.value}</div>
+                      <div className="text-sm md:text-lg font-black tracking-tighter truncate">{stat.value}</div>
                       <p className="text-[8px] md:text-[9px] mt-0.5 font-black uppercase tracking-widest text-muted-foreground/50">{stat.subtitle}</p>
                     </CardContent>
                   </Card>
@@ -228,19 +228,19 @@ export default function Dashboard() {
                     <div className="flex items-center gap-4">
                       <LayoutGrid className="h-4 w-4 md:h-5 md:w-5 text-primary" />
                       <div>
-                        <CardTitle className="text-lg md:text-xl font-black tracking-tight uppercase">Performance Distribution</CardTitle>
+                        <CardTitle className="text-lg md:text-xl font-black tracking-tight uppercase">Win Distribution</CardTitle>
                         <CardDescription className="text-[9px] md:text-[10px] font-black uppercase tracking-widest opacity-60">Victory Metrics</CardDescription>
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="flex-1 p-4 md:p-8 flex items-center justify-center min-h-[300px] md:min-h-[360px]">
-                    <ChartContainer config={chartConfig} className="w-full h-full min-h-[240px]">
+                  <CardContent className="flex-1 p-4 md:p-8 flex items-center justify-center min-h-[250px] md:min-h-[300px]">
+                    <ChartContainer config={chartConfig} className="w-full h-full min-h-[200px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={chartData}>
                           <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: '900', letterSpacing: '0.1em' }} />
                           <YAxis hide />
                           <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                          <Bar dataKey="value" radius={[8, 8, 4, 4]} barSize={window?.innerWidth < 768 ? 40 : 80}>
+                          <Bar dataKey="value" radius={[8, 8, 4, 4]} barSize={40}>
                             {chartData.map((entry, index) => (
                               <Cell key={`cell-${index}`} fill={entry.fill} className="drop-shadow-xl" />
                             ))}
@@ -266,7 +266,7 @@ export default function Dashboard() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="px-4 pb-4 md:px-6 md:pb-6">
-                      <div className="text-3xl md:text-5xl font-black tracking-tighter">{stat.value}</div>
+                      <div className="text-2xl md:text-3xl font-black tracking-tighter">{stat.value}</div>
                       <p className={`text-[8px] md:text-[9px] mt-0.5 font-black uppercase tracking-widest ${stat.invert ? 'opacity-50' : 'text-muted-foreground/50'}`}>{stat.subtitle}</p>
                     </CardContent>
                   </Card>

@@ -154,9 +154,9 @@ export default function MatchHistory() {
                   <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Search Players</Label>
                   <div className="relative group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                    <Input 
+                    <input 
                       placeholder="Name..." 
-                      className="pl-12 h-11 md:h-12 bg-muted/10 border-none focus-visible:ring-primary rounded-xl"
+                      className="w-full pl-12 h-11 md:h-12 bg-muted/10 border-none focus:outline-none focus:ring-2 focus:ring-primary rounded-xl font-bold px-4"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />

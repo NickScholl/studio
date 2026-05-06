@@ -67,7 +67,7 @@ export function AppSidebar() {
     { name: "Settings", icon: Settings, path: "/settings" },
   ];
 
-  const displayName = profile?.username || profile?.firstName ? `${profile.firstName} ${profile.lastName}`.trim() : user?.displayName || 'Player';
+  const displayName = profile?.username || (profile?.firstName ? `${profile.firstName} ${profile.lastName}`.trim() : user?.displayName || 'Player');
   const photoURL = profile?.photoURL || user?.photoURL || undefined;
 
   return (
