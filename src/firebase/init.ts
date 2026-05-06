@@ -12,6 +12,9 @@ const firebaseConfig = {
 };
 
 export function getFirebaseApp(): FirebaseApp {
+  if (typeof window === 'undefined') {
+    throw new Error('Firebase should only run on client');
+  }
   return getApps().length ? getApp() : initializeApp(firebaseConfig);
 }
 
@@ -22,16 +25,3 @@ export function getFirebaseAuth(app: FirebaseApp): Auth {
 export function getFirebaseDb(app: FirebaseApp): Firestore {
   return getFirestore(app);
 }
-
-// client-only exports
-let app: FirebaseApp;
-let auth: Auth;
-let db: Firestore;
-
-if (typeof window !== 'undefined') {
-  app = getFirebaseApp();
-  auth = getFirebaseAuth(app);
-  db = getFirebaseDb(app);
-}
-
-export { app, auth, db };
