@@ -1,11 +1,10 @@
+
 import { 
   collection, 
   addDoc, 
   serverTimestamp, 
   Firestore,
 } from 'firebase/firestore';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 
 export type MatchType = 'Singles' | 'Doubles' | 'Mixed Doubles';
 export type MatchResult = 'Win' | 'Loss';
@@ -30,33 +29,30 @@ export interface BadmintonMatch {
 }
 
 export const MatchService = {
-  addMatch: (db: Firestore, userId: string, match: Omit<BadmintonMatch, 'id' | 'submittedByUserId' | 'participantUserIds'>) => {
+  addMatch: async (db: Firestore, userId: string, match: Omit<BadmintonMatch, 'id' | 'submittedByUserId' | 'participantUserIds'>) => {
     const matchesRef = collection(db, 'matches');
     
-    // Ensure all required fields for Security Rules and grouping are present
+    // Explicitly construct the data for Firestore to ensure rules pass
     const docData = {
-      ...match,
+      matchDate: new Date(match.matchDate).toISOString(),
+      matchType: match.type || match.matchType,
+      competitionName: match.competitionName || 'Casual / Friendly',
+      myName: match.myName,
+      opponent: match.opponent,
+      partner: match.partner || null,
+      opponentPartner: match.opponentPartner || null,
+      location: match.location,
+      myScore: match.myScore,
+      opponentScore: match.opponentScore,
+      result: match.result,
+      notes: match.notes || '',
       submittedByUserId: userId,
       participantUserIds: [userId], 
       createdAt: serverTimestamp(),
-      competitionName: match.competitionName || 'Casual / Friendly',
-      // Ensure date is in ISO format if not already
-      matchDate: new Date(match.matchDate).toISOString(),
     };
 
-    // Use a try/catch inside a promise to handle potential immediate local failures
-    return addDoc(matchesRef, docData).catch((error) => {
-      console.error("Firestore AddDoc Error:", error);
-      if (error.code === 'permission-denied') {
-        const permissionError = new FirestorePermissionError({
-          path: matchesRef.path,
-          operation: 'create',
-          requestResourceData: docData,
-        });
-        errorEmitter.emit('permission-error', permissionError);
-      }
-      throw error;
-    });
+    // Return the promise so the caller can await success
+    return addDoc(matchesRef, docData);
   },
 
   calculateStats: (matches: BadmintonMatch[]) => {

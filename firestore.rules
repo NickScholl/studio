@@ -13,7 +13,8 @@ service cloud.firestore {
     }
 
     match /matches/{matchId} {
-      // Allow all signed-in users to list matches (app filters them by participantUserIds)
+      // Allow all signed-in users to read and list matches
+      // The application filters these matches by participantUserIds locally or via queries
       allow read, list: if isSignedIn();
       
       // Allow creation if the submittedByUserId matches the auth UID

@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { MatchService, MatchType, MatchResult } from '@/lib/match-service';
-import { ChevronLeft, MapPin, Target, User, Swords, Trophy } from 'lucide-react';
+import { ChevronLeft, MapPin, Target, User, Swords, Trophy, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useUser, useFirestore } from '@/firebase';
 
@@ -38,7 +38,7 @@ export default function NewMatch() {
     setDefaultDate(new Date().toISOString().split('T')[0]);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user || !db) return;
     
@@ -47,7 +47,7 @@ export default function NewMatch() {
     const matchData = {
       date: formData.get('date') as string,
       type: matchType,
-      competitionName: formData.get('competitionName') as string || '',
+      competitionName: (formData.get('competitionName') as string) || 'Casual / Friendly',
       myName: formData.get('myName') as string,
       opponent: formData.get('opponent') as string,
       partner: isDoubles ? (formData.get('partner') as string) : undefined,
@@ -69,17 +69,22 @@ export default function NewMatch() {
     };
 
     try {
-      MatchService.addMatch(db, user.uid, matchData);
+      // Crucial: Await the save to ensure it completes before redirecting
+      await MatchService.addMatch(db, user.uid, matchData);
+      
       toast({
-        title: "Match Submitted!",
-        description: `Your match has been recorded.`,
+        title: "Match Recorded!",
+        description: `Victory has been logged to your history.`,
       });
+      
       router.push('/');
-    } catch (error) {
+      router.refresh();
+    } catch (error: any) {
+      console.error("Save Match Error:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to save match data.",
+        title: "Submission Failed",
+        description: error.message || "Could not save match data. Check your connection and try again.",
       });
     } finally {
       setLoading(false);
@@ -92,43 +97,43 @@ export default function NewMatch() {
     <div className="flex min-h-screen">
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6">
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6 bg-white sticky top-0 z-10">
           <SidebarTrigger className="-ml-1" />
           <Button variant="ghost" size="icon" asChild className="mr-2">
             <Link href="/">
               <ChevronLeft className="h-4 w-4" />
             </Link>
           </Button>
-          <h1 className="text-lg font-headline font-semibold">Submit Match Results</h1>
+          <h1 className="text-lg font-bold">Record Match Results</h1>
         </header>
 
-        <main className="max-w-3xl mx-auto p-6 lg:p-10 w-full">
-          <Card className="shadow-lg border-2 border-primary/5">
-            <CardHeader className="bg-primary/5 rounded-t-lg">
-              <CardTitle>Match Details</CardTitle>
-              <CardDescription>Enter the players, scores, and competition info.</CardDescription>
+        <main className="max-w-3xl mx-auto p-6 lg:p-10 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <Card className="shadow-xl border-none">
+            <CardHeader className="bg-primary/5 rounded-t-lg border-b">
+              <CardTitle className="text-xl">Match Stats</CardTitle>
+              <CardDescription>Log the details of your latest appearance on court.</CardDescription>
             </CardHeader>
-            <CardContent className="p-6">
-              <form onSubmit={handleSubmit} className="space-y-8">
-                <div className="grid gap-6 md:grid-cols-2">
+            <CardContent className="p-8">
+              <form onSubmit={handleSubmit} className="space-y-10">
+                <div className="grid gap-8 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="date">Match Date</Label>
+                    <Label htmlFor="date" className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Match Date</Label>
                     <Input 
                       id="date" 
                       name="date" 
                       type="date" 
                       required 
                       defaultValue={defaultDate} 
-                      key={defaultDate} 
+                      className="h-12 border-2"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="type">Match Type</Label>
+                    <Label htmlFor="type" className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Match Type</Label>
                     <Select value={matchType} onValueChange={(v) => setMatchType(v as MatchType)}>
-                      <SelectTrigger>
+                      <SelectTrigger className="h-12 border-2 bg-white">
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white">
                         <SelectItem value="Singles">Singles</SelectItem>
                         <SelectItem value="Doubles">Doubles</SelectItem>
                         <SelectItem value="Mixed Doubles">Mixed Doubles</SelectItem>
@@ -137,112 +142,120 @@ export default function NewMatch() {
                   </div>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-8 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="competitionName">Competition (Optional)</Label>
+                    <Label htmlFor="competitionName" className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Competition (Optional)</Label>
                     <div className="relative">
-                      <Trophy className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input id="competitionName" name="competitionName" placeholder="e.g. City Open 2024" className="pl-10" />
+                      <Trophy className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input id="competitionName" name="competitionName" placeholder="e.g. Club Finals" className="pl-12 h-12 border-2" />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="location">Location / Venue</Label>
+                    <Label htmlFor="location" className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Venue</Label>
                     <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input id="location" name="location" placeholder="e.g. Smash Badminton Hall" className="pl-10" required />
+                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input id="location" name="location" placeholder="e.g. Sports Hub" className="pl-12 h-12 border-2" required />
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="result">Result (for Team 1)</Label>
+                  <Label htmlFor="result" className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Overall Result</Label>
                   <Select name="result" defaultValue="Win">
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 border-2 bg-white">
                       <SelectValue placeholder="Match outcome" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white">
                       <SelectItem value="Win">Victory (Win)</SelectItem>
                       <SelectItem value="Loss">Defeat (Loss)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="grid gap-8 md:grid-cols-2">
-                    <div className="space-y-4 p-4 border rounded-lg bg-muted/5">
-                      <h3 className="text-sm font-bold uppercase text-primary flex items-center gap-2">
+                <div className="grid gap-8 md:grid-cols-2">
+                  <Card className="border-2 shadow-none bg-muted/5">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-sm font-black uppercase tracking-tighter flex items-center gap-2 text-primary">
                         <User className="h-4 w-4" /> Team 1
-                      </h3>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="myName">Player Name</Label>
-                        <Input id="myName" name="myName" defaultValue={user?.displayName || ''} required />
+                        <Label htmlFor="myName" className="text-[10px] font-bold uppercase">Main Player</Label>
+                        <Input id="myName" name="myName" defaultValue={user?.displayName || ''} required className="bg-white" />
                       </div>
                       {isDoubles && (
-                        <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
-                          <Label htmlFor="partner">Partner Name</Label>
-                          <Input id="partner" name="partner" placeholder="Partner" required={isDoubles} />
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                          <Label htmlFor="partner" className="text-[10px] font-bold uppercase">Partner</Label>
+                          <Input id="partner" name="partner" placeholder="Partner Name" required={isDoubles} className="bg-white" />
                         </div>
                       )}
-                    </div>
+                    </CardContent>
+                  </Card>
 
-                    <div className="space-y-4 p-4 border rounded-lg bg-muted/5">
-                      <h3 className="text-sm font-bold uppercase text-muted-foreground flex items-center gap-2">
+                  <Card className="border-2 shadow-none bg-muted/5">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-sm font-black uppercase tracking-tighter flex items-center gap-2 text-muted-foreground">
                         <Swords className="h-4 w-4" /> Team 2
-                      </h3>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="opponent">Opponent 1</Label>
-                        <Input id="opponent" name="opponent" placeholder="Main opponent" required />
+                        <Label htmlFor="opponent" className="text-[10px] font-bold uppercase">Opponent 1</Label>
+                        <Input id="opponent" name="opponent" placeholder="Opponent Name" required className="bg-white" />
                       </div>
                       {isDoubles && (
-                        <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
-                          <Label htmlFor="opponentPartner">Opponent 2</Label>
-                          <Input id="opponentPartner" name="opponentPartner" placeholder="Opponent partner" required={isDoubles} />
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                          <Label htmlFor="opponentPartner" className="text-[10px] font-bold uppercase">Opponent 2</Label>
+                          <Input id="opponentPartner" name="opponentPartner" placeholder="Opponent Partner" required={isDoubles} className="bg-white" />
                         </div>
                       )}
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 </div>
 
-                <div className="space-y-4 border-t pt-4">
+                <div className="space-y-6 border-t pt-8">
                   <div className="flex items-center gap-2">
                     <Target className="h-4 w-4 text-primary" />
-                    <Label className="font-bold">Set Scores</Label>
+                    <Label className="font-black text-xs uppercase tracking-widest">Set-by-Set Scores</Label>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-xs uppercase text-muted-foreground">Set 1</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-bold uppercase text-muted-foreground">Set 1</Label>
                       <div className="flex gap-2">
-                        <Input name="set1_mine" placeholder="T1" type="number" required />
-                        <Input name="set1_opp" placeholder="T2" type="number" required />
+                        <Input name="set1_mine" placeholder="T1" type="number" required className="text-center font-bold" />
+                        <Input name="set1_opp" placeholder="T2" type="number" required className="text-center font-bold" />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs uppercase text-muted-foreground">Set 2</Label>
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-bold uppercase text-muted-foreground">Set 2</Label>
                       <div className="flex gap-2">
-                        <Input name="set2_mine" placeholder="T1" type="number" required />
-                        <Input name="set2_opp" placeholder="T2" type="number" required />
+                        <Input name="set2_mine" placeholder="T1" type="number" required className="text-center font-bold" />
+                        <Input name="set2_opp" placeholder="T2" type="number" required className="text-center font-bold" />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs uppercase text-muted-foreground">Set 3 (Optional)</Label>
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-bold uppercase text-muted-foreground">Set 3 (If played)</Label>
                       <div className="flex gap-2">
-                        <Input name="set3_mine" placeholder="T1" type="number" />
-                        <Input name="set3_opp" placeholder="T2" type="number" />
+                        <Input name="set3_mine" placeholder="T1" type="number" className="text-center font-bold" />
+                        <Input name="set3_opp" placeholder="T2" type="number" className="text-center font-bold" />
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="notes">Match Notes</Label>
-                  <Textarea id="notes" name="notes" placeholder="Any specific details or things to improve on?" />
+                  <Label htmlFor="notes" className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Post-Match Notes</Label>
+                  <Textarea id="notes" name="notes" placeholder="Performance details, strategies used, or areas to improve..." className="min-h-[120px] border-2" />
                 </div>
 
-                <div className="pt-4 flex flex-col md:flex-row gap-4">
-                  <Button type="submit" className="flex-1" disabled={loading}>
-                    {loading ? "Submitting..." : "Save Match Stats"}
+                <div className="pt-8 flex flex-col md:flex-row gap-4">
+                  <Button type="submit" size="lg" className="flex-1 h-14 font-bold text-base shadow-lg shadow-primary/30" disabled={loading}>
+                    {loading ? (
+                      <><Loader2 className="h-5 w-5 animate-spin mr-2" /> Saving...</>
+                    ) : "Commit Match Result"}
                   </Button>
-                  <Button type="button" variant="outline" asChild>
+                  <Button type="button" variant="outline" size="lg" className="h-14 font-bold" asChild>
                     <Link href="/">Cancel</Link>
                   </Button>
                 </div>
