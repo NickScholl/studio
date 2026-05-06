@@ -113,7 +113,7 @@ export default function Dashboard() {
           </Button>
         </header>
 
-        <main className="flex-1 p-4 md:p-16 space-y-12 md:space-y-24 w-full max-w-[1800px] mx-auto pb-64">
+        <main className="flex-1 p-4 md:p-16 space-y-12 md:space-y-24 w-full max-w-none mx-auto pb-64 overflow-x-hidden">
           <div className="relative w-full h-[300px] md:h-[600px] rounded-[2rem] md:rounded-[5rem] overflow-hidden shadow-2xl bg-primary">
             {heroImage && (
               <Image 
