@@ -420,9 +420,9 @@ function MatchRow({ match }: { match: BadmintonMatch }) {
 
         {/* Floating Edit Action at Bottom Right */}
         <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 z-[110]">
-          <Button variant="default" size="icon" asChild className="rounded-full shadow-2xl h-14 w-14 md:h-16 md:w-16 p-0 flex items-center justify-center hover:scale-110 transition-transform">
+          <Button variant="secondary" size="sm" asChild className="rounded-full shadow-2xl h-10 px-6 p-0 flex items-center justify-center hover:scale-110 transition-transform font-black text-[10px] uppercase tracking-[0.2em] bg-secondary text-white">
             <Link href={`/matches/${match.id}/edit`}>
-              <Pencil className="h-6 w-6" />
+              EDIT
             </Link>
           </Button>
         </div>
